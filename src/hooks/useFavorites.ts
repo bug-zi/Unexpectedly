@@ -1,0 +1,332 @@
+/**
+ * useFavorites Hook
+ * 管理问题收藏功能
+ */
+
+import { useState, useEffect, useCallback } from 'react';
+import { toast } from 'react-toastify';
+import { supabase } from '@/lib/supabase';
+import { FavoriteItem, FavoriteFilters, FavoriteStats } from '@/types/collections';
+
+export function useFavorites(filters?: FavoriteFilters) {
+  const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  /**
+   * 获取收藏列表
+   */
+  const fetchFavorites = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setFavorites([]);
+        return;
+      }
+
+      let query = supabase
+        .from('favorites')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      // 应用筛选条件
+      if (filters?.isAnswered !== undefined) {
+        query = query.eq('is_answered', filters.isAnswered);
+      }
+      if (filters?.collectionId) {
+        query = query.eq('collection_id', filters.collectionId);
+      }
+      if (filters?.sortBy) {
+        query = query.order(filters.sortBy, {
+          ascending: filters.sortOrder === 'asc'
+        });
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      // Supabase自动将snake_case转换为camelCase
+      // 但需要正确映射字段
+      const mappedData = data?.map(item => ({
+        id: item.id,
+        questionId: item.question_id,  // 手动映射
+        userId: item.user_id,
+        collectionId: item.collection_id,
+        notes: item.notes,
+        tags: item.tags,
+        isAnswered: item.is_answered,
+        sortOrder: item.sort_order,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at,
+      })) || [];
+
+      setFavorites(mappedData);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '加载收藏失败';
+      setError(message);
+      console.error('获取收藏失败:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [filters]);
+
+  /**
+   * 添加收藏
+   */
+  const addFavorite = useCallback(async (
+    questionId: string,
+    options?: {
+      collectionId?: string;
+      notes?: string;
+      tags?: string[];
+    }
+  ): Promise<FavoriteItem | null> => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('请先登录');
+
+      // 检查是否已收藏（使用函数式更新避免闭包问题）
+      let existingItem: any = null;
+      setFavorites(prev => {
+        const existing = prev.find(f => f.questionId === questionId);
+        if (existing) {
+          existingItem = existing;
+        }
+        return prev;
+      });
+
+      if (existingItem) {
+        toast.info('已在收藏中', { autoClose: 1500 });
+        return existingItem;
+      }
+
+      const insertData = {
+        user_id: user.id,
+        question_id: questionId,
+        collection_id: options?.collectionId || null,
+        notes: options?.notes || null,
+        tags: options?.tags || [],
+        is_answered: false,
+      };
+
+      const { data, error } = await supabase
+        .from('favorites')
+        .insert(insertData as any)
+        .select()
+        .single();
+
+      if (error) {
+        // 唯一约束冲突，说明已收藏
+        if (error.code === '23505') {
+          const { data: existing } = await supabase
+            .from('favorites')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('question_id', questionId)
+            .single();
+
+          if (existing) {
+            setFavorites(prev => [existing, ...prev]);
+            return existing;
+          }
+        }
+        throw error;
+      }
+
+      if (data) {
+        setFavorites(prev => [data, ...prev]);
+        toast.success('⭐ 已收藏到"稍后思考"', { autoClose: 1500 });
+        return data;
+      }
+
+      return null;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '收藏失败';
+      toast.error(message, { autoClose: 1500 });
+      console.error('添加收藏失败:', err);
+      return null;
+    }
+  }, []);
+
+  /**
+   * 移除收藏
+   */
+  const removeFavorite = useCallback(async (questionId: string): Promise<boolean> => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('请先登录');
+
+      const { error } = await supabase
+        .from('favorites')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('question_id', questionId);
+
+      if (error) throw error;
+
+      setFavorites(prev => prev.filter(f => f.questionId !== questionId));
+      toast.success('已取消收藏', { autoClose: 1500 });
+      return true;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '取消收藏失败';
+      toast.error(message, { autoClose: 1500 });
+      console.error('移除收藏失败:', err);
+      return false;
+    }
+  }, []);
+
+  /**
+   * 检查是否已收藏
+   */
+  const isFavorited = useCallback((questionId: string): boolean => {
+    return favorites.some(f => f.questionId === questionId);
+  }, [favorites]);
+
+  /**
+   * 获取收藏详情
+   */
+  const getFavorite = useCallback((questionId: string): FavoriteItem | undefined => {
+    return favorites.find(f => f.questionId === questionId);
+  }, [favorites]);
+
+  /**
+   * 更新收藏备注
+   */
+  const updateFavoriteNotes = useCallback(async (
+    questionId: string,
+    notes: string
+  ): Promise<boolean> => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('请先登录');
+
+      const { error } = await supabase
+        .from('favorites')
+        .update({ notes } as any) // Type cast for Supabase type inference
+        .eq('user_id', user.id)
+        .eq('question_id', questionId);
+
+      if (error) throw error;
+
+      setFavorites(prev =>
+        prev.map(f =>
+          f.questionId === questionId ? { ...f, notes } : f
+        )
+      );
+
+      toast.success('备注已更新', { autoClose: 1500 });
+      return true;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '更新失败';
+      toast.error(message, { autoClose: 1500 });
+      console.error('更新备注失败:', err);
+      return false;
+    }
+  }, []);
+
+  /**
+   * 移动到指定集合
+   */
+  const moveToCollection = useCallback(async (
+    questionId: string,
+    collectionId: string | null
+  ): Promise<boolean> => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('请先登录');
+
+      const { error } = await supabase
+        .from('favorites')
+        .update({ collection_id: collectionId } as any) // Type cast for Supabase type inference
+        .eq('user_id', user.id)
+        .eq('question_id', questionId);
+
+      if (error) throw error;
+
+      setFavorites(prev =>
+        prev.map(f =>
+          f.questionId === questionId ? { ...f, collectionId } : f
+        )
+      );
+
+      toast.success(collectionId ? '已移动到集合' : '已从集合中移出', { autoClose: 1500 });
+      return true;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '移动失败';
+      toast.error(message, { autoClose: 1500 });
+      console.error('移动收藏失败:', err);
+      return false;
+    }
+  }, []);
+
+  /**
+   * 标记为已回答
+   */
+  const markAsAnswered = useCallback(async (
+    questionId: string,
+    answered: boolean = true
+  ): Promise<boolean> => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('请先登录');
+
+      const { error } = await supabase
+        .from('favorites')
+        .update({ is_answered: answered } as any) // Type cast for Supabase type inference
+        .eq('user_id', user.id)
+        .eq('question_id', questionId);
+
+      if (error) throw error;
+
+      setFavorites(prev =>
+        prev.map(f =>
+          f.questionId === questionId ? { ...f, isAnswered: answered } : f
+        )
+      );
+
+      return true;
+    } catch (err) {
+      console.error('标记回答状态失败:', err);
+      return false;
+    }
+  }, []);
+
+  /**
+   * 获取收藏统计
+   */
+  const getStats = useCallback((): FavoriteStats => {
+    return {
+      totalFavorites: favorites.length,
+      answeredFavorites: favorites.filter(f => f.isAnswered).length,
+      pendingFavorites: favorites.filter(f => !f.isAnswered).length,
+      collectionsCount: new Set(
+        favorites.map(f => f.collectionId).filter(Boolean) as string[]
+      ).size,
+    };
+  }, [favorites]);
+
+  // 初始加载
+  useEffect(() => {
+    fetchFavorites();
+  }, [fetchFavorites]);
+
+  return {
+    favorites,
+    loading,
+    error,
+    stats: getStats(),
+    addFavorite,
+    removeFavorite,
+    isFavorited,
+    getFavorite,
+    updateFavoriteNotes,
+    moveToCollection,
+    markAsAnswered,
+    refetch: fetchFavorites,
+  };
+}
