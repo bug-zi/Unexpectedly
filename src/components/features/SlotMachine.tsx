@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gamepad2, Dice5, Sparkles } from 'lucide-react';
+import { Gamepad2, Sparkles } from 'lucide-react';
 import {
   getRandomWords,
   checkSpecialCombination,
   checkTriple,
+  getAllWords,
 } from '@/constants/slotMachineWords';
 import { EasterEgg } from '@/types';
 import { Button } from '@/components/ui/Button';
@@ -17,17 +18,39 @@ export function SlotMachine({ onSpinComplete }: SlotMachineProps) {
   const [words, setWords] = useState<[string, string, string] | null>(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const [showEasterEgg, setShowEasterEgg] = useState<EasterEgg | null>(null);
+  const [spinningWords, setSpinningWords] = useState<[string, string, string] | null>(null);
+  const allWords = getAllWords();
+
+  // 模拟词语滚动效果
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isSpinning) {
+      interval = setInterval(() => {
+        const randomWords: [string, string, string] = [
+          allWords[Math.floor(Math.random() * allWords.length)],
+          allWords[Math.floor(Math.random() * allWords.length)],
+          allWords[Math.floor(Math.random() * allWords.length)],
+        ];
+        setSpinningWords(randomWords);
+      }, 60); // 加快切换速度到60毫秒
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isSpinning, allWords]);
 
   const handleSpin = () => {
     if (isSpinning) return;
 
     setIsSpinning(true);
     setShowEasterEgg(null);
+    setSpinningWords(null);
 
     // 模拟老虎机动画
     setTimeout(() => {
       const newWords = getRandomWords();
       setWords(newWords);
+      setSpinningWords(null);
 
       // 检查特殊组合
       const specialCombo = checkSpecialCombination(newWords);
@@ -58,7 +81,7 @@ export function SlotMachine({ onSpinComplete }: SlotMachineProps) {
   };
 
   return (
-    <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 rounded-3xl p-8 md:p-12 max-w-4xl mx-auto">
+    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-800 dark:to-gray-900 rounded-3xl p-8 md:p-12 max-w-4xl mx-auto">
       {/* 标题 */}
       <div className="text-center mb-8">
         <motion.div
@@ -66,8 +89,8 @@ export function SlotMachine({ onSpinComplete }: SlotMachineProps) {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center justify-center gap-3 mb-2"
         >
-          <Gamepad2 size={40} className="text-purple-500" />
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          <Gamepad2 size={40} className="text-blue-500" />
+          <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
             灵感老虎机
           </h2>
         </motion.div>
@@ -81,32 +104,51 @@ export function SlotMachine({ onSpinComplete }: SlotMachineProps) {
         {[0, 1, 2].map((index) => (
           <motion.div
             key={index}
-            className="relative w-28 h-36 md:w-40 md:h-48 bg-white dark:bg-gray-700 rounded-2xl shadow-lg flex items-center justify-center overflow-hidden border-4 border-purple-200 dark:border-purple-800"
+            className="relative w-28 h-36 md:w-40 md:h-48 bg-white dark:bg-gray-700 rounded-2xl shadow-lg flex items-center justify-center overflow-hidden border-4 border-blue-200 dark:border-blue-800"
           >
             <AnimatePresence mode="wait">
               {isSpinning ? (
                 <motion.div
                   key="spinning"
-                  animate={{ rotate: [0, 360] }}
-                  transition={{
-                    duration: 2,
-                    ease: 'linear',
-                    delay: index * 0.1,
-                  }}
-                  className="text-purple-300 dark:text-purple-700"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="text-center w-full"
                 >
-                  <Dice5 size={48} />
+                  <motion.span
+                    key={spinningWords?.[index] || 'loading'}
+                    initial={{ y: -30, opacity: 0, scale: 0.8, filter: 'blur(2px)' }}
+                    animate={{
+                      y: 0,
+                      opacity: [0, 0.4, 0.7, 1],
+                      scale: [0.8, 0.9, 0.95, 1],
+                      filter: ['blur(2px)', 'blur(1px)', 'blur(0.5px)', 'blur(0px)']
+                    }}
+                    exit={{ y: 30, opacity: 0, scale: 0.8, filter: 'blur(2px)' }}
+                    transition={{
+                      duration: 0.06,
+                      ease: [0.25, 0.1, 0.25, 1]
+                    }}
+                    className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white block px-2"
+                  >
+                    {spinningWords?.[index] || '准备中...'}
+                  </motion.span>
                 </motion.div>
               ) : words ? (
                 <motion.span
                   key={words[index]}
-                  initial={{ scale: 0, rotate: -180, opacity: 0 }}
-                  animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                  initial={{ scale: 0.3, rotate: -15, opacity: 0 }}
+                  animate={{
+                    scale: [0.3, 1.2, 1],
+                    rotate: [ -15, 5, 0],
+                    opacity: 1
+                  }}
                   transition={{
-                    delay: index * 0.2,
+                    delay: index * 0.15,
+                    duration: 0.6,
                     type: 'spring',
-                    stiffness: 260,
-                    damping: 20,
+                    stiffness: 200,
+                    damping: 15,
                   }}
                   className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center px-2"
                 >
@@ -155,16 +197,22 @@ export function SlotMachine({ onSpinComplete }: SlotMachineProps) {
           size="lg"
           onClick={handleSpin}
           disabled={isSpinning}
-          className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white px-12 py-4 text-xl"
+          className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-12 py-4 text-xl"
         >
           {isSpinning ? (
             <>
-              <Dice5 className="mr-2 animate-spin" size={24} />
+              <motion.span
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                className="mr-2 inline-block"
+              >
+                🎰
+              </motion.span>
               抽取中...
             </>
           ) : (
             <>
-              <Dice5 className="mr-2" size={24} />
+              <span className="mr-2">🎰</span>
               抽取灵感
             </>
           )}

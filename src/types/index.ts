@@ -165,6 +165,36 @@ export interface CategoryConfig {
 }
 
 /**
+ * 海龟汤游戏记录接口
+ */
+export interface TurtleSoupRecord {
+  id: string;
+  puzzleId: string;
+  puzzleTitle: string;
+  difficulty: '简单' | '中等' | '困难';
+  category: string;
+  questionsAsked: number;
+  hintsUsed: number;
+  solved: boolean; // 是否查看真相
+  completedAt: Date;
+}
+
+/**
+ * 活动类型
+ */
+export type ActivityType = 'answer' | 'slotMachine' | 'turtleSoup';
+
+/**
+ * 统一的活动记录接口
+ */
+export interface Activity {
+  id: string;
+  type: ActivityType;
+  timestamp: Date;
+  data: Answer | SlotMachineResult | TurtleSoupRecord;
+}
+
+/**
  * 导出格式类型
  */
 export type ExportFormat = 'pdf' | 'markdown' | 'json';

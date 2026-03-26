@@ -1,8 +1,12 @@
-import { Answer, SlotMachineResult, UserProgress } from '@/types';
+import { Answer, SlotMachineResult, UserProgress, TurtleSoupRecord } from '@/types';
 
 const STORAGE_KEYS = {
   ANSWERS: 'wwx-answers',
   SLOT_MACHINE: 'wwx-slot-machine',
+  TURTLE_SOUP: 'wwx-turtle-soup',
+  RIDDLE: 'wwx-riddle',
+  YES_OR_NO: 'wwx-yes-or-no',
+  GUESS_NUMBER: 'wwx-guess-number',
   PROGRESS: 'wwx-progress',
 } as const;
 
@@ -43,6 +47,32 @@ export function getAnswersByQuestionId(questionId: string): Answer[] {
 }
 
 /**
+ * 更新回答
+ */
+export function updateAnswer(answerId: string, updates: Partial<Omit<Answer, 'id' | 'questionId' | 'userId' | 'createdAt'>>): void {
+  const answers = getAnswers();
+  const index = answers.findIndex((a) => a.id === answerId);
+
+  if (index !== -1) {
+    answers[index] = {
+      ...answers[index],
+      ...updates,
+      updatedAt: new Date(),
+    };
+    localStorage.setItem(STORAGE_KEYS.ANSWERS, JSON.stringify(answers));
+  }
+}
+
+/**
+ * 删除回答
+ */
+export function deleteAnswer(answerId: string): void {
+  const answers = getAnswers();
+  const filteredAnswers = answers.filter((a) => a.id !== answerId);
+  localStorage.setItem(STORAGE_KEYS.ANSWERS, JSON.stringify(filteredAnswers));
+}
+
+/**
  * 获取最近的回答（7天内）
  */
 export function getRecentAnswers(days: number = 7): Answer[] {
@@ -74,6 +104,114 @@ export function getSlotMachineResults(): SlotMachineResult[] {
     return results.map((r: any) => ({
       ...r,
       createdAt: new Date(r.createdAt),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * 保存海龟汤游戏记录
+ */
+export function saveTurtleSoupRecord(record: TurtleSoupRecord): void {
+  const records = getTurtleSoupRecords();
+  records.push(record);
+  localStorage.setItem(STORAGE_KEYS.TURTLE_SOUP, JSON.stringify(records));
+}
+
+/**
+ * 获取所有海龟汤游戏记录
+ */
+export function getTurtleSoupRecords(): TurtleSoupRecord[] {
+  const data = localStorage.getItem(STORAGE_KEYS.TURTLE_SOUP);
+  if (!data) return [];
+
+  try {
+    const records = JSON.parse(data);
+    return records.map((r: any) => ({
+      ...r,
+      completedAt: new Date(r.completedAt),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * 保存谜语人游戏记录
+ */
+export function saveRiddleRecord(record: any): void {
+  const records = getRiddleRecords();
+  records.push(record);
+  localStorage.setItem(STORAGE_KEYS.RIDDLE, JSON.stringify(records));
+}
+
+/**
+ * 获取所有谜语人游戏记录
+ */
+export function getRiddleRecords(): any[] {
+  const data = localStorage.getItem(STORAGE_KEYS.RIDDLE);
+  if (!data) return [];
+
+  try {
+    const records = JSON.parse(data);
+    return records.map((r: any) => ({
+      ...r,
+      completedAt: new Date(r.completedAt),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * 保存Yes or No游戏记录
+ */
+export function saveYesOrNoRecord(record: any): void {
+  const records = getYesOrNoRecords();
+  records.push(record);
+  localStorage.setItem(STORAGE_KEYS.YES_OR_NO, JSON.stringify(records));
+}
+
+/**
+ * 获取所有Yes or No游戏记录
+ */
+export function getYesOrNoRecords(): any[] {
+  const data = localStorage.getItem(STORAGE_KEYS.YES_OR_NO);
+  if (!data) return [];
+
+  try {
+    const records = JSON.parse(data);
+    return records.map((r: any) => ({
+      ...r,
+      completedAt: new Date(r.completedAt),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * 保存猜数字游戏记录
+ */
+export function saveGuessNumberRecord(record: any): void {
+  const records = getGuessNumberRecords();
+  records.push(record);
+  localStorage.setItem(STORAGE_KEYS.GUESS_NUMBER, JSON.stringify(records));
+}
+
+/**
+ * 获取所有猜数字游戏记录
+ */
+export function getGuessNumberRecords(): any[] {
+  const data = localStorage.getItem(STORAGE_KEYS.GUESS_NUMBER);
+  if (!data) return [];
+
+  try {
+    const records = JSON.parse(data);
+    return records.map((r: any) => ({
+      ...r,
+      completedAt: new Date(r.completedAt),
     }));
   } catch {
     return [];

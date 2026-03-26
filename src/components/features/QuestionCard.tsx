@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Star, Clock } from 'lucide-react';
 import { Question } from '@/types';
@@ -30,9 +30,13 @@ export function QuestionCard({
   const [laterAnimating, setLaterAnimating] = useState(false);
   const navigate = useNavigate();
 
-  // 检查是否已收藏/稍后回答
-  const favorited = isFavorited(question.id);
-  const later = isLater(question.id);
+  // 使用本地乐观状态，立即响应点击
+  const [optimisticFavorited, setOptimisticFavorited] = useState<boolean | null>(null);
+  const [optimisticLater, setOptimisticLater] = useState<boolean | null>(null);
+
+  // 获取当前状态（优先使用乐观状态，回退到全局状态）
+  const favorited = optimisticFavorited !== null ? optimisticFavorited : isFavorited(question.id);
+  const later = optimisticLater !== null ? optimisticLater : isLater(question.id);
 
   const category = question.category.primary
     ? getCategoryConfig(question.category.primary as 'thinking' | 'scenario', question.category.secondary!)
@@ -43,16 +47,39 @@ export function QuestionCard({
   const handleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
+    const newState = !favorited;
+
+    // 立即更新 UI（乐观更新）
+    setOptimisticFavorited(newState);
     setFavoriteAnimating(true);
     setTimeout(() => setFavoriteAnimating(false), 500);
 
+    // 立即显示成功提示
+    toast.success(newState ? '⭐ 已收藏' : '已取消收藏', {
+      autoClose: 1500,
+      className: '!bg-gradient-to-r !from-yellow-500 !to-amber-500 !text-white',
+      style: { background: 'linear-gradient(to right, #EAB308, #F59E0B)' }
+    });
+
     try {
-      if (favorited) {
-        await removeFavorite(question.id);
+      if (newState) {
+        const result = await addFavorite(question.id);
+        if (!result) {
+          // 如果添加失败，回滚状态并显示错误
+          setOptimisticFavorited(null);
+          toast.error('收藏失败，请重试');
+        }
       } else {
-        await addFavorite(question.id);
+        const success = await removeFavorite(question.id);
+        if (!success) {
+          // 如果删除失败，回滚状态并显示错误
+          setOptimisticFavorited(null);
+          toast.error('取消收藏失败，请重试');
+        }
       }
     } catch (error) {
+      // 出错时回滚状态
+      setOptimisticFavorited(null);
       const message = error instanceof Error ? error.message : '收藏操作失败';
       if (message.includes('请先登录')) {
         toast.warning('💡 请先登录后使用收藏功能', {
@@ -70,22 +97,44 @@ export function QuestionCard({
   const handleLater = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
+    const newState = !later;
+
+    // 立即更新 UI（乐观更新）
+    setOptimisticLater(newState);
     setLaterAnimating(true);
     setTimeout(() => setLaterAnimating(false), 500);
 
+    // 立即显示成功提示
+    toast.success(newState ? '🕐 已添加到"待思考"' : '已从"待思考"移除', {
+      autoClose: 1500,
+      className: '!bg-gradient-to-r !from-yellow-500 !to-amber-500 !text-white',
+      style: { background: 'linear-gradient(to right, #EAB308, #F59E0B)' }
+    });
+
     try {
-      if (later) {
-        await removeFromLater(question.id);
-      } else {
+      if (newState) {
         const success = await addToLater(question.id);
-        if (success) {
+        if (!success) {
+          // 如果添加失败，回滚状态并显示错误
+          setOptimisticLater(null);
+          toast.error('添加失败，请重试');
+        } else {
           // 点击"稍后回答"后自动切换到下一个问题
           setTimeout(() => {
             onSkip();
-          }, 800);
+          }, 300);
+        }
+      } else {
+        const success = await removeFromLater(question.id);
+        if (!success) {
+          // 如果删除失败，回滚状态并显示错误
+          setOptimisticLater(null);
+          toast.error('移除失败，请重试');
         }
       }
     } catch (error) {
+      // 出错时回滚状态
+      setOptimisticLater(null);
       const message = error instanceof Error ? error.message : '操作失败';
       if (message.includes('请先登录')) {
         toast.warning('💡 请先登录后使用此功能', {
@@ -106,7 +155,7 @@ export function QuestionCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       whileHover={{ y: -4 }}
-      className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 max-w-2xl mx-auto hover:shadow-xl transition-all relative"
+      className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 rounded-2xl shadow-lg p-8 max-w-2xl mx-auto hover:shadow-xl transition-all border-2 border-amber-200 dark:border-amber-800 relative"
     >
       {/* 右上角按钮组 */}
       {showFavorite && (
@@ -124,8 +173,8 @@ export function QuestionCard({
             className={clsx(
               'p-2 rounded-lg transition-all',
               later
-                ? 'text-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                : 'text-gray-400 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-700'
+                ? 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20'
+                : 'text-gray-400 hover:text-yellow-600 hover:bg-gray-100 dark:hover:bg-gray-700'
             )}
             title={later ? '取消稍后回答' : '稍后回答'}
           >
@@ -156,7 +205,7 @@ export function QuestionCard({
       )}
 
       {/* 类别标签 */}
-      <div className="flex items-center justify-between mb-6 pr-12">
+      <div className="mb-6 pr-12">
         <div
           className={clsx(
             'inline-flex items-center gap-2 px-3 py-1.5 rounded-lg',
@@ -174,22 +223,18 @@ export function QuestionCard({
           />
           <span>{category.name}</span>
         </div>
-        {question.answerCount > 0 && (
-          <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
-            <span className="text-base">💭</span>
-            <span>{question.answerCount}人已思考</span>
-          </span>
-        )}
       </div>
 
-      {/* 问题文本 */}
-      <h2 className="font-serif text-3xl md:text-4xl font-medium leading-relaxed text-gray-900 dark:text-white mb-8">
-        {question.content}
-      </h2>
+      {/* 问题文本 - 固定高度限制 */}
+      <div className="min-h-[120px] max-h-[140px] mb-8">
+        <h2 className="font-serif text-2xl md:text-3xl font-medium leading-relaxed text-gray-900 dark:text-white line-clamp-4">
+          {question.content}
+        </h2>
+      </div>
 
       {/* 难度标签 */}
       <div className="flex items-center gap-2 mb-6">
-        <span className="text-sm text-gray-500 dark:text-gray-400">
+        <span className="text-sm text-amber-700 dark:text-amber-300 font-medium">
           难度:
         </span>
         <div className="flex gap-1">
@@ -199,8 +244,8 @@ export function QuestionCard({
               className={clsx(
                 'w-2 h-2 rounded-full',
                 level <= question.difficulty
-                  ? 'bg-primary-500'
-                  : 'bg-gray-300 dark:bg-gray-600'
+                  ? 'bg-amber-500'
+                  : 'bg-amber-200 dark:bg-amber-800'
               )}
             />
           ))}
@@ -209,13 +254,18 @@ export function QuestionCard({
 
       {/* 操作按钮 */}
       <div className="flex flex-col sm:flex-row gap-4">
-        <Button onClick={onStart} fullWidth>
+        <Button
+          variant="ghost"
+          onClick={onStart}
+          fullWidth
+          className="!bg-amber-500 hover:!bg-amber-600 !text-white !border-0 shadow-md hover:shadow-lg"
+        >
           开始思考
         </Button>
         <Button
           variant="ghost"
           onClick={onSkip}
-          className="border border-gray-200 dark:border-gray-700"
+          className="border border-amber-200 dark:border-amber-800 text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-amber-900/20"
           fullWidth
         >
           换一个
@@ -224,11 +274,11 @@ export function QuestionCard({
 
       {/* 标签 */}
       {question.tags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex flex-wrap gap-2 mt-6 pt-6 border-t border-amber-200 dark:border-amber-800">
           {question.tags.map((tag) => (
             <span
               key={tag}
-              className="px-3 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full"
+              className="px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/30 rounded-full"
             >
               #{tag}
             </span>

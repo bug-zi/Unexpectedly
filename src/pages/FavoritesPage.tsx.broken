@@ -1,11 +1,12 @@
 /**
  * 我的收藏页面
  * 展示收藏的问题和主题集合
+ * 支持拖拽排序和拖拽到集合
  */
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
   Search,
@@ -15,18 +16,38 @@ import {
   Grid,
   List,
   LogIn,
+  GripVertical,
+  Check,
 } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useCollections } from '@/hooks/useCollections';
-import { QuestionCard } from '@/components/features/QuestionCard';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { CreateCollectionDialog } from '@/components/collections/CreateCollectionDialog';
+import { DraggableQuestionCard } from '@/components/collections/DraggableQuestionCard';
+import { DropableCollectionCard } from '@/components/collections/DropableCollectionCard';
 import { getQuestionById } from '@/constants/questions';
-import { formatDistanceToNow } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
 import { supabase } from '@/lib/supabase';
 import { clsx } from 'clsx';
+import { FavoriteItem } from '@/types/collections';
+import { Collection } from '@/types/collections';
 
 // 自定义动画
 const customEasing = {
@@ -39,7 +60,7 @@ type FilterType = 'all' | 'answered';
 
 export function FavoritesPage() {
   const navigate = useNavigate();
-  const { favorites, stats, loading: favoritesLoading } = useFavorites();
+  const { favorites, stats, loading: favoritesLoading, moveToCollection, refetch } = useFavorites();
   const { collections, loading: collectionsLoading } = useCollections();
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [filterType, setFilterType] = useState<FilterType>('all');
@@ -48,6 +69,29 @@ export function FavoritesPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [selectedStatCard, setSelectedStatCard] = useState<'all' | 'answered' | 'collections'>('all');
+
+  // 拖拽相关状态
+  const [isReordering, setIsReordering] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [orderedFavorites, setOrderedFavorites] = useState<FavoriteItem[]>([]);
+  const [dragOverCollection, setDragOverCollection] = useState<string | null>(null);
+
+  // 配置拖拽传感器
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 移动8px后才激活拖拽，避免误触
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // 当favorites变化时更新orderedFavorites
+  useEffect(() => {
+    setOrderedFavorites(favorites);
+  }, [favorites]);
 
   // 综合加载状态：认证检查 + 收藏数据 + 集合数据
   const isLoading = checkingAuth || favoritesLoading || collectionsLoading;
@@ -94,19 +138,85 @@ export function FavoritesPage() {
     navigate(`/question/${questionId}`);
   };
 
-  const handleSkip = () => {
-    // 找下一个问题
-    const currentIndex = filteredFavorites.findIndex(
-      f => f.questionId === filteredFavorites[0]?.questionId
-    );
-    const nextIndex = (currentIndex + 1) % filteredFavorites.length;
-    if (filteredFavorites[nextIndex]) {
-      handleQuestionClick(filteredFavorites[nextIndex].questionId);
+  // 拖拽开始
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
+  // 拖拽结束
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveId(null);
+    setDragOverCollection(null);
+
+    if (!over) return;
+
+    // 检查是否拖拽到集合
+    if (over.id.toString().startsWith('collection-')) {
+      const collectionId = over.id.toString().replace('collection-', '');
+      const questionId = active.id as string;
+
+      // 移动问题到集合
+      const success = await moveToCollection(questionId, collectionId);
+      if (success) {
+        refetch();
+      }
+      return;
+    }
+
+    // 排序收藏问题
+    if (active.id !== over.id) {
+      const oldIndex = orderedFavorites.findIndex((f) => f.questionId === active.id);
+      const newIndex = orderedFavorites.findIndex((f) => f.questionId === over.id);
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newOrder = arrayMove(orderedFavorites, oldIndex, newIndex);
+        setOrderedFavorites(newOrder);
+
+        // TODO: 更新后端排序
+        await updateSortOrder(newOrder);
+      }
+    }
+  };
+
+  // 更新排序到后端
+  const updateSortOrder = async (newOrder: FavoriteItem[]) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // 批量更新排序
+      const updates = newOrder.map((item, index) => ({
+        user_id: user.id,
+        question_id: item.questionId,
+        sort_order: index,
+      }));
+
+      // 使用 RPC 或批量更新
+      for (const update of updates) {
+        await supabase
+          .from('favorites')
+          .update({ sort_order: update.sort_order } as any)
+          .eq('user_id', update.user_id)
+          .eq('question_id', update.question_id);
+      }
+    } catch (error) {
+      console.error('更新排序失败:', error);
+    }
+  };
+
+  // 拖拽到集合上方
+  const handleDragOver = (event: any) => {
+    const { over } = event;
+    if (over?.id.toString().startsWith('collection-')) {
+      setDragOverCollection(over.id.toString().replace('collection-', ''));
+    } else {
+      setDragOverCollection(null);
     }
   };
 
   return (
-    <div className="min-h-screen noise-bg bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 dark:from-gray-900 dark:via-yellow-900/20 dark:to-orange-900/20">
+    <div className="min-h-screen noise-bg bg-gradient-to-br from-slate-50 via-blue-50 to-orange-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
       {/* 导航栏 */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/50 dark:border-gray-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -114,7 +224,7 @@ export function FavoritesPage() {
             <motion.button
               whileHover={{ scale: 1.05, x: -3 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate('/questions')}
+              onClick={() => navigate('/')}
               className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
             >
               <ArrowLeft size={20} />
@@ -192,12 +302,12 @@ export function FavoritesPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-8 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-2xl p-8 border-2 border-yellow-200 dark:border-yellow-800"
+              className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl p-8 border-2 border-blue-200 dark:border-blue-800"
             >
               <div className="flex items-start gap-6">
                 <div className="flex-shrink-0">
-                  <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/50 rounded-full flex items-center justify-center">
-                    <LogIn size={32} className="text-yellow-600 dark:text-yellow-400" />
+                  <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
+                    <LogIn size={32} className="text-blue-600 dark:text-blue-400" />
                   </div>
                 </div>
                 <div className="flex-1">
@@ -213,21 +323,21 @@ export function FavoritesPage() {
                       <span>收藏喜欢的问题</span>
                     </li>
                     <li className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                      <span className="text-yellow-500">📁</span>
+                      <span className="text-purple-500">📁</span>
                       <span>创建主题集合</span>
                     </li>
                     <li className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                      <span className="text-yellow-500">📊</span>
+                      <span className="text-green-500">📊</span>
                       <span>追踪学习进度</span>
                     </li>
                     <li className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                      <span className="text-yellow-500">🔔</span>
+                      <span className="text-blue-500">🔔</span>
                       <span>设置学习提醒</span>
                     </li>
                   </ul>
                   <Button
                     onClick={() => navigate('/login')}
-                    className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     <LogIn size={18} className="mr-2" />
                     立即登录
@@ -238,8 +348,45 @@ export function FavoritesPage() {
           )}
 
           {/* 主要内容（仅在加载完成后显示） */}
-          {!isLoading && (
+          {!isLoading && isAuthenticated && (
             <>
+            {/* 拖拽控制栏 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 flex items-center justify-between bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-md border-2 border-gray-200 dark:border-gray-700"
+            >
+              <div className="flex items-center gap-3">
+                <GripVertical size={20} className="text-purple-500" />
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">拖拽排序模式</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    拖拽问题卡片可调整顺序，拖拽到集合可添加问题
+                  </p>
+                </div>
+              </div>
+              <Button
+                onClick={() => setIsReordering(!isReordering)}
+                variant={isReordering ? 'primary' : 'ghost'}
+                className={clsx(
+                  'border-2 transition-all',
+                  isReordering ? 'border-purple-500' : 'border-gray-200 dark:border-gray-700'
+                )}
+              >
+                {isReordering ? (
+                  <>
+                    <Check size={18} className="mr-2" />
+                    完成排序
+                  </>
+                ) : (
+                  <>
+                    <GripVertical size={18} className="mr-2" />
+                    开始排序
+                  </>
+                )}
+              </Button>
+            </motion.div>
+
           {/* 统计卡片 */}
           <motion.div
             initial={{ opacity: 0, y: -30 }}
@@ -262,18 +409,18 @@ export function FavoritesPage() {
                 label: '已回答',
                 value: stats.answeredFavorites,
                 icon: Star,
-                color: 'text-yellow-500',
-                bgColor: 'bg-yellow-100 dark:bg-yellow-900/30',
-                borderColor: 'border-yellow-400 dark:border-yellow-600',
+                color: 'text-green-500',
+                bgColor: 'bg-green-100 dark:bg-green-900/30',
+                borderColor: 'border-green-400 dark:border-green-600',
               },
               {
                 key: 'collections',
                 label: '主题集合',
                 value: stats.collectionsCount,
                 icon: FolderOpen,
-                color: 'text-yellow-500',
-                bgColor: 'bg-yellow-100 dark:bg-yellow-900/30',
-                borderColor: 'border-yellow-400 dark:border-yellow-600',
+                color: 'text-purple-500',
+                bgColor: 'bg-purple-100 dark:bg-purple-900/30',
+                borderColor: 'border-purple-400 dark:border-purple-600',
               },
             ].map((stat) => (
               <motion.div
@@ -417,61 +564,12 @@ export function FavoritesPage() {
 
             {collections.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {collections.slice(0, 6).map((collection, index) => (
-                  <motion.div
+                {collections.slice(0, 6).map((collection) => (
+                  <DropableCollectionCard
                     key={collection.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 + index * 0.05 }}
-                    whileHover={{ scale: 1.02, y: -4 }}
-                    whileTap={{ scale: 0.98 }}
+                    collection={collection}
                     onClick={() => navigate(`/collections/${collection.id}`)}
-                    className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer border-2 border-transparent hover:border-purple-200 dark:hover:border-purple-800 relative overflow-hidden group"
-                  >
-                    {/* 进度条背景 */}
-                    <div
-                      className="absolute bottom-0 left-0 h-1 transition-all"
-                      style={{
-                        width: `${collection.progress}%`,
-                        backgroundColor: collection.color,
-                      }}
-                    />
-
-                    <div className="flex items-start justify-between mb-4">
-                      <div
-                        className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
-                        style={{ backgroundColor: `${collection.color}20` }}
-                      >
-                        {collection.icon || '📁'}
-                      </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                          {collection.progress}%
-                        </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                          {collection.answeredCount} / {collection.questionCount}
-                        </div>
-                      </div>
-                    </div>
-
-                    <h3 className="font-bold text-gray-900 dark:text-white mb-2">
-                      {collection.name}
-                    </h3>
-                    {collection.description && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                        {collection.description}
-                      </p>
-                    )}
-
-                    {collection.lastAnsweredAt && (
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                        最后活跃：{formatDistanceToNow(new Date(collection.lastAnsweredAt), {
-                          addSuffix: true,
-                          locale: zhCN,
-                        })}
-                      </div>
-                    )}
-                  </motion.div>
+                  />
                 ))}
               </div>
             ) : (
@@ -511,37 +609,96 @@ export function FavoritesPage() {
                     : '点击问题卡片上的星星图标收藏喜欢的问题'}
                 </p>
                 {!searchQuery && (
-                  <Button onClick={() => navigate('/questions')} variant="secondary">
+                  <Button onClick={() => navigate('/')} variant="secondary">
                     去浏览问题
                   </Button>
                 )}
               </div>
             ) : (
-              <div className="space-y-6">
-                {filteredFavorites.map((favorite, index) => {
-                  const question = getQuestionById(favorite.questionId);
-                  if (!question) return null;
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+                onDragOver={handleDragOver}
+              >
+                <SortableContext
+                  items={orderedFavorites.map(f => f.questionId)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-4">
+                    <AnimatePresence mode="popLayout">
+                      {orderedFavorites.map((favorite, index) => {
+                        const question = getQuestionById(favorite.questionId);
+                        if (!question) return null;
 
-                  return (
-                    <motion.div
-                      key={favorite.id}
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: Math.min(index * 0.05, 0.5) }}
-                    >
-                      <QuestionCard
-                        question={question}
-                        onStart={() => handleQuestionClick(question.id)}
-                        onSkip={handleSkip}
-                      />
-                    </motion.div>
-                  );
-                })}
-              </div>
+                        // 如果有搜索或筛选，只显示匹配的项
+                        const matchesFilter = (() => {
+                          if (searchQuery) {
+                            const query = searchQuery.toLowerCase();
+                            const matchesSearch =
+                              question.content.toLowerCase().includes(query) ||
+                              question.tags.some(tag => tag.toLowerCase().includes(query));
+                            if (!matchesSearch) return false;
+                          }
+                          if (filterType === 'answered' && !favorite.isAnswered) return false;
+                          return true;
+                        })();
+
+                        if (!matchesFilter) return null;
+
+                        return (
+                          <motion.div
+                            key={favorite.questionId}
+                            layout
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{
+                              layout: { type: 'spring', stiffness: 300, damping: 30 },
+                              opacity: { duration: 0.2 },
+                            }}
+                          >
+                            <DraggableQuestionCard
+                              question={question}
+                              index={index}
+                              isAnswered={favorite.isAnswered}
+                              onStart={() => handleQuestionClick(question.id)}
+                              disableDrag={!isReordering}
+                              isDragging={activeId === question.id}
+                            />
+                          </motion.div>
+                        );
+                      })}
+                    </AnimatePresence>
+                  </div>
+                </SortableContext>
+
+                {/* 拖拽时的浮层 */}
+                <DragOverlay>
+                  {activeId ? (() => {
+                    const question = getQuestionById(activeId);
+                    const favorite = orderedFavorites.find(f => f.questionId === activeId);
+                    if (!question) return null;
+
+                    return (
+                      <div className="rotate-3 opacity-80 shadow-2xl scale-105">
+                        <DraggableQuestionCard
+                          question={question}
+                          index={orderedFavorites.findIndex(f => f.questionId === activeId)}
+                          isAnswered={favorite?.isAnswered}
+                          disableDrag={true}
+                          isDragging={true}
+                        />
+                      </div>
+                    );
+                  })() : null}
+                </DragOverlay>
+              </DndContext>
             )}
           </motion.div>
-            </>
-          )}
+          </>
+          )} {/* end of isAuthenticated check */}
         </div>
       </main>
 

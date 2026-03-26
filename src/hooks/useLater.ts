@@ -22,6 +22,11 @@ export function useLater() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 自动加载待思考列表
+  useEffect(() => {
+    fetchLaterQuestions();
+  }, []);
+
   /**
    * 获取待思考列表
    */
@@ -117,7 +122,6 @@ export function useLater() {
           createdAt: new Date(data.created_at),
           updatedAt: new Date(data.updated_at),
         }, ...prev]);
-        toast.success('🕐 已添加到"待思考"', { autoClose: 1500 });
         return true;
       }
 
@@ -147,7 +151,6 @@ export function useLater() {
       if (error) throw error;
 
       setLaterQuestions(prev => prev.filter(l => l.questionId !== questionId));
-      toast.success('已从"待思考"移除', { autoClose: 1500 });
       return true;
     } catch (err) {
       const message = err instanceof Error ? err.message : '操作失败';

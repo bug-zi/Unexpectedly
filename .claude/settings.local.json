@@ -48,7 +48,30 @@
       "Bash(else echo \"Git仓库不存在\")",
       "Bash(fi)",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(pkill:*)",
+      "Bash(grep -n \"^          <>$\" src/pages/FavoritesPage.tsx)",
+      "Bash(grep -E \"\\(<>|</>|^.*\\\\\\(/>\\\\\\)|^.*\\\\\\)$\\)\")",
+      "Bash(npx eslint:*)",
+      "Bash(cd:*)",
+      "Bash(git checkout:*)",
+      "Bash(npm list:*)",
+      "Bash(sed -n '449,519p' \"D:/Code/自创项目/万万没想到/src/pages/HomePage.tsx\")",
+      "Bash(\"D:/Code/data/temp_quickstart.txt\")",
+      "Read(//d/Code/data/**)",
+      "Bash(timeout /t 3 /nobreak)",
+      "mcp__chrome-devtools__list_pages",
+      "mcp__chrome-devtools__wait_for",
+      "Bash(timeout /t 5)",
+      "mcp__chrome-devtools__get_network_request",
+      "Bash(timeout /t 5 /nobreak)",
+      "Bash(timeout /t 2 /nobreak >nul 2>&1)",
+      "Bash(ping:*)",
+      "mcp__chrome-devtools__list_network_requests"
     ]
   }
 }

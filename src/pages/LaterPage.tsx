@@ -92,7 +92,7 @@ export function LaterPage() {
   };
 
   return (
-    <div className="min-h-screen noise-bg bg-gradient-to-br from-slate-50 via-blue-50 to-orange-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
+    <div className="min-h-screen noise-bg bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 dark:from-gray-900 dark:via-yellow-900/20 dark:to-orange-900/20">
       {/* 导航栏 */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/50 dark:border-gray-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -100,7 +100,7 @@ export function LaterPage() {
             <motion.button
               whileHover={{ scale: 1.05, x: -3 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/questions')}
               className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
             >
               <ArrowLeft size={20} />
@@ -112,8 +112,8 @@ export function LaterPage() {
               transition={{ ease: customEasing.unexpected }}
               className="flex items-center gap-3"
             >
-              <Clock size={24} className="text-blue-500" />
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+              <Clock size={24} className="text-yellow-500" />
+              <h1 className="text-xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
                 待思考
               </h1>
             </motion.div>
@@ -137,7 +137,7 @@ export function LaterPage() {
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                  className="w-20 h-20 border-4 border-blue-200 dark:border-blue-900 rounded-full"
+                  className="w-20 h-20 border-4 border-yellow-200 dark:border-yellow-900 rounded-full"
                 />
                 {/* 中圈旋转 */}
                 <motion.div
@@ -149,7 +149,7 @@ export function LaterPage() {
                 <motion.div
                   animate={{ scale: [1, 1.2, 1] }}
                   transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute top-5 left-5 w-10 h-10 bg-gradient-to-br from-blue-400 to-cyan-500 dark:from-blue-500 dark:to-cyan-600 rounded-full flex items-center justify-center"
+                  className="absolute top-5 left-5 w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 dark:from-yellow-500 dark:to-orange-600 rounded-full flex items-center justify-center"
                 >
                   <Clock size={20} className="text-white" />
                 </motion.div>
@@ -178,12 +178,12 @@ export function LaterPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl p-8 border-2 border-blue-200 dark:border-blue-800"
+              className="mb-8 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-2xl p-8 border-2 border-yellow-200 dark:border-yellow-800"
             >
               <div className="flex items-start gap-6">
                 <div className="flex-shrink-0">
-                  <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
-                    <LogIn size={32} className="text-blue-600 dark:text-blue-400" />
+                  <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/50 rounded-full flex items-center justify-center">
+                    <LogIn size={32} className="text-yellow-600 dark:text-yellow-400" />
                   </div>
                 </div>
                 <div className="flex-1">
@@ -195,25 +195,25 @@ export function LaterPage() {
                   </p>
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-6">
                     <li className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                      <span className="text-blue-500">🕐</span>
+                      <span className="text-yellow-500">🕐</span>
                       <span>标记问题稍后思考</span>
                     </li>
                     <li className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                      <span className="text-cyan-500">📋</span>
+                      <span className="text-yellow-500">📋</span>
                       <span>整理待思考清单</span>
                     </li>
                     <li className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                      <span className="text-green-500">📊</span>
+                      <span className="text-yellow-500">📊</span>
                       <span>追踪思考进度</span>
                     </li>
                     <li className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                      <span className="text-purple-500">🔔</span>
+                      <span className="text-yellow-500">🔔</span>
                       <span>设置优先级提醒</span>
                     </li>
                   </ul>
                   <Button
                     onClick={() => navigate('/login')}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white"
                   >
                     <LogIn size={18} className="mr-2" />
                     立即登录
@@ -239,9 +239,9 @@ export function LaterPage() {
                     label: '待思考总数',
                     value: stats.total,
                     icon: Clock,
-                    color: 'text-blue-500',
-                    bgColor: 'bg-blue-100 dark:bg-blue-900/30',
-                    borderColor: 'border-blue-400 dark:border-blue-600',
+                    color: 'text-yellow-500',
+                    bgColor: 'bg-yellow-100 dark:bg-yellow-900/30',
+                    borderColor: 'border-yellow-400 dark:border-yellow-600',
                   },
                   {
                     key: 'high',
@@ -303,7 +303,7 @@ export function LaterPage() {
                     placeholder="搜索待思考的问题..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-12 py-3 text-base border-2 border-gray-200 dark:border-gray-700 focus:border-blue-400 dark:focus:border-blue-600 rounded-2xl"
+                    className="pl-12 py-3 text-base border-2 border-gray-200 dark:border-gray-700 focus:border-yellow-400 dark:focus:border-yellow-600 rounded-2xl"
                     fullWidth
                   />
                 </div>
@@ -314,7 +314,7 @@ export function LaterPage() {
                     onClick={() => setViewMode('grid')}
                     className={`p-2 rounded-lg transition-all ${
                       viewMode === 'grid'
-                        ? 'bg-blue-500 text-white'
+                        ? 'bg-yellow-500 text-white'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                     }`}
                   >
@@ -324,7 +324,7 @@ export function LaterPage() {
                     onClick={() => setViewMode('list')}
                     className={`p-2 rounded-lg transition-all ${
                       viewMode === 'list'
-                        ? 'bg-blue-500 text-white'
+                        ? 'bg-yellow-500 text-white'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                     }`}
                   >
@@ -357,7 +357,7 @@ export function LaterPage() {
                         : '点击问题卡片上的时钟图标标记为待思考'}
                     </p>
                     {!searchQuery && (
-                      <Button onClick={() => navigate('/')} variant="secondary">
+                      <Button onClick={() => navigate('/questions')} variant="secondary">
                         去浏览问题
                       </Button>
                     )}

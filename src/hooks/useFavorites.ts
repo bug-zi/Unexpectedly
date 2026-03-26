@@ -13,6 +13,11 @@ export function useFavorites(filters?: FavoriteFilters) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 自动加载收藏列表
+  useEffect(() => {
+    fetchFavorites();
+  }, [filters]);
+
   /**
    * 获取收藏列表
    */
@@ -131,17 +136,42 @@ export function useFavorites(filters?: FavoriteFilters) {
             .single();
 
           if (existing) {
-            setFavorites(prev => [existing, ...prev]);
-            return existing;
+            // 映射 snake_case 到 camelCase
+            const mappedData = {
+              id: existing.id,
+              questionId: existing.question_id,
+              userId: existing.user_id,
+              collectionId: existing.collection_id,
+              notes: existing.notes,
+              tags: existing.tags,
+              isAnswered: existing.is_answered,
+              sortOrder: existing.sort_order,
+              createdAt: existing.created_at,
+              updatedAt: existing.updated_at,
+            };
+            setFavorites(prev => [mappedData, ...prev]);
+            return mappedData;
           }
         }
         throw error;
       }
 
       if (data) {
-        setFavorites(prev => [data, ...prev]);
-        toast.success('⭐ 已收藏到"稍后思考"', { autoClose: 1500 });
-        return data;
+        // 映射 snake_case 到 camelCase
+        const mappedData = {
+          id: data.id,
+          questionId: data.question_id,
+          userId: data.user_id,
+          collectionId: data.collection_id,
+          notes: data.notes,
+          tags: data.tags,
+          isAnswered: data.is_answered,
+          sortOrder: data.sort_order,
+          createdAt: data.created_at,
+          updatedAt: data.updated_at,
+        };
+        setFavorites(prev => [mappedData, ...prev]);
+        return mappedData;
       }
 
       return null;
@@ -170,7 +200,6 @@ export function useFavorites(filters?: FavoriteFilters) {
       if (error) throw error;
 
       setFavorites(prev => prev.filter(f => f.questionId !== questionId));
-      toast.success('已取消收藏', { autoClose: 1500 });
       return true;
     } catch (err) {
       const message = err instanceof Error ? err.message : '取消收藏失败';

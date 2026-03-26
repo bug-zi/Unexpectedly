@@ -18,8 +18,8 @@ import {
 } from 'lucide-react';
 // 使用 Iconify 高级图标
 import { Icon } from '@iconify/react';
-import { getAnswers } from '@/utils/storage';
-import { Answer } from '@/types';
+import { getAnswers, getSlotMachineResults, getTurtleSoupRecords, updateAnswer, deleteAnswer } from '@/utils/storage';
+import { Answer, Activity } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ThoughtComparison } from '@/components/features/ThoughtComparison';
@@ -41,7 +41,11 @@ export function GrowthTrackerPage() {
   const [loading, setLoading] = useState(false);
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle');
   const [answers, setAnswers] = useState<Answer[]>([]);
-  const [expandedAnswers, setExpandedAnswers] = useState<Set<string>>(new Set());
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+  const [editingAnswer, setEditingAnswer] = useState<Answer | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   // 从云端加载数据（如果已登录）
   useEffect(() => {
@@ -53,11 +57,47 @@ export function GrowthTrackerPage() {
         // 从本地加载
         const local = getAnswers();
         setAnswers(local);
+        // 加载所有活动
+        loadAllActivities();
       }
     };
 
     loadData();
   }, [isAuthenticated, user]);
+
+  // 加载所有类型的活动记录
+  const loadAllActivities = () => {
+    const answersData = getAnswers();
+    const slotMachineResults = getSlotMachineResults();
+    const turtleSoupRecords = getTurtleSoupRecords();
+
+    // 转换为统一的活动格式
+    const allActivities: Activity[] = [
+      ...answersData.map(a => ({
+        id: a.id,
+        type: 'answer' as const,
+        timestamp: a.createdAt,
+        data: a,
+      })),
+      ...slotMachineResults.map(r => ({
+        id: r.id,
+        type: 'slotMachine' as const,
+        timestamp: r.createdAt,
+        data: r,
+      })),
+      ...turtleSoupRecords.map(r => ({
+        id: r.id,
+        type: 'turtleSoup' as const,
+        timestamp: r.completedAt,
+        data: r,
+      })),
+    ];
+
+    // 按时间倒序排序
+    allActivities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+
+    setActivities(allActivities);
+  };
 
   const loadFromCloud = async () => {
     if (!isAuthenticated || !user) return;
@@ -111,6 +151,8 @@ export function GrowthTrackerPage() {
 
         setAnswers(mergedAnswers);
         setSyncStatus('success');
+        // 加载所有活动
+        loadAllActivities();
       }
     } catch (error) {
       console.error('从云端加载数据失败:', error);
@@ -134,23 +176,43 @@ export function GrowthTrackerPage() {
     return answers.filter((answer) => new Date(answer.createdAt) >= cutoffDate);
   }, [answers, selectedPeriod]);
 
+  // 筛选时间范围后的活动
+  const filteredActivities = useMemo(() => {
+    if (selectedPeriod === 'all') return activities;
+
+    const days = selectedPeriod === '7days' ? 7 : 30;
+    const cutoffDate = subDays(new Date(), days);
+
+    return activities.filter((activity) => new Date(activity.timestamp) >= cutoffDate);
+  }, [activities, selectedPeriod]);
+
   // 统计数据
   const stats = useMemo(() => {
-    const totalAnswers = filteredAnswers.length;
-    const totalWords = filteredAnswers.reduce(
-      (sum, answer) => sum + answer.metadata.wordCount,
+    const answerActivities = filteredActivities.filter(a => a.type === 'answer');
+    const totalAnswers = answerActivities.length;
+
+    // 计算总字数：包含问答和老虎机
+    let totalWords = answerActivities.reduce(
+      (sum, activity) => sum + (activity.data as Answer).metadata.wordCount,
       0
     );
 
-    // 计算连续天数
-    const currentStreak = calculateStreak(filteredAnswers);
+    // 添加老虎机的字数
+    const slotMachineActivities = filteredActivities.filter(a => a.type === 'slotMachine');
+    slotMachineActivities.forEach(activity => {
+      const slotResult = activity.data as any;
+      if (slotResult.response) {
+        totalWords += slotResult.response.length;
+      }
+    });
 
     return {
       totalAnswers,
       totalWords,
-      currentStreak,
+      totalSlotMachines: slotMachineActivities.length,
+      totalTurtleSoups: filteredActivities.filter(a => a.type === 'turtleSoup').length,
     };
-  }, [filteredAnswers]);
+  }, [filteredActivities]);
 
   // 查找可对比的回答（同一问题7天前的回答）
   const comparisonPairs = useMemo(() => {
@@ -158,19 +220,19 @@ export function GrowthTrackerPage() {
   }, [filteredAnswers]);
 
   // 按日期分组
-  const answersByDate = useMemo(() => {
-    const grouped: Record<string, Answer[]> = {};
+  const activitiesByDate = useMemo(() => {
+    const grouped: Record<string, Activity[]> = {};
 
-    filteredAnswers.forEach((answer) => {
-      const dateKey = format(new Date(answer.createdAt), 'yyyy-MM-dd');
+    filteredActivities.forEach((activity) => {
+      const dateKey = format(new Date(activity.timestamp), 'yyyy-MM-dd');
       if (!grouped[dateKey]) {
         grouped[dateKey] = [];
       }
-      grouped[dateKey].push(answer);
+      grouped[dateKey].push(activity);
     });
 
     return grouped;
-  }, [filteredAnswers]);
+  }, [filteredActivities]);
 
   const handleExport = () => {
     setShowBatchExport(true);
@@ -180,33 +242,104 @@ export function GrowthTrackerPage() {
     await loadFromCloud();
   };
 
-  const toggleAnswerExpansion = (answerId: string) => {
-    setExpandedAnswers(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(answerId)) {
-        newSet.delete(answerId);
-      } else {
-        newSet.add(answerId);
-      }
-      return newSet;
+  const handleActivityClick = (activity: Activity) => {
+    // 只有问答和老虎机有详细内容可以展示
+    if (activity.type === 'answer' || activity.type === 'slotMachine') {
+      setSelectedActivity(activity);
+    }
+  };
+
+  const handleEditAnswer = (answer: Answer) => {
+    setSelectedActivity(null);
+    setEditingAnswer(answer);
+  };
+
+  const handleSaveEdit = (updatedContent: string) => {
+    if (!editingAnswer) return;
+
+    // 更新本地存储
+    updateAnswer(editingAnswer.id, {
+      content: updatedContent,
+      metadata: {
+        ...editingAnswer.metadata,
+        wordCount: updatedContent.length,
+      },
     });
+
+    // 如果已登录，同步到云端
+    if (isAuthenticated && user) {
+      supabase
+        .from('answers')
+        .update({
+          content: updatedContent,
+          metadata: {
+            wordCount: updatedContent.length,
+            readingTime: editingAnswer.metadata.readingTime,
+            writingTime: editingAnswer.metadata.writingTime,
+          },
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', editingAnswer.id)
+        .eq('user_id', user.id)
+        .then(({ error }) => {
+          if (error) {
+            console.error('云端更新失败:', error);
+          }
+        });
+    }
+
+    // 重新加载数据
+    loadAllActivities();
+    setEditingAnswer(null);
+  };
+
+  const handleDeleteAnswer = (answerId: string) => {
+    setDeleteTargetId(answerId);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    if (!deleteTargetId) return;
+
+    // 删除本地存储
+    deleteAnswer(deleteTargetId);
+
+    // 如果已登录，软删除云端数据
+    if (isAuthenticated && user) {
+      supabase
+        .from('answers')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', deleteTargetId)
+        .eq('user_id', user.id)
+        .then(({ error }) => {
+          if (error) {
+            console.error('云端删除失败:', error);
+          }
+        });
+    }
+
+    // 重新加载数据
+    loadAllActivities();
+    setShowDeleteConfirm(false);
+    setDeleteTargetId(null);
+    setSelectedActivity(null);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-gray-900 dark:via-amber-900/20 dark:to-yellow-900/20">
       {/* 导航栏 */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-amber-200 dark:border-amber-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <button
-              onClick={() => navigate('/')}
-              className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+              onClick={() => navigate('/questions')}
+              className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
             >
               <Icon icon="ph:arrow-left" width={22} height={22} />
               <span>返回</span>
             </button>
             <div className="flex items-center gap-2">
-              <Icon icon="ph:chart-line-up-duotone" width={28} height={28} className="text-primary-500" />
+              <Icon icon="ph:chart-line-up-duotone" width={28} height={28} className="text-amber-500" />
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                 成长足迹
               </h1>
@@ -276,7 +409,7 @@ export function GrowthTrackerPage() {
                     onClick={() => setSelectedPeriod(period.key as any)}
                     className={`px-5 py-2 rounded-lg font-medium transition-all ${
                       selectedPeriod === period.key
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md'
+                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md'
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                     }`}
                   >
@@ -304,31 +437,29 @@ export function GrowthTrackerPage() {
                 label: '累计回答',
                 value: stats.totalAnswers,
                 icon: 'lucide:message-circle',
-                gradient: 'from-blue-500 to-cyan-500',
-                bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+                gradient: 'from-amber-500 to-yellow-500',
+                bgColor: 'bg-amber-50 dark:bg-amber-900/20',
               },
               {
                 label: '总字数',
                 value: stats.totalWords.toLocaleString(),
                 icon: 'ph:text-aa',
-                gradient: 'from-purple-500 to-pink-500',
-                bgColor: 'bg-purple-50 dark:bg-purple-900/20',
-              },
-              {
-                label: '连续天数',
-                value: stats.currentStreak,
-                icon: 'ph:flame',
-                gradient: 'from-green-500 to-emerald-500',
-                bgColor: 'bg-green-50 dark:bg-green-900/20',
-              },
-              {
-                label: '平均字数',
-                value: stats.totalAnswers > 0
-                  ? Math.round(stats.totalWords / stats.totalAnswers)
-                  : 0,
-                icon: 'ph:chart-bar',
-                gradient: 'from-orange-500 to-red-500',
+                gradient: 'from-orange-500 to-amber-500',
                 bgColor: 'bg-orange-50 dark:bg-orange-900/20',
+              },
+              {
+                label: '灵感次数',
+                value: stats.totalSlotMachines,
+                icon: 'ph:lightbulb',
+                gradient: 'from-yellow-500 to-amber-500',
+                bgColor: 'bg-yellow-50 dark:bg-yellow-900/20',
+              },
+              {
+                label: '海龟汤',
+                value: stats.totalTurtleSoups,
+                icon: 'ph:bowl-food',
+                gradient: 'from-amber-500 to-yellow-500',
+                bgColor: 'bg-amber-50 dark:bg-amber-900/20',
               },
             ].map((stat, index) => (
               <motion.div
@@ -444,18 +575,18 @@ export function GrowthTrackerPage() {
             className="mb-8"
           >
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-              📅 思考时间线
+              📅 活动时间线
             </h3>
 
-            {Object.keys(answersByDate).length === 0 ? (
+            {Object.keys(activitiesByDate).length === 0 ? (
               <Card className="p-12 text-center">
                 <div className="flex flex-col items-center gap-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-full flex items-center justify-center">
-                    <Icon icon="ph:calendar-x" width={36} height={36} className="text-blue-500 dark:text-blue-400" />
+                  <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 rounded-full flex items-center justify-center">
+                    <Icon icon="ph:calendar-x" width={36} height={36} className="text-amber-500 dark:text-amber-400" />
                   </div>
                   <div>
                     <p className="text-lg font-medium text-gray-900 dark:text-white mb-1">
-                      还没有回答记录
+                      还没有活动记录
                     </p>
                     <p className="text-gray-500 dark:text-gray-400">
                       开始思考，记录你的成长足迹吧！
@@ -465,9 +596,9 @@ export function GrowthTrackerPage() {
               </Card>
             ) : (
               <div className="space-y-4">
-                {Object.entries(answersByDate)
+                {Object.entries(activitiesByDate)
                   .sort((a, b) => b[0].localeCompare(a[0]))
-                  .map(([dateKey, dayAnswers], index) => (
+                  .map(([dateKey, dayActivities], index) => (
                     <motion.div
                       key={dateKey}
                       initial={{ opacity: 0, x: -20 }}
@@ -476,7 +607,7 @@ export function GrowthTrackerPage() {
                     >
                       <Card className="overflow-hidden">
                         {/* 日期头部 */}
-                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <div className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
@@ -493,24 +624,30 @@ export function GrowthTrackerPage() {
                                 </p>
                               </div>
                             </div>
-                            <div className="px-4 py-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
-                              <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
-                                {dayAnswers.length} 个回答
+                            <div className="px-4 py-2 bg-amber-100 dark:bg-amber-900/30 rounded-full">
+                              <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                                {dayActivities.length} 个活动
                               </span>
                             </div>
                           </div>
                         </div>
 
-                        {/* 回答列表 */}
+                        {/* 活动列表 */}
                         <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                          {dayAnswers.map((answer) => {
-                            const question = getQuestionById(answer.questionId);
-                            const isExpanded = expandedAnswers.has(answer.id);
+                          {dayActivities.map((activity) => {
+                            // 根据活动类型渲染不同的内容
+                            if (activity.type === 'answer') {
+                              const answer = activity.data as Answer;
+                              const question = getQuestionById(answer.questionId);
 
-                            return (
-                              <div key={answer.id} className="p-5 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                              return (
+                              <div
+                                key={answer.id}
+                                onClick={() => handleActivityClick(activity)}
+                                className="p-5 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                              >
                                 {/* 问题标题 */}
-                                <div className="flex items-start gap-3 mb-3">
+                                <div className="flex items-start gap-3">
                                   <div className="flex-shrink-0 mt-1">
                                     <div className="p-2 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-lg">
                                       <Icon icon="ph:question-duotone" width={18} height={18} className="text-orange-500" />
@@ -536,48 +673,117 @@ export function GrowthTrackerPage() {
                                       )}
                                     </div>
                                   </div>
-                                  <button
-                                    onClick={() => toggleAnswerExpansion(answer.id)}
-                                    className="flex-shrink-0 p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                                  >
-                                    {isExpanded ? (
-                                      <Icon icon="ph:caret-up" width={20} height={20} className="text-gray-500" />
-                                    ) : (
-                                      <Icon icon="ph:caret-down" width={20} height={20} className="text-gray-500" />
-                                    )}
-                                  </button>
+                                  <div className="flex-shrink-0">
+                                    <Icon icon="ph:caret-right" width={20} height={20} className="text-gray-400" />
+                                  </div>
                                 </div>
-
-                                {/* 回答内容（可展开） */}
-                                {isExpanded && (
-                                  <motion.div
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: 'auto' }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    className="mt-4 ml-11"
-                                  >
-                                    <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
-                                      <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
-                                        {answer.content}
-                                      </p>
-                                      {answer.metadata.tags && answer.metadata.tags.length > 0 && (
-                                        <div className="flex flex-wrap gap-2 mt-3">
-                                          {answer.metadata.tags.map((tag, i) => (
-                                            <span
-                                              key={i}
-                                              className="px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-md"
-                                            >
-                                              #{tag}
-                                            </span>
-                                          ))}
-                                        </div>
-                                      )}
-                                    </div>
-                                  </motion.div>
-                                )}
                               </div>
                             );
-                          })}
+                          } else if (activity.type === 'slotMachine') {
+                            const slotResult = activity.data as any;
+                            return (
+                              <div
+                                key={activity.id}
+                                onClick={() => handleActivityClick(activity)}
+                                className="p-5 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                              >
+                                <div className="flex items-start gap-3">
+                                  <div className="flex-shrink-0 mt-1">
+                                    <div className="p-2 bg-gradient-to-br from-orange-100 to-yellow-100 dark:from-orange-900/30 dark:to-yellow-900/30 rounded-lg">
+                                      <Icon icon="ph:lightbulb-duotone" width={18} height={18} className="text-orange-500" />
+                                    </div>
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <span className="font-medium text-gray-900 dark:text-white">灵感老虎机</span>
+                                      {slotResult.easterEgg && (
+                                        <span className="px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-full text-xs">
+                                          彩蛋
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="flex flex-wrap gap-2 mb-2">
+                                      {slotResult.words.map((word: string, i: number) => (
+                                        <span key={i} className="px-3 py-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg text-sm font-medium">
+                                          {word}
+                                        </span>
+                                      ))}
+                                    </div>
+                                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                                      <span className="flex items-center gap-1">
+                                        <Icon icon="ph:clock" width={14} height={14} />
+                                        {format(new Date(activity.timestamp), 'HH:mm')}
+                                      </span>
+                                      {slotResult.response && (
+                                        <span className="flex items-center gap-1">
+                                          <Icon icon="ph:text-aa" width={14} height={14} />
+                                          {slotResult.response.length} 字
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  {slotResult.response && (
+                                    <div className="flex-shrink-0">
+                                      <Icon icon="ph:caret-right" width={20} height={20} className="text-gray-400" />
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          } else if (activity.type === 'turtleSoup') {
+                            const soupRecord = activity.data as any;
+                            const difficultyColor = {
+                              '简单': 'text-lime-600 dark:text-lime-400 bg-lime-50 dark:bg-lime-900/20',
+                              '中等': 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20',
+                              '困难': 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20',
+                            }[soupRecord.difficulty];
+                            return (
+                              <div key={activity.id} className="p-5 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                <div className="flex items-start gap-3">
+                                  <div className="flex-shrink-0 mt-1">
+                                    <div className="p-2 bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 rounded-lg">
+                                      <Icon icon="ph:bowl-food" width={18} height={18} className="text-amber-500" />
+                                    </div>
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <span className="font-medium text-gray-900 dark:text-white">海龟汤</span>
+                                      <span className={`px-2 py-0.5 rounded-full text-xs ${difficultyColor}`}>
+                                        {soupRecord.difficulty}
+                                      </span>
+                                      <span className="px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs">
+                                        {soupRecord.category}
+                                      </span>
+                                    </div>
+                                    <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">{soupRecord.puzzleTitle}</p>
+                                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                                      <span className="flex items-center gap-1">
+                                        <Icon icon="ph:clock" width={14} height={14} />
+                                        {format(new Date(activity.timestamp), 'HH:mm')}
+                                      </span>
+                                      <span className="flex items-center gap-1">
+                                        <Icon icon="ph:chat-circle-dots" width={14} height={14} />
+                                        {soupRecord.questionsAsked} 个问题
+                                      </span>
+                                      {soupRecord.hintsUsed > 0 && (
+                                        <span className="flex items-center gap-1">
+                                          <Icon icon="ph:lightbulb" width={14} height={14} />
+                                          {soupRecord.hintsUsed} 个提示
+                                        </span>
+                                      )}
+                                      {soupRecord.solved && (
+                                        <span className="px-2 py-0.5 bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-300 rounded-full text-xs">
+                                          已完成
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })}
                         </div>
                       </Card>
                     </motion.div>
@@ -609,6 +815,272 @@ export function GrowthTrackerPage() {
             </div>
 
             <ThoughtComparison oldAnswer={showComparison.oldAnswer} newAnswer={showComparison.newAnswer} />
+          </motion.div>
+        </div>
+      )}
+
+      {/* 活动详情弹窗 */}
+      {selectedActivity && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                {selectedActivity.type === 'answer' ? '问题回答' : '灵感联想'}
+              </h2>
+              <div className="flex items-center gap-2">
+                {selectedActivity.type === 'answer' && (
+                  <>
+                    <button
+                      onClick={() => handleEditAnswer(selectedActivity.data as Answer)}
+                      className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
+                    >
+                      <Icon icon="ph:pencil-simple" width={18} height={18} />
+                      <span>编辑</span>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteAnswer(selectedActivity.id)}
+                      className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+                    >
+                      <Icon icon="ph:trash" width={18} height={18} />
+                      <span>删除</span>
+                    </button>
+                  </>
+                )}
+                <button
+                  onClick={() => setSelectedActivity(null)}
+                  className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {selectedActivity.type === 'answer' && (() => {
+              const answer = selectedActivity.data as Answer;
+              const question = getQuestionById(answer.questionId);
+              return (
+                <div className="space-y-6">
+                  {/* 问题 */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="p-2 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-lg">
+                        <Icon icon="ph:question-duotone" width={20} height={20} className="text-orange-500" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">问题</h3>
+                    </div>
+                    <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
+                      <p className="text-gray-900 dark:text-white font-medium mb-2">{question?.content || '未知问题'}</p>
+                      <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                        <span className="flex items-center gap-1">
+                          <Icon icon="ph:clock" width={14} height={14} />
+                          {format(new Date(answer.createdAt), 'yyyy年MM月dd日 HH:mm')}
+                        </span>
+                        {question?.category && (
+                          <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 rounded-full">
+                            {getCategoryConfig(question.category.primary)?.label || question.category.primary}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 回答 */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="p-2 bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 rounded-lg">
+                        <Icon icon="ph:chat-circle-dots" width={20} height={20} className="text-blue-500" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">我的回答</h3>
+                    </div>
+                    <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
+                      <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">{answer.content}</p>
+                      <div className="flex items-center gap-3 mt-4 text-xs text-gray-500 dark:text-gray-400">
+                        <span className="flex items-center gap-1">
+                          <Icon icon="ph:text-aa" width={14} height={14} />
+                          {answer.metadata.wordCount} 字
+                        </span>
+                        {answer.metadata.tags && answer.metadata.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {answer.metadata.tags.map((tag, i) => (
+                              <span key={i} className="px-2 py-1 text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-md">
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {selectedActivity.type === 'slotMachine' && (() => {
+              const slotResult = selectedActivity.data as any;
+              return (
+                <div className="space-y-6">
+                  {/* 词语组合 */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="p-2 bg-gradient-to-br from-orange-100 to-yellow-100 dark:from-orange-900/30 dark:to-yellow-900/30 rounded-lg">
+                        <Icon icon="ph:lightbulb-duotone" width={20} height={20} className="text-orange-500" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">灵感词语</h3>
+                      {slotResult.easterEgg && (
+                        <span className="px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-full text-xs">
+                          {slotResult.easterEgg.title}
+                        </span>
+                      )}
+                    </div>
+                    <div className="p-4 bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 rounded-xl border border-orange-200 dark:border-orange-800">
+                      <div className="flex flex-wrap justify-center gap-3 mb-3">
+                        {slotResult.words.map((word: string, i: number) => (
+                          <span key={i} className="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg text-lg font-bold">
+                            {word}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="text-center text-xs text-gray-500 dark:text-gray-400">
+                        <span className="flex items-center justify-center gap-1">
+                          <Icon icon="ph:clock" width={14} height={14} />
+                          {format(new Date(selectedActivity.timestamp), 'yyyy年MM月dd日 HH:mm')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 联想内容 */}
+                  {slotResult.response && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="p-2 bg-gradient-to-br from-yellow-100 to-amber-100 dark:from-yellow-900/30 dark:to-amber-900/30 rounded-lg">
+                          <Icon icon="ph:lightbulb" width={20} height={20} className="text-pink-500" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">我的联想</h3>
+                      </div>
+                      <div className="p-4 bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-xl border border-yellow-200 dark:border-yellow-800">
+                        <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">{slotResult.response}</p>
+                        <div className="flex items-center gap-3 mt-4 text-xs text-gray-500 dark:text-gray-400">
+                          <span className="flex items-center gap-1">
+                            <Icon icon="ph:text-aa" width={14} height={14} />
+                            {slotResult.response.length} 字
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </motion.div>
+        </div>
+      )}
+
+      {/* 编辑对话框 */}
+      {editingAnswer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">编辑回答</h2>
+              <button
+                onClick={() => setEditingAnswer(null)}
+                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* 问题 */}
+              <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
+                <p className="text-gray-900 dark:text-white font-medium">
+                  {getQuestionById(editingAnswer.questionId)?.content || '未知问题'}
+                </p>
+              </div>
+
+              {/* 编辑区 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  你的回答
+                </label>
+                <textarea
+                  value={editingAnswer.content}
+                  onChange={(e) => setEditingAnswer({ ...editingAnswer, content: e.target.value })}
+                  className="w-full px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-amber-500 dark:focus:border-amber-400 focus:outline-none transition-colors text-gray-900 dark:text-gray-100 min-h-[200px] resize-y"
+                  placeholder="在这里修改你的回答..."
+                />
+                <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                  {editingAnswer.content.length} 字
+                </div>
+              </div>
+
+              {/* 操作按钮 */}
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => handleSaveEdit(editingAnswer.content)}
+                  disabled={!editingAnswer.content.trim()}
+                  className="flex-1"
+                >
+                  保存修改
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => setEditingAnswer(null)}
+                  className="flex-1"
+                >
+                  取消
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* 删除确认对话框 */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6"
+          >
+            <div className="text-center">
+              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Icon icon="ph:warning-circle" width={32} height={32} className="text-red-500" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                确认删除
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                你确定要删除这条问答记录吗？此操作无法撤销。
+              </p>
+              <div className="flex gap-3">
+                <Button
+                  onClick={confirmDelete}
+                  className="flex-1 bg-red-500 hover:bg-red-600"
+                >
+                  确认删除
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setDeleteTargetId(null);
+                  }}
+                  className="flex-1"
+                >
+                  取消
+                </Button>
+              </div>
+            </div>
           </motion.div>
         </div>
       )}

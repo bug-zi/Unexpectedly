@@ -63,22 +63,19 @@ export function CategoryListPage() {
   };
 
   const pageTitle = type === 'thinking' ? '思维维度' : '生活场景';
-  const pageIcon = type === 'thinking' ? '🧠' : '🌍';
-  const pageGradient = type === 'thinking'
-    ? 'from-purple-500 via-pink-500 to-purple-500'
-    : 'from-blue-500 via-cyan-500 to-blue-500';
+  const pageIcon = type === 'thinking' ? 'Lightbulb' : 'Globe';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-orange-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
+    <div className="min-h-screen noise-bg bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-gray-900 dark:via-amber-900/20 dark:to-yellow-900/20">
       {/* 导航栏 */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/50 dark:border-gray-800/50">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-amber-200 dark:border-amber-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <motion.button
               whileHover={{ scale: 1.05, x: -3 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate('/')}
-              className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
+              onClick={() => navigate('/questions')}
+              className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
             >
               <ArrowLeft size={20} />
               <span>返回</span>
@@ -89,8 +86,8 @@ export function CategoryListPage() {
               transition={{ ease: customEasing.unexpected }}
               className="flex items-center gap-3"
             >
-              <span className="text-2xl">{pageIcon}</span>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <Icon name={pageIcon} size={24} className="text-amber-600 dark:text-amber-400" />
+              <h1 className="text-xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
                 {pageTitle}
               </h1>
             </motion.div>
@@ -126,15 +123,15 @@ export function CategoryListPage() {
           >
             <div className="relative">
               <Search
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-400"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-400"
                 size={22}
               />
               <Input
                 type="text"
-                placeholder="🔍 搜索问题或标签..."
+                placeholder="搜索问题或标签..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 py-4 text-base border-2 border-gray-200 dark:border-gray-700 focus:border-purple-400 dark:focus:border-purple-600 rounded-2xl shadow-lg"
+                className="pl-12 py-4 text-base border-2 border-gray-200 dark:border-gray-700 focus:border-amber-400 dark:focus:border-amber-600 rounded-2xl shadow-lg"
                 fullWidth
               />
             </div>
@@ -148,7 +145,7 @@ export function CategoryListPage() {
             className="mb-10"
           >
             <div className="flex items-center gap-3 mb-6 justify-center">
-              <Filter size={20} className="text-purple-500" />
+              <Filter size={20} className="text-amber-500" />
               <span className="text-gray-700 dark:text-gray-300 font-medium">按分类筛选</span>
             </div>
             <div className="flex flex-wrap gap-3 justify-center">
@@ -158,8 +155,8 @@ export function CategoryListPage() {
                 onClick={() => setSelectedCategory(null)}
                 className={`px-6 py-3 rounded-2xl font-bold transition-all shadow-lg ${
                   !selectedCategory
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white warm-glow'
-                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border-2 border-transparent hover:border-purple-300 dark:hover:border-purple-700'
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border-2 border-transparent hover:border-amber-300 dark:hover:border-amber-700'
                 }`}
               >
                 <Sparkles size={16} className="inline mr-2" />
@@ -183,7 +180,7 @@ export function CategoryListPage() {
                     className={`px-6 py-3 rounded-2xl font-bold transition-all flex items-center gap-2 shadow-lg ${
                       isSelected
                         ? 'text-white'
-                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border-2 border-transparent hover:border-purple-300 dark:hover:border-purple-700'
+                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border-2 border-transparent hover:border-amber-300 dark:hover:border-amber-700'
                     }`}
                     style={
                       isSelected
@@ -287,9 +284,9 @@ export function CategoryListPage() {
               transition={{ delay: 0.6 }}
               className="mt-16 text-center"
             >
-              <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-full border border-purple-200 dark:border-purple-800">
-                <Sparkles size={18} className="text-purple-500" />
-                <span className="text-purple-700 dark:text-purple-300 font-medium">
+              <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 rounded-full border border-amber-200 dark:border-amber-800">
+                <Sparkles size={18} className="text-amber-500" />
+                <span className="text-amber-700 dark:text-amber-300 font-medium">
                   显示 {filteredQuestions.length} 个问题
                 </span>
               </div>
