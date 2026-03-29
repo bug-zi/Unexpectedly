@@ -105,7 +105,10 @@
       "Bash(cmd.exe //c \"dir /s \\\\\"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\\" 2>nul | findstr /C:\\\\\"File\\(s\\)\\\\\" /C:\\\\\"Dir\\(s\\)\\\\\"\")",
       "Bash(du -sh C:/Users/Administrator/AppData/Local/Temp/*)",
       "Bash(cmd.exe //c \"rmdir /s /q \\\\\"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\Temp\\\\jnjffswh\\\\\" 2>nul && echo Deleted jnjffswh folder || echo Folder not found or locked\")",
-      "Bash(cmd.exe //c \"del /s /q \\\\\"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\Temp\\\\*.*\\\\\" 2>nul && echo Cleaned temp files\")"
+      "Bash(cmd.exe //c \"del /s /q \\\\\"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\Temp\\\\*.*\\\\\" 2>nul && echo Cleaned temp files\")",
+      "mcp__chrome-devtools__performance_start_trace",
+      "Bash(vercel --version)",
+      "Bash(vercel whoami:*)"
     ]
   }
 }

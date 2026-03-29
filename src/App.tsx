@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { HomePage } from '@/pages/HomePage';
+import { LandingPage } from '@/pages/LandingPage';
 import { QuestionPage } from '@/pages/QuestionPage';
 import { QuestionExplorerPage } from '@/pages/QuestionExplorerPage';
 import { SlotMachinePage } from '@/pages/SlotMachinePage';
@@ -90,6 +91,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/landing" element={<LandingPage />} />
         <Route path="/questions" element={<QuestionExplorerPage />} />
         <Route path="/questions/growth" element={<GrowthTrackerPage />} />
         <Route path="/growth" element={<GrowthTrackerPage />} />

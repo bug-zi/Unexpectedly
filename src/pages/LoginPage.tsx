@@ -66,8 +66,13 @@ export function LoginPage() {
           position: 'top-right',
           autoClose: 2000,
         });
+      } else {
+        // 登录成功
+        toast.success('✅ 登录成功！', {
+          position: 'top-right',
+          autoClose: 1500,
+        });
       }
-      // 登录成功的提示由useAuth hook处理，这里不重复显示
 
       // 延迟跳转，让用户看到成功提示
       setTimeout(() => {
@@ -115,7 +120,10 @@ export function LoginPage() {
     setLoading(false);
 
     if (result.success) {
-      // GitHub 登录成功的提示由useAuth hook处理，这里不重复显示
+      toast.success('✅ GitHub 登录成功！', {
+        position: 'top-right',
+        autoClose: 2000,
+      });
     } else {
       setError(result.error || 'GitHub 登录失败');
     }

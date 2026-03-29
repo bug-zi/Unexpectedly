@@ -251,6 +251,15 @@ export function HomePage() {
               <motion.button
                 whileHover={{ scale: 1.05, rotate: 1 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/landing')}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              >
+                <Sparkles size={18} />
+                <span>体验介绍</span>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05, rotate: 1 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => navigate('/checkin')}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition-colors"
               >
