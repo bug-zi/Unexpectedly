@@ -109,7 +109,9 @@
       "mcp__chrome-devtools__performance_start_trace",
       "Bash(vercel --version)",
       "Bash(vercel whoami:*)",
-      "Bash(tee build.log)"
+      "Bash(tee build.log)",
+      "Bash(timeout 3)",
+      "Bash(timeout 2)"
     ]
   }
 }

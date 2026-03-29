@@ -1,0 +1,109 @@
+{
+  "site": {
+    "name": "万万没想到",
+    "tagline": "Unexpectedly - 每日思维提升工具",
+    "description": "每天5分钟深度思考，比刷短视频强100倍。1000+真人设计问题，25种思维维度，追踪你的思维进化。",
+    "url": "https://yourwebsite.com"
+  },
+  "app": {
+    "url": "https://your-app-url.com",
+    "name": "万万没想到应用"
+  },
+  "features": [
+    {
+      "title": "别让大脑生锈",
+      "description": "5种思维维度 × 5种生活场景，像健身一样锻炼思维",
+      "icon": "brain",
+      "color": "amber"
+    },
+    {
+      "title": "灵感不是等出来的",
+      "description": "三个随机词语，强行打破你的思维惯性",
+      "icon": "sparkles",
+      "color": "yellow"
+    },
+    {
+      "title": "看见自己的成长",
+      "description": "不只是记录答案，而是追踪你的思维如何进化",
+      "icon": "trending-up",
+      "color": "orange"
+    },
+    {
+      "title": "每天5分钟",
+      "description": "养成思考习惯，比刷短视频强100倍",
+      "icon": "target",
+      "color": "red"
+    },
+    {
+      "title": "知识不是干货",
+      "description": "系统思维、健康管理，真正有用的认知工具",
+      "icon": "lightbulb",
+      "color": "amber"
+    },
+    {
+      "title": "你不是一个人在思考",
+      "description": "和其他深度思考者交流，别在信息茧房里打转",
+      "icon": "gamepad-2",
+      "color": "yellow"
+    }
+  ],
+  "stats": [
+    {
+      "value": "1000+",
+      "label": "不是AI生成的",
+      "sublabel": "真人设计的深度问题",
+      "icon": "target"
+    },
+    {
+      "value": "25",
+      "label": "思维维度",
+      "sublabel": "覆盖你生活的方方面面",
+      "icon": "brain"
+    },
+    {
+      "value": "∞",
+      "label": "组合可能",
+      "sublabel": "永远有新的思考角度",
+      "icon": "sparkles"
+    },
+    {
+      "value": "0",
+      "label": "广告推送",
+      "sublabel": "专注纯粹，不抢注意力",
+      "icon": "alert-circle"
+    }
+  ],
+  "testimonials": [
+    {
+      "name": "李明",
+      "role": "产品经理",
+      "avatar": "李",
+      "content": "用了三个月，发现自己的思维方式真的改变了。以前遇到问题只会抱怨，现在会主动从不同角度思考。",
+      "rating": 5
+    },
+    {
+      "name": "王芳",
+      "role": "设计师",
+      "avatar": "王",
+      "content": "灵感老虎机真的太棒了！每次遇到创意瓶颈的时候，抽几个词语就能打开新思路。已经推荐给整个团队了。",
+      "rating": 5
+    },
+    {
+      "name": "张伟",
+      "role": "工程师",
+      "avatar": "张",
+      "content": "最喜欢的是成长追踪功能。能看到自己的思考轨迹和变化，这种可视化的进步真的很有成就感。",
+      "rating": 5
+    }
+  ],
+  "social": {
+    "github": "https://github.com/yourusername/yourrepo",
+    "twitter": "https://twitter.com/yourusername",
+    "email": "your-email@example.com"
+  },
+  "colors": {
+    "primary": "#f59e0b",
+    "secondary": "#eab308",
+    "accent": "#f97316"
+  }
+}

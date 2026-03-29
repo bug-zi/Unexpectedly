@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="万万没想到 Unexpectedly - 每日思维提升工具。每天5分钟深度思考，锻炼你的思维能力，追踪成长轨迹。">
+  <meta name="keywords" content="思维训练, 深度思考, 创意激发, 自我提升, 成长记录">
+  <meta name="author" content="万万没想到">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yourwebsite.com/">
+  <meta property="og:title" content="万万没想到 Unexpectedly - 每日思维提升工具">
+  <meta property="og:description" content="每天5分钟深度思考，比刷短视频强100倍。1000+真人设计问题，25种思维维度，追踪你的思维进化。">
+  <meta property="og:image" content="https://yourwebsite.com/og-image.jpg">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://yourwebsite.com/">
+  <meta property="twitter:title" content="万万没想到 Unexpectedly - 每日思维提升工具">
+  <meta property="twitter:description" content="每天5分钟深度思考，比刷短视频强100倍。1000+真人设计问题，25种思维维度。">
+  <meta property="twitter:image" content="https://yourwebsite.com/twitter-image.jpg">
+
+  <title>万万没想到 Unexpectedly - 每日思维提升工具</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- AOS Animation Library -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      font-family: 'Noto Sans SC', sans-serif;
+    }
+
+    /* Custom Animations */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes gradient-shift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes blob {
+      0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+      50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+    }
+
+    .animate-float {
+      animation: float 4s ease-in-out infinite;
+    }
+
+    .animate-gradient {
+      background-size: 200% 200%;
+      animation: gradient-shift 3s ease infinite;
+    }
+
+    .animate-blob {
+      animation: blob 8s ease-in-out infinite;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(to bottom, #f97316, #eab308, #22c55e, #3b82f6);
+      border-radius: 5px;
+    }
+
+    /* Smooth Scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Card Hover Effects */
+    .feature-card {
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Gradient Backgrounds */
+    .bg-grid {
+      background-image:
+        linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+        linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+  </style>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#f97316',   // Orange
+            secondary: '#eab308', // Yellow
+            success: '#22c55e',   // Green
+            info: '#3b82f6',      // Blue
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 overflow-x-hidden">
+
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-200">
+    <div class="container mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <img src="https://unexpectedly.debugzi.com/favicon.png" alt="万万没想到" class="w-10 h-10 rounded-xl">
+          <div>
+            <span class="text-xl font-bold">万万没想到</span>
+            <p class="text-xs text-gray-500">每日思维提升工具</p>
+          </div>
+        </div>
+        <div class="hidden md:flex items-center gap-6">
+          <a href="#features" class="text-gray-600 hover:text-primary transition-colors font-medium">功能</a>
+          <a href="#stats" class="text-gray-600 hover:text-primary transition-colors font-medium">数据</a>
+          <a href="#testimonials" class="text-gray-600 hover:text-primary transition-colors font-medium">用户评价</a>
+          <a href="https://unexpectedly.debugzi.com/" class="px-6 py-2 bg-gradient-to-r from-primary via-secondary to-success text-white rounded-full font-semibold hover:shadow-lg transition-shadow">
+            进入应用
+          </a>
+        </div>
+        <button class="md:hidden text-gray-700" id="mobile-menu-btn">
+          <i data-lucide="menu" class="w-6 h-6"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="fixed inset-0 z-40 bg-white/95 backdrop-blur-lg hidden" id="mobile-menu">
+    <div class="flex flex-col items-center justify-center h-full gap-8">
+      <a href="#features" class="text-2xl text-gray-800 hover:text-primary transition-colors mobile-menu-link font-medium">功能</a>
+      <a href="#stats" class="text-2xl text-gray-800 hover:text-primary transition-colors mobile-menu-link font-medium">数据</a>
+      <a href="#testimonials" class="text-2xl text-gray-800 hover:text-primary transition-colors mobile-menu-link font-medium">用户评价</a>
+      <a href="https://unexpectedly.debugzi.com/" class="px-8 py-3 bg-gradient-to-r from-primary via-secondary to-success text-white rounded-full font-semibold text-xl">
+        进入应用
+      </a>
+      <button class="absolute top-6 right-6 text-gray-800" id="close-menu-btn">
+        <i data-lucide="x" class="w-8 h-8"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="relative min-h-screen flex items-center pt-20 bg-grid">
+    <!-- Background Decorations -->
+    <div class="absolute inset-0 overflow-hidden">
+      <div class="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full blur-3xl animate-float"></div>
+      <div class="absolute bottom-20 left-20 w-80 h-80 bg-gradient-to-br from-success/10 to-info/10 rounded-full blur-3xl animate-float" style="animation-delay: -2s;"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-secondary/5 via-primary/5 to-success/5 rounded-full blur-3xl animate-blob"></div>
+    </div>
+
+    <div class="container mx-auto px-6 py-20">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <!-- Left Content -->
+        <div class="space-y-8" data-aos="fade-right" data-aos-duration="1000">
+          <!-- Badge -->
+          <div class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-full shadow-sm">
+            <i data-lucide="sparkles" class="w-4 h-4 text-primary"></i>
+            <span class="text-sm text-gray-700 font-medium">别再假装你在学习了</span>
+          </div>
+
+          <!-- Title -->
+          <div class="space-y-4">
+            <h1 class="text-5xl md:text-7xl font-black leading-tight text-gray-900">
+              <span class="block">万万没想到</span>
+              <span class="block text-2xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-success mt-2 animate-gradient">
+                Unexpectedly
+              </span>
+            </h1>
+            <p class="text-2xl text-gray-600 font-medium">
+              每日思维提升工具
+            </p>
+          </div>
+
+          <!-- Main Message -->
+          <div class="space-y-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900">
+              每天
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-success">
+                深度思考 5分钟
+              </span>
+            </h2>
+            <p class="text-xl text-gray-600 leading-relaxed">
+              在这个信息爆炸的时代，<span class="text-primary font-semibold">缺的不是知识</span>，
+              是<span class="text-primary font-semibold">停下来思考</span>的能力
+            </p>
+          </div>
+
+          <!-- CTA Buttons -->
+          <div class="flex flex-col sm:flex-row gap-4 pt-4">
+            <a href="https://unexpectedly.debugzi.com/"
+               class="inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-primary via-secondary to-success text-white rounded-full font-bold text-lg hover:shadow-2xl hover:scale-105 transition-all animate-gradient">
+              <span>开始思考</span>
+              <i data-lucide="arrow-right" class="w-5 h-5"></i>
+            </a>
+            <a href="#features"
+               class="inline-flex items-center justify-center gap-3 px-8 py-4 bg-white text-gray-700 rounded-full font-bold text-lg border-2 border-gray-200 hover:border-primary hover:bg-primary/5 transition-all">
+              <i data-lucide="sparkles" class="w-5 h-5"></i>
+              <span>了解更多</span>
+            </a>
+          </div>
+
+          <!-- Trust Badges -->
+          <div class="flex items-center gap-6 pt-4">
+            <div class="flex items-center gap-2">
+              <i data-lucide="check-circle-2" class="w-5 h-5 text-success"></i>
+              <span class="text-sm text-gray-600">免费使用</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <i data-lucide="check-circle-2" class="w-5 h-5 text-success"></i>
+              <span class="text-sm text-gray-600">无广告</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <i data-lucide="check-circle-2" class="w-5 h-5 text-success"></i>
+              <span class="text-sm text-gray-600">数据安全</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Content - Illustration + Rotating Facts -->
+        <div class="relative" data-aos="fade-left" data-aos-duration="1000">
+          <div class="sticky top-32 space-y-6">
+            <!-- Illustration -->
+            <div class="relative">
+              <div class="w-full h-auto bg-gradient-to-br from-orange-50 to-yellow-50 rounded-3xl p-8 overflow-hidden">
+                <img src="https://cdn.undraw.co/illustration/reading_6jjr.svg" alt="深度阅读" class="w-full h-auto" style="filter: hue-rotate(10deg) saturate(1.2);">
+              </div>
+            </div>
+
+            <!-- Fact Card -->
+            <div class="p-6 bg-white rounded-3xl shadow-xl border border-gray-100">
+              <div class="flex items-start gap-4 mb-4">
+                <div class="p-3 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-xl flex-shrink-0">
+                  <i data-lucide="brain" class="w-6 h-6 text-primary"></i>
+                </div>
+                <div class="flex-1">
+                  <p class="text-xl font-bold text-gray-900 leading-relaxed fact-text">
+                    你每天在手机上花4小时，但思考不到4分钟
+                  </p>
+                </div>
+              </div>
+              <div class="flex gap-2" id="fact-progress">
+                <div class="h-1.5 rounded-full bg-gradient-to-r from-primary via-secondary to-success w-1/4"></div>
+                <div class="h-1.5 rounded-full bg-gray-200 w-1/4"></div>
+                <div class="h-1.5 rounded-full bg-gray-200 w-1/4"></div>
+                <div class="h-1.5 rounded-full bg-gray-200 w-1/4"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="absolute bottom-12 left-1/2 -translate-x-1/2">
+      <div class="flex flex-col items-center gap-2 text-gray-400 animate-bounce">
+        <span class="text-sm">往下看</span>
+        <i data-lucide="chevron-down" class="w-6 h-6"></i>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="relative py-32 bg-gradient-to-b from-white via-gray-50 to-white">
+    <!-- Background Decorations -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute top-1/4 left-10 w-72 h-72 bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-full blur-3xl animate-blob"></div>
+      <div class="absolute bottom-1/4 right-10 w-72 h-72 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-full blur-3xl animate-blob" style="animation-delay: -4s;"></div>
+    </div>
+
+    <div class="container mx-auto px-6">
+      <div class="mb-20 text-center" data-aos="fade-up">
+        <div class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/20 rounded-full mb-6">
+          <i data-lucide="sparkles" class="w-4 h-4 text-violet-600"></i>
+          <span class="text-sm text-violet-700 font-medium">核心功能</span>
+        </div>
+        <h2 class="text-5xl md:text-7xl font-black mb-6 text-gray-900">
+          不是
+          <span class="block text-transparent bg-clip-text bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500">
+            又一个工具
+          </span>
+        </h2>
+        <p class="text-2xl text-gray-600 max-w-2xl mx-auto">
+          是让你的大脑<span class="text-violet-600 font-semibold">真正工作</span>起来
+        </p>
+      </div>
+
+      <!-- Feature Cards with Alternating Layout -->
+      <div class="space-y-16">
+        <!-- Feature 1 - Large Card with Image on Left -->
+        <div class="grid lg:grid-cols-2 gap-8 items-center" data-aos="fade-up">
+          <div class="relative order-2 lg:order-1">
+            <div class="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-3xl blur-2xl"></div>
+            <div class="relative bg-gradient-to-br from-violet-50 to-purple-50 rounded-3xl p-12 border border-violet-100">
+              <div class="flex items-center gap-4 mb-6">
+                <div class="p-4 bg-gradient-to-br from-violet-500/20 to-purple-500/20 rounded-2xl backdrop-blur-sm">
+                  <i data-lucide="brain" class="w-12 h-12 text-violet-600"></i>
+                </div>
+                <div class="text-6xl font-black text-violet-100">01</div>
+              </div>
+              <h3 class="text-3xl font-bold mb-4 text-gray-900">别让大脑生锈</h3>
+              <p class="text-gray-600 text-lg leading-relaxed mb-6">5种思维维度 × 5种生活场景，像健身一样锻炼思维</p>
+              <div class="flex items-center gap-3">
+                <div class="px-4 py-2 bg-violet-100 rounded-full text-sm font-medium text-violet-700">假设思维</div>
+                <div class="px-4 py-2 bg-violet-100 rounded-full text-sm font-medium text-violet-700">逆向思考</div>
+                <div class="px-4 py-2 bg-violet-100 rounded-full text-sm font-medium text-violet-700">联想创意</div>
+              </div>
+            </div>
+          </div>
+          <div class="order-1 lg:order-2 space-y-6" data-aos="fade-left">
+            <h4 class="text-2xl font-bold text-gray-900">深度思维训练</h4>
+            <p class="text-gray-600 text-lg leading-relaxed">
+              通过精心设计的问题体系，每天锻炼你的思维能力。不再是被动接受信息，而是主动思考、分析、创造。
+            </p>
+            <ul class="space-y-3">
+              <li class="flex items-center gap-3">
+                <i data-lucide="check-circle-2" class="w-5 h-5 text-violet-600"></i>
+                <span class="text-gray-700">25种思维维度组合</span>
+              </li>
+              <li class="flex items-center gap-3">
+                <i data-lucide="check-circle-2" class="w-5 h-5 text-violet-600"></i>
+                <span class="text-gray-700">1000+真人设计问题</span>
+              </li>
+              <li class="flex items-center gap-3">
+                <i data-lucide="check-circle-2" class="w-5 h-5 text-violet-600"></i>
+                <span class="text-gray-700">智能推荐适合你的题目</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Feature 2 - Large Card with Image on Right -->
+        <div class="grid lg:grid-cols-2 gap-8 items-center" data-aos="fade-up">
+          <div class="space-y-6" data-aos="fade-right">
+            <h4 class="text-2xl font-bold text-gray-900">灵感老虎机</h4>
+            <p class="text-gray-600 text-lg leading-relaxed">
+              创意枯竭时，三个随机词语强行打破你的思维惯性。看似不相关的词语，却能激发出意想不到的灵感火花。
+            </p>
+            <ul class="space-y-3">
+              <li class="flex items-center gap-3">
+                <i data-lucide="zap" class="w-5 h-5 text-orange-600"></i>
+                <span class="text-gray-700">即时获取创意灵感</span>
+              </li>
+              <li class="flex items-center gap-3">
+                <i data-lucide="zap" class="w-5 h-5 text-orange-600"></i>
+                <span class="text-gray-700">记录你的创意瞬间</span>
+              </li>
+              <li class="flex items-center gap-3">
+                <i data-lucide="zap" class="w-5 h-5 text-orange-600"></i>
+                <span class="text-gray-700">发现隐藏的彩蛋组合</span>
+              </li>
+            </ul>
+          </div>
+          <div class="relative">
+            <div class="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-3xl blur-2xl"></div>
+            <div class="relative bg-gradient-to-br from-orange-50 to-red-50 rounded-3xl p-12 border border-orange-100">
+              <div class="flex items-center gap-4 mb-6">
+                <div class="p-4 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-2xl backdrop-blur-sm">
+                  <i data-lucide="sparkles" class="w-12 h-12 text-orange-600"></i>
+                </div>
+                <div class="text-6xl font-black text-orange-100">02</div>
+              </div>
+              <h3 class="text-3xl font-bold mb-4 text-gray-900">灵感不是等出来的</h3>
+              <p class="text-gray-600 text-lg leading-relaxed mb-6">三个随机词语，强行打破你的思维惯性</p>
+              <div class="flex items-center gap-2">
+                <span class="px-4 py-3 bg-white/60 rounded-xl text-lg font-bold text-gray-700">🎲</span>
+                <span class="px-4 py-3 bg-white/60 rounded-xl text-lg font-bold text-gray-700">+</span>
+                <span class="px-4 py-3 bg-white/60 rounded-xl text-lg font-bold text-gray-700">💡</span>
+                <span class="px-4 py-3 bg-white/60 rounded-xl text-lg font-bold text-gray-700">=</span>
+                <span class="px-4 py-3 bg-white/60 rounded-xl text-lg font-bold text-gray-700">✨</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature 3 & 4 - Two Side by Side Cards -->
+        <div class="grid md:grid-cols-2 gap-8">
+          <!-- Feature 3 -->
+          <div class="relative group" data-aos="fade-up" data-aos-delay="100">
+            <div class="absolute inset-0 bg-gradient-to-br from-green-500/10 to-cyan-500/10 rounded-3xl blur-2xl group-hover:blur-3xl transition-all"></div>
+            <div class="relative bg-gradient-to-br from-green-50 to-cyan-50 rounded-3xl p-10 border border-green-100 h-full">
+              <div class="flex items-center justify-between mb-6">
+                <div class="p-3 bg-gradient-to-br from-green-500/20 to-cyan-500/20 rounded-2xl backdrop-blur-sm">
+                  <i data-lucide="trending-up" class="w-10 h-10 text-green-600"></i>
+                </div>
+                <div class="text-5xl font-black text-green-100">03</div>
+              </div>
+              <h3 class="text-2xl font-bold mb-3 text-gray-900">看见自己的成长</h3>
+              <p class="text-gray-600 leading-relaxed mb-6">不只是记录答案，而是追踪你的思维如何进化</p>
+              <div class="bg-white/60 rounded-2xl p-4 backdrop-blur-sm border border-green-100">
+                <div class="text-sm font-medium mb-2 text-gray-700">你的思维轨迹</div>
+                <div class="flex items-end gap-1 h-16">
+                  <div class="w-1/5 bg-gradient-to-t from-green-200 to-green-300 rounded-t" style="height: 30%"></div>
+                  <div class="w-1/5 bg-gradient-to-t from-green-300 to-green-400 rounded-t" style="height: 45%"></div>
+                  <div class="w-1/5 bg-gradient-to-t from-green-400 to-green-500 rounded-t" style="height: 55%"></div>
+                  <div class="w-1/5 bg-gradient-to-t from-green-500 to-green-600 rounded-t" style="height: 75%"></div>
+                  <div class="w-1/5 bg-gradient-to-t from-green-600 to-green-700 rounded-t" style="height: 100%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature 4 -->
+          <div class="relative group" data-aos="fade-up" data-aos-delay="200">
+            <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-3xl blur-2xl group-hover:blur-3xl transition-all"></div>
+            <div class="relative bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl p-10 border border-blue-100 h-full">
+              <div class="flex items-center justify-between mb-6">
+                <div class="p-3 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-2xl backdrop-blur-sm">
+                  <i data-lucide="target" class="w-10 h-10 text-blue-600"></i>
+                </div>
+                <div class="text-5xl font-black text-blue-100">04</div>
+              </div>
+              <h3 class="text-2xl font-bold mb-3 text-gray-900">每天5分钟</h3>
+              <p class="text-gray-600 leading-relaxed mb-6">养成思考习惯，比刷短视频强100倍</p>
+              <div class="grid grid-cols-7 gap-2">
+                <div class="aspect-square bg-white/60 rounded-lg flex items-center justify-center text-xs font-bold text-gray-600 border border-blue-100">一</div>
+                <div class="aspect-square bg-white/60 rounded-lg flex items-center justify-center text-xs font-bold text-gray-600 border border-blue-100">二</div>
+                <div class="aspect-square bg-white/60 rounded-lg flex items-center justify-center text-xs font-bold text-gray-600 border border-blue-100">三</div>
+                <div class="aspect-square bg-white/60 rounded-lg flex items-center justify-center text-xs font-bold text-gray-600 border border-blue-100">四</div>
+                <div class="aspect-square bg-white/60 rounded-lg flex items-center justify-center text-xs font-bold text-gray-600 border border-blue-100">五</div>
+                <div class="aspect-square bg-white/40 rounded-lg flex items-center justify-center text-xs font-bold text-gray-500 border border-blue-100">六</div>
+                <div class="aspect-square bg-white/40 rounded-lg flex items-center justify-center text-xs font-bold text-gray-500 border border-blue-100">日</div>
+                <div class="aspect-square bg-gradient-to-br from-green-100 to-green-200 rounded-lg flex items-center justify-center border border-green-200">
+                  <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                </div>
+                <div class="aspect-square bg-gradient-to-br from-green-100 to-green-200 rounded-lg flex items-center justify-center border border-green-200">
+                  <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                </div>
+                <div class="aspect-square bg-white/40 rounded-lg flex items-center justify-center border border-blue-100">
+                  <i data-lucide="clock" class="w-4 h-4 text-blue-400"></i>
+                </div>
+                <div class="aspect-square bg-white/40 rounded-lg flex items-center justify-center border border-blue-100">
+                  <i data-lucide="clock" class="w-4 h-4 text-blue-400"></i>
+                </div>
+                <div class="aspect-square bg-white/40 rounded-lg flex items-center justify-center border border-blue-100">
+                  <i data-lucide="clock" class="w-4 h-4 text-blue-400"></i>
+                </div>
+                <div class="aspect-square bg-white/30 rounded-lg flex items-center justify-center border border-blue-100">
+                  <i data-lucide="coffee" class="w-4 h-4 text-gray-400"></i>
+                </div>
+                <div class="aspect-square bg-white/30 rounded-lg flex items-center justify-center border border-blue-100">
+                  <i data-lucide="coffee" class="w-4 h-4 text-gray-400"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature 5 & 6 - Bottom Cards -->
+        <div class="grid md:grid-cols-2 gap-8">
+          <!-- Feature 5 -->
+          <div class="relative group" data-aos="fade-up" data-aos-delay="300">
+            <div class="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-rose-500/10 rounded-3xl blur-2xl group-hover:blur-3xl transition-all"></div>
+            <div class="relative bg-gradient-to-br from-pink-50 to-rose-50 rounded-3xl p-10 border border-pink-100 h-full">
+              <div class="flex items-center justify-between mb-6">
+                <div class="p-3 bg-gradient-to-br from-pink-500/20 to-rose-500/20 rounded-2xl backdrop-blur-sm">
+                  <i data-lucide="lightbulb" class="w-10 h-10 text-pink-600"></i>
+                </div>
+                <div class="text-5xl font-black text-pink-100">05</div>
+              </div>
+              <h3 class="text-2xl font-bold mb-3 text-gray-900">知识不是干货</h3>
+              <p class="text-gray-600 leading-relaxed mb-6">系统思维、健康管理，真正有用的认知工具</p>
+              <div class="space-y-2">
+                <div class="flex items-center gap-3 px-4 py-2 bg-white/60 rounded-xl border border-pink-100">
+                  <i data-lucide="book-open" class="w-5 h-5 text-pink-600"></i>
+                  <span class="font-medium text-gray-700">系统思维方法论</span>
+                </div>
+                <div class="flex items-center gap-3 px-4 py-2 bg-white/60 rounded-xl border border-pink-100">
+                  <i data-lucide="heart-pulse" class="w-5 h-5 text-pink-600"></i>
+                  <span class="font-medium text-gray-700">健康管理知识</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature 6 -->
+          <div class="relative group" data-aos="fade-up" data-aos-delay="400">
+            <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-violet-500/10 rounded-3xl blur-2xl group-hover:blur-3xl transition-all"></div>
+            <div class="relative bg-gradient-to-br from-indigo-50 to-violet-50 rounded-3xl p-10 border border-indigo-100 h-full">
+              <div class="flex items-center justify-between mb-6">
+                <div class="p-3 bg-gradient-to-br from-indigo-500/20 to-violet-500/20 rounded-2xl backdrop-blur-sm">
+                  <i data-lucide="gamepad-2" class="w-10 h-10 text-indigo-600"></i>
+                </div>
+                <div class="text-5xl font-black text-indigo-100">06</div>
+              </div>
+              <h3 class="text-2xl font-bold mb-3 text-gray-900">你不是一个人在思考</h3>
+              <p class="text-gray-600 leading-relaxed mb-6">和其他深度思考者交流，别在信息茧房里打转</p>
+              <div class="flex items-center gap-3">
+                <div class="flex -space-x-2">
+                  <div class="w-10 h-10 bg-gradient-to-br from-indigo-200 to-indigo-300 rounded-full flex items-center justify-center text-sm font-bold border-2 border-white text-indigo-700">李</div>
+                  <div class="w-10 h-10 bg-gradient-to-br from-violet-200 to-violet-300 rounded-full flex items-center justify-center text-sm font-bold border-2 border-white text-violet-700">王</div>
+                  <div class="w-10 h-10 bg-gradient-to-br from-purple-200 to-purple-300 rounded-full flex items-center justify-center text-sm font-bold border-2 border-white text-purple-700">张</div>
+                </div>
+                <div class="px-4 py-2 bg-white/60 rounded-xl border border-indigo-100">
+                  <span class="font-bold text-lg text-gray-800">1000+</span>
+                  <span class="text-sm ml-1 text-gray-600">思考者</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section id="stats" class="relative py-32 bg-gradient-to-br from-gray-50 via-white to-gray-50 overflow-hidden">
+    <!-- Background Decorations -->
+    <div class="absolute inset-0">
+      <div class="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-violet-500/5 to-purple-500/5 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-br from-orange-500/5 to-red-500/5 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="container mx-auto px-6">
+      <div class="grid lg:grid-cols-3 gap-12 items-center mb-16">
+        <!-- Left - Illustration -->
+        <div class="relative order-2 lg:order-1" data-aos="fade-right">
+          <div class="w-full h-auto bg-gradient-to-br from-blue-50 to-green-50 rounded-3xl p-8 overflow-hidden">
+            <img src="https://cdn.undraw.co/illustration/goals_dwgr.svg" alt="目标达成" class="w-full h-auto" style="filter: hue-rotate(200deg) saturate(1.2);">
+          </div>
+        </div>
+
+        <!-- Right - Title -->
+        <div class="lg:col-span-2 order-1 lg:order-2 text-center lg:text-left" data-aos="fade-left">
+          <div class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-full mb-6">
+            <i data-lucide="bar-chart-2" class="w-4 h-4 text-blue-600"></i>
+            <span class="text-sm text-blue-700 font-medium">数据说话</span>
+          </div>
+          <h2 class="text-5xl md:text-6xl font-black text-gray-900 mb-6">
+            真实的
+            <span class="block text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500">
+              成长数据
+            </span>
+          </h2>
+          <p class="text-xl text-gray-600 max-w-2xl">
+            不是虚假的宣传，而是实实在在的体验
+          </p>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+        <!-- Stat 1 -->
+        <div class="relative group" data-aos="fade-up" data-aos-delay="100">
+          <div class="absolute inset-0 bg-gradient-to-br from-violet-500/20 to-purple-500/20 rounded-3xl blur-xl group-hover:blur-2xl transition-all"></div>
+          <div class="relative bg-white rounded-3xl p-8 border border-violet-100 hover:border-violet-200 transition-all">
+            <div class="flex items-center justify-between mb-4">
+              <div class="p-3 bg-gradient-to-br from-violet-500 to-purple-500 rounded-2xl">
+                <i data-lucide="target" class="w-6 h-6 text-white"></i>
+              </div>
+              <div class="w-12 h-12 bg-gradient-to-br from-violet-100 to-purple-100 rounded-full flex items-center justify-center">
+                <i data-lucide="trending-up" class="w-5 h-5 text-violet-600"></i>
+              </div>
+            </div>
+            <div class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-violet-600 to-purple-600 mb-2">1000+</div>
+            <div class="text-lg font-bold text-gray-800 mb-1">精心设计的问题</div>
+            <div class="text-sm text-gray-500">每道题都经过真人审核</div>
+            <div class="mt-4 pt-4 border-t border-violet-100">
+              <div class="flex items-center gap-2 text-violet-600 text-sm font-medium">
+                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                <span>拒绝AI生成</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stat 2 -->
+        <div class="relative group" data-aos="fade-up" data-aos-delay="200">
+          <div class="absolute inset-0 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-3xl blur-xl group-hover:blur-2xl transition-all"></div>
+          <div class="relative bg-white rounded-3xl p-8 border border-orange-100 hover:border-orange-200 transition-all">
+            <div class="flex items-center justify-between mb-4">
+              <div class="p-3 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl">
+                <i data-lucide="brain" class="w-6 h-6 text-white"></i>
+              </div>
+              <div class="w-12 h-12 bg-gradient-to-br from-orange-100 to-red-100 rounded-full flex items-center justify-center">
+                <i data-lucide="sparkles" class="w-5 h-5 text-orange-600"></i>
+              </div>
+            </div>
+            <div class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-orange-600 to-red-600 mb-2">25</div>
+            <div class="text-lg font-bold text-gray-800 mb-1">思维维度</div>
+            <div class="text-sm text-gray-500">覆盖生活的方方面面</div>
+            <div class="mt-4 pt-4 border-t border-orange-100">
+              <div class="flex gap-1 flex-wrap">
+                <span class="px-2 py-1 bg-orange-50 text-orange-700 rounded text-xs font-medium">假设思维</span>
+                <span class="px-2 py-1 bg-orange-50 text-orange-700 rounded text-xs font-medium">逆向思考</span>
+                <span class="px-2 py-1 bg-orange-50 text-orange-700 rounded text-xs font-medium">创意联想</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stat 3 -->
+        <div class="relative group" data-aos="fade-up" data-aos-delay="300">
+          <div class="absolute inset-0 bg-gradient-to-br from-green-500/20 to-cyan-500/20 rounded-3xl blur-xl group-hover:blur-2xl transition-all"></div>
+          <div class="relative bg-white rounded-3xl p-8 border border-green-100 hover:border-green-200 transition-all">
+            <div class="flex items-center justify-between mb-4">
+              <div class="p-3 bg-gradient-to-br from-green-500 to-cyan-500 rounded-2xl">
+                <i data-lucide="infinity" class="w-6 h-6 text-white"></i>
+              </div>
+              <div class="w-12 h-12 bg-gradient-to-br from-green-100 to-cyan-100 rounded-full flex items-center justify-center">
+                <i data-lucide="refresh-cw" class="w-5 h-5 text-green-600"></i>
+              </div>
+            </div>
+            <div class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-green-600 to-cyan-600 mb-2">∞</div>
+            <div class="text-lg font-bold text-gray-800 mb-1">无限组合</div>
+            <div class="text-sm text-gray-500">永远有新的思考角度</div>
+            <div class="mt-4 pt-4 border-t border-green-100">
+              <div class="flex items-center gap-2 text-green-600 text-sm font-medium">
+                <i data-lucide="repeat" class="w-4 h-4"></i>
+                <span>持续更新中</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stat 4 -->
+        <div class="relative group" data-aos="fade-up" data-aos-delay="400">
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-3xl blur-xl group-hover:blur-2xl transition-all"></div>
+          <div class="relative bg-white rounded-3xl p-8 border border-blue-100 hover:border-blue-200 transition-all">
+            <div class="flex items-center justify-between mb-4">
+              <div class="p-3 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-2xl">
+                <i data-lucide="shield-check" class="w-6 h-6 text-white"></i>
+              </div>
+              <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
+                <i data-lucide="lock" class="w-5 h-5 text-blue-600"></i>
+              </div>
+            </div>
+            <div class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-blue-600 to-indigo-600 mb-2">0</div>
+            <div class="text-lg font-bold text-gray-800 mb-1">广告推送</div>
+            <div class="text-sm text-gray-500">专注纯粹，不抢注意力</div>
+            <div class="mt-4 pt-4 border-t border-blue-100">
+              <div class="flex items-center gap-2 text-blue-600 text-sm font-medium">
+                <i data-lucide="heart" class="w-4 h-4"></i>
+                <span>用户至上</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section id="testimonials" class="relative py-32 bg-gradient-to-b from-white via-gray-50 to-white">
+    <!-- Background Decorations -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute top-1/4 right-10 w-80 h-80 bg-gradient-to-br from-yellow-500/5 to-orange-500/5 rounded-full blur-3xl animate-blob"></div>
+      <div class="absolute bottom-1/4 left-10 w-80 h-80 bg-gradient-to-br from-green-500/5 to-cyan-500/5 rounded-full blur-3xl animate-blob" style="animation-delay: -2s;"></div>
+    </div>
+
+    <div class="container mx-auto px-6">
+      <div class="grid lg:grid-cols-3 gap-12 items-end mb-16">
+        <!-- Left - Title -->
+        <div class="lg:col-span-2 text-center lg:text-left" data-aos="fade-right">
+          <div class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-full mb-6">
+            <i data-lucide="message-circle" class="w-4 h-4 text-yellow-600"></i>
+            <span class="text-sm text-yellow-700 font-medium">真实评价</span>
+          </div>
+          <h2 class="text-5xl md:text-7xl font-black text-gray-900 mb-6">
+            用户
+            <span class="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500">
+              真实反馈
+            </span>
+          </h2>
+          <p class="text-2xl text-gray-600">看看其他人如何通过深度思考改变自己</p>
+        </div>
+
+        <!-- Right - Illustration -->
+        <div class="relative order-2 lg:order-1" data-aos="fade-left">
+          <div class="w-full h-auto bg-gradient-to-br from-yellow-50 to-green-50 rounded-3xl p-8 overflow-hidden">
+            <img src="https://cdn.undraw.co/illustration/reading-notes_dg9z.svg" alt="思考社区" class="w-full h-auto" style="filter: hue-rotate(45deg) saturate(1.2);">
+          </div>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        <!-- Testimonial 1 -->
+        <div class="relative group" data-aos="fade-up" data-aos-delay="100">
+          <div class="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-3xl blur-xl group-hover:blur-2xl transition-all"></div>
+          <div class="relative bg-white rounded-3xl p-8 border border-violet-100 hover:border-violet-200 transition-all h-full flex flex-col">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="relative">
+                <div class="w-16 h-16 bg-gradient-to-br from-violet-500 to-purple-500 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                  李
+                </div>
+                <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
+                  <i data-lucide="check" class="w-3 h-3 text-white"></i>
+                </div>
+              </div>
+              <div>
+                <div class="font-bold text-gray-900 text-lg">李明</div>
+                <div class="text-sm text-gray-500">产品经理 · 使用3个月</div>
+              </div>
+            </div>
+            <p class="text-gray-700 leading-relaxed mb-6 flex-1">
+              "用了三个月，发现自己的思维方式真的改变了。以前遇到问题只会抱怨，现在会主动从不同角度思考。"
+            </p>
+            <div class="space-y-3">
+              <div class="flex items-center gap-2">
+                <div class="flex gap-1">
+                  <i data-lucide="star" class="w-5 h-5 text-yellow-500 fill-yellow-500"></i>
+                  <i data-lucide="star" class="w-5 h-5 text-yellow-500 fill-yellow-500"></i>
+                  <i data-lucide="star" class="w-5 h-5 text-yellow-500 fill-yellow-500"></i>
+                  <i data-lucide="star" class="w-5 h-5 text-yellow-500 fill-yellow-500"></i>
+                  <i data-lucide="star" class="w-5 h-5 text-yellow-500 fill-yellow-500"></i>
+                </div>
+                <span class="text-sm text-gray-600 ml-2">5.0</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 bg-violet-50 text-violet-700 rounded-full text-xs font-medium">思维提升</span>
+                <span class="px-3 py-1 bg-violet-50 text-violet-700 rounded-full text-xs font-medium">角度多元</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 2 -->
+        <div class="relative group" data-aos="fade-up" data-aos-delay="200">
+          <div class="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-3xl blur-xl group-hover:blur-2xl transition-all"></div>
+          <div class="relative bg-white rounded-3xl p-8 border border-orange-100 hover:border-orange-200 transition-all h-full flex flex-col">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="relative">
+                <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                  王
+                </div>
+                <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
+                  <i data-lucide="check" class="w-3 h-3 text-white"></i>
+                </div>
+              </div>
+              <div>
+                <div class="font-bold text-gray-900 text-lg">王芳</div>
+                <div class="text-sm text-gray-500">设计师 · 使用6个月</div>
+              </div>
+            </div>
+            <p class="text-gray-700 leading-relaxed mb-6 flex-1">
+              "灵感老虎机真的太棒了！每次遇到创意瓶颈的时候，抽几个词语就能打开新思路。已经推荐给整个团队了。"
+            </p>
+            <div class="space-y-3">
+              <div class="flex items-center gap-2">
+                <div class="flex gap-1">
+                  <i data-lucide="star" class="w-5 h-5 text-yellow-500 fill-yellow-500"></i>
+                  <i data-lucide="star" class="w-5 h-5 text-yellow-500 fill-yellow-500"></i>
+                  <i data-lucide="star" class="w-5 h-5 text-yellow-500 fill-yellow-500"></i>
+                  <i data-lucide="star" class="w-5 h-5 text-yellow-500 fill-yellow-500"></i>
+                  <i data-lucide="star" class="w-5 h-5 text-yellow-500 fill-yellow-500"></i>
+                </div>
+                <span class="text-sm text-gray-600 ml-2">5.0</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-xs font-medium">创意激发</span>
+                <span class="px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-xs font-medium">团队推荐</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 3 -->
+        <div class="relative group" data-aos="fade-up" data-aos-delay="300">
+          <div class="absolute inset-0 bg-gradient-to-br from-green-500/10 to-cyan-500/10 rounded-3xl blur-xl group-hover:blur-2xl transition-all"></div>
+          <div class="relative bg-white rounded-3xl p-8 border border-green-100 hover:border-green-200 transition-all h-full flex flex-col">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="relative">
+                <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-cyan-500 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                  张
+                </div>
+                <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
+                  <i data-lucide="check" class="w-3 h-3 text-white"></i>
+                </div>
+              </div>
+              <div>
+                <div class="font-bold text-gray-900 text-lg">张伟</div>
+                <div class="text-sm text-gray-500">工程师 · 使用4个月</div>
+              </div>
+            </div>
+            <p class="text-gray-700 leading-relaxed mb-6 flex-1">
+              "最喜欢的是成长追踪功能。能看到自己的思考轨迹和变化，这种可视化的进步真的很有成就感。"
+            </p>
+            <div class="space-y-3">
+              <div class="flex items-center gap-2">
+                <div class="flex gap-1">
+                  <i data-lucide="star" class="w-5 h-5 text-yellow-500 fill-yellow-500"></i>
+                  <i data-lucide="star" class="w-5 h-5 text-yellow-500 fill-yellow-500"></i>
+                  <i data-lucide="star" class="w-5 h-5 text-yellow-500 fill-yellow-500"></i>
+                  <i data-lucide="star" class="w-5 h-5 text-yellow-500 fill-yellow-500"></i>
+                  <i data-lucide="star" class="w-5 h-5 text-yellow-500 fill-yellow-500"></i>
+                </div>
+                <span class="text-sm text-gray-600 ml-2">5.0</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">成长追踪</span>
+                <span class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">可视化</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trust Indicators -->
+      <div class="mt-16 text-center" data-aos="fade-up">
+        <div class="inline-flex items-center gap-6 px-8 py-4 bg-white rounded-full shadow-lg border border-gray-100">
+          <div class="flex items-center gap-2">
+            <i data-lucide="users" class="w-5 h-5 text-violet-600"></i>
+            <span class="text-gray-700 font-medium">1000+ 活跃用户</span>
+          </div>
+          <div class="w-px h-6 bg-gray-200"></div>
+          <div class="flex items-center gap-2">
+            <i data-lucide="star" class="w-5 h-5 text-yellow-500"></i>
+            <span class="text-gray-700 font-medium">4.9 平均评分</span>
+          </div>
+          <div class="w-px h-6 bg-gray-200"></div>
+          <div class="flex items-center gap-2">
+            <i data-lucide="message-square" class="w-5 h-5 text-green-600"></i>
+            <span class="text-gray-700 font-medium">500+ 真实评价</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA Section -->
+  <section class="relative py-32 bg-gradient-to-br from-gray-50 to-white overflow-hidden">
+    <!-- Background Decorations -->
+    <div class="absolute inset-0">
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-br from-primary/5 via-secondary/5 to-success/5 rounded-full blur-3xl animate-blob"></div>
+    </div>
+
+    <div class="relative z-10 container mx-auto px-6 text-center">
+      <div class="max-w-4xl mx-auto" data-aos="zoom-in">
+        <h2 class="text-5xl md:text-7xl font-black text-gray-900 mb-8 leading-tight">
+          别让你的大脑
+          <br />
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-success">
+            变成信息的垃圾桶
+          </span>
+        </h2>
+
+        <p class="text-2xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
+          每天5分钟深度思考，比被信息流喂食1小时更有价值
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+          <a href="https://unexpectedly.debugzi.com/"
+             class="inline-flex items-center gap-3 px-12 py-6 bg-gradient-to-r from-primary via-secondary to-success text-white rounded-full font-black text-xl hover:shadow-2xl hover:scale-105 transition-all animate-gradient">
+            <span>现在就开始</span>
+            <i data-lucide="arrow-right" class="w-6 h-6"></i>
+          </a>
+          <div class="flex items-center gap-4 text-gray-600">
+            <i data-lucide="check-circle-2" class="w-5 h-5 text-success"></i>
+            <span>免费使用</span>
+            <i data-lucide="check-circle-2" class="w-5 h-5 text-success"></i>
+            <span>无广告</span>
+            <i data-lucide="check-circle-2" class="w-5 h-5 text-success"></i>
+            <span>数据安全</span>
+          </div>
+        </div>
+
+        <p class="mt-16 text-gray-500 text-base">
+          如果你还是习惯刷短视频，那我们可能不适合你
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="relative py-12 bg-white border-t border-gray-200">
+    <div class="container mx-auto px-6">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+        <div class="flex items-center gap-3">
+          <img src="https://unexpectedly.debugzi.com/favicon.png" alt="万万没想到" class="w-10 h-10 rounded-xl">
+          <div>
+            <span class="text-lg font-bold text-gray-900">万万没想到 Unexpectedly</span>
+            <p class="text-xs text-gray-500">让思考成为习惯</p>
+          </div>
+        </div>
+        <div class="text-gray-600 text-sm">
+          © 2024 万万没想到. 让思考成为习惯.
+        </div>
+        <div class="flex gap-6">
+          <a href="#" class="text-gray-600 hover:text-primary transition-colors">
+            <i data-lucide="github" class="w-5 h-5"></i>
+          </a>
+          <a href="#" class="text-gray-600 hover:text-primary transition-colors">
+            <i data-lucide="twitter" class="w-5 h-5"></i>
+          </a>
+          <a href="#" class="text-gray-600 hover:text-primary transition-colors">
+            <i data-lucide="mail" class="w-5 h-5"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Initialize AOS
+    AOS.init({
+      duration: 800,
+      once: true,
+      offset: 100
+    });
+
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Fact Rotation
+    const facts = [
+      { text: "你每天在手机上花4小时，但思考不到4分钟", icon: "brain" },
+      { text: "刷100条短视频 ≠ 真正学到1个知识", icon: "message-circle" },
+      { text: "你的大脑需要深度思考，不是无限滚动", icon: "zap" },
+      { text: "停下来思考5分钟，比忙碌1小时更有价值", icon: "target" }
+    ];
+
+    let currentFact = 0;
+    const factText = document.querySelector('.fact-text');
+    const factProgress = document.querySelectorAll('#fact-progress > div');
+
+    function rotateFact() {
+      currentFact = (currentFact + 1) % facts.length;
+      factText.style.opacity = '0';
+      factText.style.transition = 'opacity 0.3s ease';
+
+      setTimeout(() => {
+        factText.textContent = facts[currentFact].text;
+        factText.style.opacity = '1';
+
+        factProgress.forEach((bar, index) => {
+          if (index === currentFact) {
+            bar.classList.remove('bg-gray-200');
+            bar.classList.add('bg-gradient-to-r', 'from-primary', 'via-secondary', 'to-success');
+          } else {
+            bar.classList.add('bg-gray-200');
+            bar.classList.remove('bg-gradient-to-r', 'from-primary', 'via-secondary', 'to-success');
+          }
+        });
+      }, 300);
+    }
+
+    setInterval(rotateFact, 4000);
+
+    // Mobile Menu
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const closeMenuBtn = document.getElementById('close-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileMenuLinks = document.querySelectorAll('.mobile-menu-link');
+
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.remove('hidden');
+    });
+
+    closeMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.add('hidden');
+    });
+
+    mobileMenuLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenu.classList.add('hidden');
+      });
+    });
+
+    // Smooth Scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
