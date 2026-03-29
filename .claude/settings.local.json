@@ -108,7 +108,8 @@
       "Bash(cmd.exe //c \"del /s /q \\\\\"C:\\\\Users\\\\Administrator\\\\AppData\\\\Local\\\\Temp\\\\*.*\\\\\" 2>nul && echo Cleaned temp files\")",
       "mcp__chrome-devtools__performance_start_trace",
       "Bash(vercel --version)",
-      "Bash(vercel whoami:*)"
+      "Bash(vercel whoami:*)",
+      "Bash(tee build.log)"
     ]
   }
 }
