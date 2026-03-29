@@ -1,27 +1,31 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Clock, Check, Download, } from 'lucide-react';
+import { ArrowLeft, Bookmark, Check, Clock, Download, Heart, Plus } from 'lucide-react';
 import { getQuestionById } from '@/constants/questions';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useLater } from '@/hooks/useLater';
 import { Answer } from '@/types';
 import { saveAnswer } from '@/utils/storage';
 import { calculateWordCount } from '@/utils/textAnalysis';
+import { updateDailyTaskProgress } from '@/utils/taskManager';
 import { Button } from '@/components/ui/Button';
 import { TextArea } from '@/components/ui/TextArea';
 import { CategoryIcon } from '@/components/ui/Icon';
 import { getCategoryConfig } from '@/constants/categories';
 import { ExportDialog } from '@/components/features/ExportDialog';
 import { supabase } from '@/lib/supabase';
+import { toast } from 'react-toastify';
 
 export function QuestionPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { currentQuestion, addAnswer, answers } = useAppStore();
   const { user, isAuthenticated } = useAuth();
-  const { markAsAnswered } = useFavorites();
+  const { addFavorite, removeFavorite, isFavorited } = useFavorites();
+  const { addToLater, removeFromLater, isLater } = useLater();
 
   const [content, setContent] = useState('');
   const [writingTime, setWritingTime] = useState(0);
@@ -126,6 +130,9 @@ export function QuestionPage() {
       addAnswer(answer);
       setSavedAnswer(answer);
 
+      // 更新每日任务进度（问题思考）
+      updateDailyTaskProgress('daily-question', 1);
+
       // 2. 标记收藏的问题为已回答
       if (question && isAuthenticated) {
         await markAsAnswered(question.id, true);
@@ -227,6 +234,61 @@ export function QuestionPage() {
                   <span className="text-sm font-medium text-amber-700 dark:text-amber-300">{category.name}</span>
                 </div>
               )}
+
+              {/* 收藏按钮 */}
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  if (!question) return;
+                  if (!isAuthenticated) {
+                    toast.info('请先登录', { autoClose: 1500 });
+                    navigate('/login');
+                    return;
+                  }
+
+                  if (isFavorited(question.id)) {
+                    removeFavorite(question.id);
+                  } else {
+                    addFavorite(question.id);
+                  }
+                }}
+                disabled={!isAuthenticated}
+              >
+                <Heart
+                  size={16}
+                  className={isFavorited(question?.id || '') ? 'fill-red-500 text-red-500' : ''}
+                />
+                {isFavorited(question?.id || '') ? '已收藏' : '收藏'}
+              </Button>
+
+              {/* 待思考按钮 */}
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  if (!question) return;
+                  if (!isAuthenticated) {
+                    toast.info('请先登录', { autoClose: 1500 });
+                    navigate('/login');
+                    return;
+                  }
+
+                  if (isLater(question.id)) {
+                    removeFromLater(question.id);
+                  } else {
+                    addToLater(question.id);
+                  }
+                }}
+                disabled={!isAuthenticated}
+              >
+                <Clock
+                  size={16}
+                  className={isLater(question?.id || '') ? 'fill-blue-500 text-blue-500' : ''}
+                />
+                {isLater(question?.id || '') ? '已添加' : '待思考'}
+              </Button>
+
               <Button
                 size="sm"
                 variant="ghost"

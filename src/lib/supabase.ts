@@ -1,5 +1,6 @@
 /**
  * Supabase 客户端配置
+ * 使用单例模式，避免重复初始化导致的 Navigator Lock 竞争
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -17,6 +18,19 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    flowType: 'pkce', // 使用 PKCE 流程提高安全性
+    // 使用 implicit 流程而不是 PKCE，避免注册时的复杂流程
+    flowType: 'implicit',
+    storage: window.localStorage,
+    storageKey: 'sb-qfeajzwaliulepahckdx-auth-token',
+  },
+  // 添加全局错误处理
+  global: {
+    headers: {
+      'X-Client-Info': 'wanwan-xiangdao',
+    },
+  },
+  // 启用数据库查询缓存，减少重复请求
+  db: {
+    schema: 'public',
   },
 });

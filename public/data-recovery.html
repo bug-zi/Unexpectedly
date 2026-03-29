@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>数据恢复工具 - 万万没想到</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #e53e3e;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e53e3e;
+            padding-bottom: 10px;
+        }
+        .status {
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .status.error {
+            background: #fed7d7;
+            color: #c53030;
+            border-left: 4px solid #c53030;
+        }
+        .status.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border-left: 4px solid #22543d;
+        }
+        .status.warning {
+            background: #feebc8;
+            color: #7c2d12;
+            border-left: 4px solid #7c2d12;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .info-box {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3182ce;
+        }
+        .info-box strong {
+            display: block;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+        .info-box span {
+            color: #4a5568;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        pre {
+            background: #1a202c;
+            color: #48bb78;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        button {
+            background: #3182ce;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #2c5282;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+        button.primary {
+            background: #48bb78;
+        }
+        button.primary:hover {
+            background: #38a169;
+        }
+        button.danger {
+            background: #f56565;
+        }
+        button.danger:hover {
+            background: #e53e3e;
+        }
+        .data-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .data-item {
+            background: #f7fafc;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border-left: 3px solid #3182ce;
+        }
+        .data-item strong {
+            color: #2d3748;
+        }
+        .data-item .count {
+            float: right;
+            background: #3182ce;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3182ce;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 万万没想到 - 数据恢复工具</h1>
+
+        <div class="card">
+            <h2>当前状态</h2>
+            <div id="statusMessage"></div>
+            <div class="info-grid">
+                <div class="info-box">
+                    <strong>Supabase 用户ID</strong>
+                    <span id="supabaseUserId">检查中...</span>
+                </div>
+                <div class="info-box">
+                    <strong>SessionStorage 用户ID</strong>
+                    <span id="sessionUserId">检查中...</span>
+                </div>
+            </div>
+            <div id="userIdMatchStatus"></div>
+        </div>
+
+        <div class="card">
+            <h2>检测到的所有数据</h2>
+            <div id="allDataList" class="data-list"></div>
+        </div>
+
+        <div class="card">
+            <h2>数据迁移选项</h2>
+            <div class="button-group">
+                <button id="fixUserId" class="primary" onclick="fixUserIdMismatch()">🔧 修复用户ID不匹配</button>
+                <button onclick="mergeAllData()">🔄 合并所有用户数据</button>
+                <button onclick="exportData()">💾 导出数据备份</button>
+                <button class="danger" onclick="clearMismatchedData()">🗑️ 清理冲突数据</button>
+            </div>
+            <div id="migrationResult" style="margin-top: 20px;"></div>
+        </div>
+
+        <div class="card">
+            <h2>详细日志</h2>
+            <pre id="log">正在初始化...</pre>
+        </div>
+    </div>
+
+    <script>
+        // 从环境变量获取Supabase配置（需要用户手动输入）
+        let supabase = null;
+        let supabaseUser = null;
+
+        function log(message) {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logEl.textContent = `[${timestamp}] ${message}\n` + logEl.textContent;
+        }
+
+        async function checkSupabaseAuth() {
+            try {
+                // 尝试从已登录的页面获取Supabase客户端
+                const response = await fetch('/api/check-auth');
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.user;
+                }
+            } catch (e) {
+                log('无法通过API检查Supabase认证，尝试直接使用session');
+            }
+
+            // 尝试从localStorage获取Supabase session
+            const sessionKey = Object.keys(localStorage).find(k =>
+                k.includes('supabase') && k.includes('session')
+            );
+
+            if (sessionKey) {
+                try {
+                    const sessionData = JSON.parse(localStorage.getItem(sessionKey));
+                    if (sessionData?.user?.id) {
+                        return sessionData.user;
+                    }
+                } catch (e) {
+                    log('解析Supabase session失败');
+                }
+            }
+
+            return null;
+        }
+
+        function getSessionUserId() {
+            return sessionStorage.getItem('current-user-id');
+        }
+
+        function getAllUserDataKeys() {
+            return Object.keys(localStorage).filter(k =>
+                k.startsWith('user-') || k.startsWith('guest-')
+            );
+        }
+
+        function extractUserIdFromKey(key) {
+            const match = key.match(/(?:user|guest)-([^ -]+)-/);
+            return match ? match[1] : null;
+        }
+
+        function getDataSummary(key) {
+            try {
+                const data = JSON.parse(localStorage.getItem(key));
+                if (Array.isArray(data)) {
+                    return { type: 'array', count: data.length };
+                } else if (typeof data === 'object') {
+                    return { type: 'object', keys: Object.keys(data).length };
+                } else {
+                    return { type: typeof data };
+                }
+            } catch (e) {
+                return { type: 'error', error: e.message };
+            }
+        }
+
+        function displayStatus() {
+            const statusEl = document.getElementById('statusMessage');
+            const matchEl = document.getElementById('userIdMatchStatus');
+
+            if (!supabaseUser) {
+                statusEl.innerHTML = '<div class="status warning">⚠️ 无法检测到Supabase登录状态，请确保您已登录</div>';
+                matchEl.innerHTML = '';
+                return;
+            }
+
+            const sessionUserId = getSessionUserId();
+
+            if (sessionUserId === supabaseUser.id) {
+                statusEl.innerHTML = '<div class="status success">✅ 用户ID匹配正常</div>';
+                matchEl.innerHTML = '<div class="status success">✅ SessionStorage 和 Supabase 用户ID一致</div>';
+            } else {
+                statusEl.innerHTML = '<div class="status error">❌ 用户ID不匹配！这就是数据丢失的原因</div>';
+                matchEl.innerHTML = `
+                    <div class="status error">
+                        <strong>问题：</strong>SessionStorage中存储的用户ID与Supabase登录用户不一致<br>
+                        <strong>SessionStorage：</strong>${sessionUserId || '无'}<br>
+                        <strong>Supabase：</strong>${supabaseUser.id}<br>
+                        <strong>解决方案：</strong>点击"修复用户ID不匹配"按钮
+                    </div>
+                `;
+            }
+
+            document.getElementById('supabaseUserId').textContent = supabaseUser.id || '未登录';
+            document.getElementById('sessionUserId').textContent = sessionUserId || '无';
+        }
+
+        function displayAllData() {
+            const keys = getAllUserDataKeys();
+            const dataByUser = {};
+
+            keys.forEach(key => {
+                const userId = extractUserIdFromKey(key);
+                if (!userId) return;
+
+                if (!dataByUser[userId]) {
+                    dataByUser[userId] = [];
+                }
+
+                const summary = getDataSummary(key);
+                const dataType = key.includes('yes-or-no') ? 'Yes or No' :
+                                 key.includes('riddle') ? '谜语人' :
+                                 key.includes('guess-number') ? '猜数字' :
+                                 key.includes('turtle-soup') ? '海龟汤' :
+                                 key.includes('answers') ? '问题回答' :
+                                 key.includes('favorites') ? '收藏' :
+                                 key.includes('task') ? '任务进度' :
+                                 key.includes('slot-machine') ? '老虎机' : '其他';
+
+                dataByUser[userId].push({
+                    key,
+                    dataType,
+                    summary
+                });
+            });
+
+            const listEl = document.getElementById('allDataList');
+            let html = '';
+
+            Object.keys(dataByUser).forEach(userId => {
+                const isCurrentUser = userId === getSessionUserId() || userId === (supabaseUser?.id);
+                const badge = isCurrentUser ? ' <span style="background:green;color:white;padding:2px 6px;border-radius:10px;font-size:11px;">当前用户</span>' : '';
+                const badge2 = userId === getSessionUserId() ? ' <span style="background:blue;color:white;padding:2px 6px;border-radius:10px;font-size:11px;">Session用户</span>' : '';
+                const badge3 = userId === supabaseUser?.id ? ' <span style="background:purple;color:white;padding:2px 6px;border-radius:10px;font-size:11px;">Supabase用户</span>' : '';
+
+                html += `<div style="margin-bottom: 20px;">
+                    <h3 style="color: #2d3748; margin-bottom: 10px;">
+                        用户ID: ${userId.substring(0, 8)}...${badge}${badge2}${badge3}
+                    </h3>`;
+
+                dataByUser[userId].forEach(item => {
+                    const countText = item.summary.type === 'array' ? `${item.summary.count}条` :
+                                     item.summary.type === 'object' ? `${item.summary.keys}项` : '';
+                    html += `
+                        <div class="data-item">
+                            <strong>${item.dataType}</strong>
+                            ${countText ? `<span class="count">${countText}</span>` : ''}
+                            <div style="font-size:11px;color:#718096;margin-top:5px;">${item.key}</div>
+                        </div>`;
+                });
+
+                html += '</div>';
+            });
+
+            if (html === '') {
+                html = '<p style="color:#718096;">暂无数据</p>';
+            }
+
+            listEl.innerHTML = html;
+        }
+
+        async function fixUserIdMismatch() {
+            if (!supabaseUser) {
+                alert('无法检测到Supabase登录状态，请确保已登录');
+                return;
+            }
+
+            const resultEl = document.getElementById('migrationResult');
+            resultEl.innerHTML = '<div class="loading"></div> 正在修复...';
+
+            log('开始修复用户ID不匹配问题');
+            log(`SessionStorage用户ID: ${getSessionUserId()}`);
+            log(`Supabase用户ID: ${supabaseUser.id}`);
+
+            // 更新SessionStorage
+            sessionStorage.setItem('current-user-id', supabaseUser.id);
+            log('✅ 已更新SessionStorage用户ID');
+
+            // 检查是否需要迁移数据
+            const sessionUserId = getSessionUserId();
+            const keys = getAllUserDataKeys();
+            const oldUserData = keys.filter(k => k.includes(`user-${sessionUserId}-`) || k.includes(`guest-`));
+
+            if (oldUserData.length > 0) {
+                log(`发现 ${oldUserData.length} 个旧数据键，开始迁移...`);
+
+                oldUserData.forEach(oldKey => {
+                    const data = localStorage.getItem(oldKey);
+                    const newKey = oldKey
+                        .replace(`user-${sessionUserId}-`, `user-${supabaseUser.id}-`)
+                        .replace('guest-', `user-${supabaseUser.id}-`);
+
+                    if (oldKey !== newKey) {
+                        localStorage.setItem(newKey, data);
+                        log(`✅ 迁移: ${oldKey.substring(0, 50)}... -> ${newKey.substring(0, 50)}...`);
+                    }
+                });
+
+                log('✅ 数据迁移完成');
+            } else {
+                log('没有需要迁移的旧数据');
+            }
+
+            resultEl.innerHTML = '<div class="status success">✅ 修复完成！页面将在3秒后刷新...</div>';
+            log('修复完成，准备刷新页面');
+
+            setTimeout(() => {
+                window.location.reload();
+            }, 3000);
+        }
+
+        function mergeAllData() {
+            const resultEl = document.getElementById('migrationResult');
+            resultEl.innerHTML = '<div class="loading"></div> 正在合并数据...';
+
+            if (!supabaseUser) {
+                resultEl.innerHTML = '<div class="status error">❌ 需要先登录</div>';
+                return;
+            }
+
+            const targetUserId = supabaseUser.id;
+            const keys = getAllUserDataKeys();
+            const mergedData = {};
+
+            log('开始合并所有用户数据...');
+            log(`目标用户ID: ${targetUserId}`);
+
+            keys.forEach(key => {
+                const userId = extractUserIdFromKey(key);
+                if (userId === targetUserId) return;
+
+                const dataType = key.split('-').pop();
+                const targetKey = `user-${targetUserId}-${dataType}`;
+
+                try {
+                    const data = JSON.parse(localStorage.getItem(key));
+
+                    if (!mergedData[targetKey]) {
+                        // 尝试加载目标数据
+                        mergedData[targetKey] = JSON.parse(localStorage.getItem(targetKey) || '[]');
+                    }
+
+                    // 合并数组数据
+                    if (Array.isArray(mergedData[targetKey]) && Array.isArray(data)) {
+                        mergedData[targetKey] = [...mergedData[targetKey], ...data];
+                        log(`✅ 合并 ${dataType}: +${data.length} 条`);
+                    }
+                } catch (e) {
+                    log(`❌ 跳过 ${key}: ${e.message}`);
+                }
+            });
+
+            // 保存合并后的数据
+            Object.keys(mergedData).forEach(key => {
+                localStorage.setItem(key, JSON.stringify(mergedData[key]));
+                log(`💾 保存合并数据: ${key}`);
+            });
+
+            resultEl.innerHTML = '<div class="status success">✅ 数据合并完成！页面将在3秒后刷新...</div>';
+
+            setTimeout(() => {
+                window.location.reload();
+            }, 3000);
+        }
+
+        function exportData() {
+            const data = {
+                timestamp: new Date().toISOString(),
+                supabaseUserId: supabaseUser?.id,
+                sessionUserId: getSessionUserId(),
+                localStorage: {}
+            };
+
+            Object.keys(localStorage).forEach(key => {
+                data.localStorage[key] = localStorage.getItem(key);
+            });
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `wanwan-backup-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            log('✅ 数据已导出');
+        }
+
+        function clearMismatchedData() {
+            if (!confirm('⚠️ 警告：此操作将删除所有不匹配当前用户ID的数据！\n\n建议先点击"导出数据备份"。\n\n确定要继续吗？')) {
+                return;
+            }
+
+            const resultEl = document.getElementById('migrationResult');
+            resultEl.innerHTML = '<div class="loading"></div> 正在清理...';
+
+            const currentUserId = supabaseUser?.id || getSessionUserId();
+            const keys = getAllUserDataKeys();
+            let deletedCount = 0;
+
+            keys.forEach(key => {
+                const userId = extractUserIdFromKey(key);
+                if (userId !== currentUserId) {
+                    localStorage.removeItem(key);
+                    deletedCount++;
+                    log(`🗑️ 删除: ${key}`);
+                }
+            });
+
+            resultEl.innerHTML = `<div class="status success">✅ 已清理 ${deletedCount} 个不匹配的数据项</div>`;
+            log(`✅ 清理完成，删除了 ${deletedCount} 项`);
+        }
+
+        // 初始化
+        async function init() {
+            log('开始诊断...');
+
+            supabaseUser = await checkSupabaseAuth();
+
+            if (supabaseUser) {
+                log(`✅ 检测到Supabase用户: ${supabaseUser.id}`);
+            } else {
+                log('⚠️ 未检测到Supabase登录状态');
+            }
+
+            const sessionUserId = getSessionUserId();
+            log(`SessionStorage用户ID: ${sessionUserId || '无'}`);
+
+            displayStatus();
+            displayAllData();
+
+            log('诊断完成');
+        }
+
+        init();
+    </script>
+</body>
+</html>

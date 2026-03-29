@@ -26,6 +26,7 @@ import {
   type Riddle
 } from '@/constants/riddles';
 import { saveRiddleRecord } from '@/utils/storage';
+import { updateDailyTaskProgress } from '@/utils/taskManager';
 
 export function RiddlePage() {
   const navigate = useNavigate();
@@ -83,6 +84,9 @@ export function RiddlePage() {
         completedAt: new Date()
       };
       saveRiddleRecord(record);
+
+      // 更新每日任务进度（逻辑推理）
+      updateDailyTaskProgress('daily-reasoning', 1);
 
       setShowAnswer(true);
       setSolvedCount(prev => prev + 1);

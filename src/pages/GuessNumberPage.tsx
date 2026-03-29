@@ -26,6 +26,7 @@ import {
   type GuessResult
 } from '@/utils/guessNumber';
 import { saveGuessNumberRecord } from '@/utils/storage';
+import { updateDailyTaskProgress } from '@/utils/taskManager';
 
 export function GuessNumberPage() {
   const navigate = useNavigate();
@@ -95,6 +96,9 @@ export function GuessNumberPage() {
         completedAt: new Date()
       };
       saveGuessNumberRecord(record);
+
+      // 更新每日任务进度（逻辑推理）
+      updateDailyTaskProgress('daily-reasoning', 1);
 
       // 更新最佳成绩
       const currentBest = localStorage.getItem('guessNumberBestScore');

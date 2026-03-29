@@ -338,6 +338,26 @@ export function useCollections(filters?: CollectionFilters) {
     fetchCollections();
   }, [fetchCollections]);
 
+  // 监听用户数据变化事件（登录/登出时刷新）
+  useEffect(() => {
+    const handleDataChange = () => {
+      // 延迟一下，确保 sessionStorage 已更新
+      setTimeout(() => {
+        fetchCollections();
+      }, 100);
+    };
+
+    window.addEventListener('user-data-changed', handleDataChange);
+    window.addEventListener('user-logged-out', handleDataChange);
+    window.addEventListener('user-logged-in', handleDataChange);
+
+    return () => {
+      window.removeEventListener('user-data-changed', handleDataChange);
+      window.removeEventListener('user-logged-out', handleDataChange);
+      window.removeEventListener('user-logged-in', handleDataChange);
+    };
+  }, [fetchCollections]);
+
   return {
     collections,
     loading,
@@ -392,6 +412,26 @@ export function useCollection(collectionId?: string) {
 
   useEffect(() => {
     fetchCollection();
+  }, [fetchCollection]);
+
+  // 监听用户数据变化事件（登录/登出时刷新）
+  useEffect(() => {
+    const handleDataChange = () => {
+      // 延迟一下，确保 sessionStorage 已更新
+      setTimeout(() => {
+        fetchCollection();
+      }, 100);
+    };
+
+    window.addEventListener('user-data-changed', handleDataChange);
+    window.addEventListener('user-logged-out', handleDataChange);
+    window.addEventListener('user-logged-in', handleDataChange);
+
+    return () => {
+      window.removeEventListener('user-data-changed', handleDataChange);
+      window.removeEventListener('user-logged-out', handleDataChange);
+      window.removeEventListener('user-logged-in', handleDataChange);
+    };
   }, [fetchCollection]);
 
   return {

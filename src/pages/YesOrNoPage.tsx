@@ -16,8 +16,9 @@ import {
   RotateCcw,
   Trophy
 } from 'lucide-react';
-import { getRandomWord, analyzeYesNoQuestion, isValidYesOrNoQuestion, getCategories } from '@/constants/yesOrNoWords';
-import { saveYesOrNoRecord } from '@/utils/storage';
+import { getRandomWord, analyzeYesNoQuestion, isValidYesOrNoQuestion, getCategories, getRandomWordFromCategory } from '@/constants/yesOrNoWords';
+import { saveYesOrNoRecord, getYesOrNoRecords } from '@/utils/storage';
+import { updateDailyTaskProgress } from '@/utils/taskManager';
 
 interface QAPair {
   question: string;
@@ -44,7 +45,28 @@ export function YesOrNoPage() {
   const qaListRef = useRef<HTMLDivElement>(null);
 
   const startNewGame = (specificCategory?: string) => {
-    const { word, category: newCategory } = getRandomWord();
+    let word: string;
+    let newCategory: string;
+
+    if (specificCategory) {
+      // 如果指定了类别，从该类别中获取词语
+      const wordFromCategory = getRandomWordFromCategory(specificCategory);
+      if (!wordFromCategory) {
+        // 如果类别无效，回退到随机模式
+        const random = getRandomWord();
+        word = random.word;
+        newCategory = random.category;
+      } else {
+        word = wordFromCategory;
+        newCategory = specificCategory;
+      }
+    } else {
+      // 随机模式
+      const random = getRandomWord();
+      word = random.word;
+      newCategory = random.category;
+    }
+
     setTargetWord(word);
     setCategory(newCategory);
     setQaHistory([]);
@@ -57,6 +79,11 @@ export function YesOrNoPage() {
   };
 
   useEffect(() => {
+    // 加载已完成的总局数
+    const records = getYesOrNoRecords();
+    const completedGames = records.filter((r: any) => r.solved).length;
+    setTotalGames(completedGames);
+
     startNewGame();
   }, []);
 
@@ -114,7 +141,12 @@ export function YesOrNoPage() {
         solved: true,
         completedAt: new Date()
       };
+      console.log('💾 保存Yes or No记录:', record);
       saveYesOrNoRecord(record);
+
+      // 更新每日任务进度（逻辑推理）
+      console.log('📝 更新逻辑推理任务进度');
+      updateDailyTaskProgress('daily-reasoning', 1);
 
       setTotalGames(prev => prev + 1);
     } else {
@@ -157,6 +189,7 @@ export function YesOrNoPage() {
       solved: false,
       completedAt: new Date()
     };
+    console.log('💾 保存Yes or No记录（未完成）:', record);
     saveYesOrNoRecord(record);
   };
 
@@ -307,7 +340,7 @@ export function YesOrNoPage() {
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => startNewGame()}
-                    className="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-700 dark:text-gray-300 rounded-full transition-colors text-sm"
+                    className="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-700 dark:text-gray-300 rounded-full transition-colors text-sm border border-gray-300 dark:border-gray-600"
                   >
                     随机
                   </button>

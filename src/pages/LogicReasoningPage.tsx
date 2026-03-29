@@ -6,8 +6,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Puzzle, Lightbulb, HelpCircle, Hash, BookOpen, BarChart3, Shuffle, X } from 'lucide-react';
+import { ArrowLeft, Puzzle, Lightbulb, HelpCircle, Hash, BookOpen, BarChart3, Shuffle, X, History, Clock, Trophy, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import {
+  getTurtleSoupRecords,
+  getRiddleRecords,
+  getYesOrNoRecords,
+  getGuessNumberRecords
+} from '@/utils/storage';
 
 interface GameCard {
   id: string;
@@ -19,6 +25,8 @@ interface GameCard {
   gradient: string;
   borderColor: string;
   textColor: string;
+  disabled?: boolean;
+  disabledReason?: string;
 }
 
 export function LogicReasoningPage() {
@@ -26,6 +34,8 @@ export function LogicReasoningPage() {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [showInstructions, setShowInstructions] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [showRecords, setShowRecords] = useState(false);
+  const [showComingSoon, setShowComingSoon] = useState(false);
   const [gameStats, setGameStats] = useState({
     totalGames: 0,
     turtleSoupWins: 0,
@@ -33,6 +43,7 @@ export function LogicReasoningPage() {
     yesOrNoWins: 0,
     guessNumberWins: 0
   });
+  const [gameRecords, setGameRecords] = useState<any[]>([]);
 
   // 加载游戏统计数据
   useEffect(() => {
@@ -40,11 +51,18 @@ export function LogicReasoningPage() {
   }, []);
 
   const loadGameStats = () => {
-    // 从localStorage加载各游戏统计
-    const turtleSoupRecords = JSON.parse(localStorage.getItem('turtleSoupRecords') || '[]');
-    const riddleRecords = JSON.parse(localStorage.getItem('riddleRecords') || '[]');
-    const yesOrNoRecords = JSON.parse(localStorage.getItem('yesOrNoRecords') || '[]');
-    const guessNumberRecords = JSON.parse(localStorage.getItem('guessNumberRecords') || '[]');
+    // 从storage工具加载各游戏统计（支持用户隔离）
+    const turtleSoupRecords = getTurtleSoupRecords();
+    const riddleRecords = getRiddleRecords();
+    const yesOrNoRecords = getYesOrNoRecords();
+    const guessNumberRecords = getGuessNumberRecords();
+
+    console.log('📊 加载游戏统计:', {
+      turtleSoup: turtleSoupRecords.length,
+      riddle: riddleRecords.length,
+      yesOrNo: yesOrNoRecords.length,
+      guessNumber: guessNumberRecords.length
+    });
 
     setGameStats({
       totalGames: turtleSoupRecords.length + riddleRecords.length + yesOrNoRecords.length + guessNumberRecords.length,
@@ -55,9 +73,52 @@ export function LogicReasoningPage() {
     });
   };
 
+  const loadGameRecords = () => {
+    // 加载所有游戏记录
+    const turtleSoupRecords = getTurtleSoupRecords().map((r: any) => ({
+      ...r,
+      gameType: '海龟汤',
+      icon: '🐢',
+      color: 'red'
+    }));
+
+    const riddleRecords = getRiddleRecords().map((r: any) => ({
+      ...r,
+      gameType: '谜语人',
+      icon: '💡',
+      color: 'orange'
+    }));
+
+    const yesOrNoRecords = getYesOrNoRecords().map((r: any) => ({
+      ...r,
+      gameType: 'Yes or No',
+      icon: '❓',
+      color: 'rose'
+    }));
+
+    const guessNumberRecords = getGuessNumberRecords().map((r: any) => ({
+      ...r,
+      gameType: '猜数字',
+      icon: '🔢',
+      color: 'amber'
+    }));
+
+    // 合并并按时间倒序排列（最新的在前）
+    const allRecords = [...turtleSoupRecords, ...riddleRecords, ...yesOrNoRecords, ...guessNumberRecords]
+      .sort((a: any, b: any) => new Date(b.createdAt || b.syncedAt).getTime() - new Date(a.createdAt || a.syncedAt).getTime());
+
+    setGameRecords(allRecords);
+  };
+
   const startRandomGame = () => {
-    const randomIndex = Math.floor(Math.random() * gameCards.length);
-    navigate(gameCards[randomIndex].path);
+    // 过滤掉禁用的游戏
+    const availableGames = gameCards.filter(card => !card.disabled);
+    if (availableGames.length === 0) {
+      setShowComingSoon(true);
+      return;
+    }
+    const randomIndex = Math.floor(Math.random() * availableGames.length);
+    navigate(availableGames[randomIndex].path);
   };
 
   const gameCards: GameCard[] = [
@@ -92,7 +153,9 @@ export function LogicReasoningPage() {
       color: 'red',
       gradient: 'from-rose-500 to-pink-500',
       borderColor: 'border-red-200 dark:border-red-800',
-      textColor: 'text-red-700 dark:text-red-300'
+      textColor: 'text-red-700 dark:text-red-300',
+      disabled: true,
+      disabledReason: '稍后开放，敬请期待'
     },
     {
       id: 'guess-number',
@@ -143,6 +206,17 @@ export function LogicReasoningPage() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => setShowInstructions(true)}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                title="游戏说明"
+              >
+                <BookOpen size={18} />
+                <span className="hidden md:inline">游戏说明</span>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={startRandomGame}
                 className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                 title="随机开始游戏"
@@ -168,12 +242,15 @@ export function LogicReasoningPage() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setShowInstructions(true)}
+                onClick={() => {
+                  loadGameRecords();
+                  setShowRecords(true);
+                }}
                 className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
-                title="游戏说明"
+                title="查看推理记录"
               >
-                <BookOpen size={18} />
-                <span className="hidden md:inline">游戏说明</span>
+                <History size={18} />
+                <span className="hidden md:inline">推理记录</span>
               </motion.button>
             </div>
           </div>
@@ -346,6 +423,260 @@ export function LogicReasoningPage() {
         )}
       </AnimatePresence>
 
+      {/* 即将推出弹窗 */}
+      <AnimatePresence>
+        {showComingSoon && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowComingSoon(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 20, stiffness: 300 }}
+              className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-md w-full border-2 border-rose-200 dark:border-rose-800"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* 头部 */}
+              <div className="bg-gradient-to-r from-rose-500 to-pink-500 px-6 py-4 rounded-t-3xl flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <HelpCircle size={24} className="text-white" />
+                  <h3 className="text-xl font-bold text-white">即将推出</h3>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowComingSoon(false)}
+                  className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
+                >
+                  <X size={24} />
+                </motion.button>
+              </div>
+
+              {/* 内容 */}
+              <div className="p-6 text-center">
+                <div className="mb-4">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center">
+                    <HelpCircle size={32} className="text-white" />
+                  </div>
+                  <h4 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    稍后开放，敬请期待
+                  </h4>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Yes or No 游戏正在优化中，敬请期待更精彩的推理体验！
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="w-2 h-2 rounded-full bg-rose-500" />
+                    <span>智能AI出题系统</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="w-2 h-2 rounded-full bg-pink-500" />
+                    <span>丰富词库类别</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="w-2 h-2 rounded-full bg-orange-500" />
+                    <span>推理记录追踪</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 推理记录弹窗 */}
+      <AnimatePresence>
+        {showRecords && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowRecords(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 20, stiffness: 300 }}
+              className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden border-2 border-red-200 dark:border-red-800 flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* 头部 */}
+              <div className="bg-gradient-to-r from-red-500 to-rose-500 px-6 py-4 flex items-center justify-between flex-shrink-0">
+                <div className="flex items-center gap-3">
+                  <History size={24} className="text-white" />
+                  <h3 className="text-xl font-bold text-white">推理游戏记录</h3>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowRecords(false)}
+                  className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
+                >
+                  <X size={24} />
+                </motion.button>
+              </div>
+
+              {/* 内容 */}
+              <div className="p-6 overflow-y-auto flex-1">
+                {gameRecords.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Trophy size={48} className="mx-auto text-gray-400 mb-4" />
+                    <p className="text-gray-600 dark:text-gray-400">
+                      还没有游戏记录，开始你的第一次推理吧！✨
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {gameRecords.map((record: any, index: number) => (
+                      <motion.div
+                        key={record.id || record.soupId || index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className={`bg-gradient-to-r from-${record.color}-50 to-${record.color}-100 dark:from-${record.color}-900/20 dark:to-${record.color}-900/30 rounded-xl p-4 border border-${record.color}-200 dark:border-${record.color}-800`}
+                      >
+                        {/* 游戏类型和结果 */}
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl">{record.icon}</span>
+                            <span className="px-3 py-1 text-sm font-medium rounded-full bg-gradient-to-r from-red-500 to-rose-500 text-white">
+                              {record.gameType}
+                            </span>
+                            {record.solved !== undefined && (
+                              <span className={`text-xs px-2 py-1 rounded-full ${
+                                record.solved
+                                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                  : 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
+                              }`}>
+                                {record.solved ? '✓ 已完成' : '✗ 未完成'}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
+                            <Calendar size={14} />
+                            <span>
+                              {(() => {
+                                const date = new Date(record.createdAt || record.syncedAt || record.completedAt);
+                                return date.toLocaleString('zh-CN', {
+                                  year: 'numeric',
+                                  month: '2-digit',
+                                  day: '2-digit',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                });
+                              })()}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* 海龟汤特有信息 */}
+                        {record.gameType === '海龟汤' && (
+                          <div className="bg-white dark:bg-gray-800 rounded-lg p-3 mb-2">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                🏷️ {record.soupId || '未知汤面'}
+                              </span>
+                              <span className="text-xs px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded-full">
+                                {record.hintsUsed || 0} 次提示
+                              </span>
+                            </div>
+                            {record.timeSpent !== undefined && (
+                              <div className="text-sm text-gray-600 dark:text-gray-400">
+                                ⏱️ 用时：{Math.floor(record.timeSpent / 60)}分{record.timeSpent % 60}秒
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* 谜语人特有信息 */}
+                        {record.gameType === '谜语人' && record.riddleId && (
+                          <div className="bg-white dark:bg-gray-800 rounded-lg p-3 mb-2">
+                            <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                              📝 谜题 #{record.riddleId}
+                            </div>
+                            {record.answer && (
+                              <div className="text-sm text-gray-600 dark:text-gray-400">
+                                💡 答案：{record.answer}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Yes or No 特有信息 */}
+                        {record.gameType === 'Yes or No' && (
+                          <div className="bg-white dark:bg-gray-800 rounded-lg p-3 mb-2">
+                            <div className="flex items-center justify-between">
+                              <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                🎯 目标词：{record.targetWord}
+                              </div>
+                              <span className="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-full">
+                                {record.category}
+                              </span>
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              ❓ 提问次数：{record.questionsCount || 0} 次
+                            </div>
+                            {record.timeSpent !== undefined && (
+                              <div className="text-sm text-gray-600 dark:text-gray-400">
+                                ⏱️ 用时：{Math.floor(record.timeSpent / 60)}分{record.timeSpent % 60}秒
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* 猜数字特有信息 */}
+                        {record.gameType === '猜数字' && (
+                          <div className="bg-white dark:bg-gray-800 rounded-lg p-3 mb-2">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                🔢 神秘数字：{record.secretNumber}
+                              </span>
+                              <span className={`text-xs px-2 py-1 rounded-full ${
+                                record.completed
+                                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                  : 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
+                              }`}>
+                                {record.completed ? '✓ 猜中' : '✗ 未猜中'}
+                              </span>
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              🎲 尝试次数：{record.attemptsCount || 0} 次
+                            </div>
+                            {record.timeSpent !== undefined && (
+                              <div className="text-sm text-gray-600 dark:text-gray-400">
+                                ⏱️ 用时：{Math.floor(record.timeSpent / 60)}分{record.timeSpent % 60}秒
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 底部统计 */}
+              {gameRecords.length > 0 && (
+                <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                    共 <span className="font-bold text-red-600 dark:text-red-400">{gameRecords.length}</span> 条游戏记录
+                  </p>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* 主要内容 */}
       <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
@@ -374,15 +705,32 @@ export function LogicReasoningPage() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                onHoverStart={() => setHoveredCard(card.id)}
+                onHoverStart={() => !card.disabled && setHoveredCard(card.id)}
                 onHoverEnd={() => setHoveredCard(null)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => navigate(card.path)}
-                className={`relative bg-white dark:bg-gray-800 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 ${card.borderColor} overflow-hidden cursor-pointer group`}
+                whileHover={card.disabled ? {} : { scale: 1.02 }}
+                whileTap={card.disabled ? {} : { scale: 0.98 }}
+                onClick={() => {
+                  if (card.disabled) {
+                    setShowComingSoon(true);
+                  } else {
+                    navigate(card.path);
+                  }
+                }}
+                className={`relative bg-white dark:bg-gray-800 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 ${card.borderColor} overflow-hidden ${
+                  card.disabled ? 'opacity-50 grayscale cursor-not-allowed' : 'cursor-pointer group'
+                }`}
               >
                 {/* 背景装饰 */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+
+                {/* 禁用标记 */}
+                {card.disabled && (
+                  <div className="absolute top-4 right-4 z-10">
+                    <div className={`px-3 py-1 bg-gradient-to-r ${card.gradient} text-white text-xs font-bold rounded-full shadow-lg`}>
+                      即将推出
+                    </div>
+                  </div>
+                )}
 
                 {/* 内容 */}
                 <div className="relative p-8">

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>数据诊断工具</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #f5f5f5; }
+        .section { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { color: #e53e3e; margin-top: 0; }
+        pre { background: #f7fafc; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        button { background: #3182ce; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #2c5282; }
+        .success { color: green; font-weight: bold; }
+        .warning { color: orange; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🔍 万万没想到 - 数据诊断工具</h1>
+    
+    <div class="section">
+        <h2>当前用户信息</h2>
+        <pre id="userInfo"></pre>
+    </div>
+
+    <div class="section">
+        <h2>localStorage 中的所有数据键</h2>
+        <pre id="localStorageKeys"></pre>
+    </div>
+
+    <div class="section">
+        <h2>逻辑推理模块数据</h2>
+        <pre id="logicData"></pre>
+    </div>
+
+    <div class="section">
+        <h2>问题思考模块数据</h2>
+        <pre id="questionData"></pre>
+    </div>
+
+    <div class="section">
+        <h2>所有用户的数据</h2>
+        <pre id="allUserData"></pre>
+    </div>
+
+    <div class="section">
+        <h2>操作</h2>
+        <button onclick="copyAllData()">📋 复制所有数据到剪贴板</button>
+        <button onclick="exportData()">💾 导出数据为JSON</button>
+    </div>
+
+    <script>
+        // 获取当前用户ID
+        function getCurrentUserId() {
+            return sessionStorage.getItem('current-user-id');
+        }
+
+        // 获取所有localStorage键
+        function getAllKeys() {
+            return Object.keys(localStorage);
+        }
+
+        // 获取用户数据
+        function getUserData(key) {
+            const userId = getCurrentUserId();
+            if (!userId) {
+                // 游客模式
+                const guestKey = `guest-${key}`;
+                return JSON.parse(localStorage.getItem(guestKey) || 'null');
+            }
+            const userKey = `user-${userId}-${key}`;
+            return JSON.parse(localStorage.getItem(userKey) || 'null');
+        }
+
+        // 显示用户信息
+        function displayUserInfo() {
+            const userId = getCurrentUserId();
+            const userInfo = {
+                当前用户ID: userId || '未登录（游客模式）',
+                SessionStorage中所有数据: {...sessionStorage}
+            };
+            document.getElementById('userInfo').textContent = JSON.stringify(userInfo, null, 2);
+        }
+
+        // 显示所有localStorage键
+        function displayLocalStorageKeys() {
+            const keys = getAllKeys();
+            const grouped = {
+                '用户相关键': keys.filter(k => k.startsWith('user-')),
+                '游客相关键': keys.filter(k => k.startsWith('guest-')),
+                '其他键': keys.filter(k => !k.startsWith('user-') && !k.startsWith('guest-'))
+            };
+            document.getElementById('localStorageKeys').textContent = JSON.stringify(grouped, null, 2);
+        }
+
+        // 显示逻辑推理数据
+        function displayLogicData() {
+            const logicData = {
+                yesOrNo: getUserData('wwx-yes-or-no'),
+                riddle: getUserData('wwx-riddle'),
+                guessNumber: getUserData('wwx-guess-number'),
+                turtleSoup: getUserData('wwx-turtle-soup')
+            };
+            document.getElementById('logicData').textContent = JSON.stringify(logicData, null, 2);
+        }
+
+        // 显示问题思考数据
+        function displayQuestionData() {
+            const questionData = {
+                answers: getUserData('wwx-answers'),
+                favorites: getUserData('wwx-favorites'),
+                later: getUserData('wwx-later'),
+                collections: getUserData('wwx-collections')
+            };
+            document.getElementById('questionData').textContent = JSON.stringify(questionData, null, 2);
+        }
+
+        // 显示所有用户数据
+        function displayAllUserData() {
+            const keys = getAllKeys();
+            const allData = {};
+            
+            keys.forEach(key => {
+                if (key.startsWith('user-') || key.startsWith('guest-')) {
+                    try {
+                        allData[key] = {
+                            数据类型: key.includes('yes-or-no') ? 'Yes or No' :
+                                      key.includes('riddle') ? '谜语人' :
+                                      key.includes('guess-number') ? '猜数字' :
+                                      key.includes('turtle-soup') ? '海龟汤' :
+                                      key.includes('answers') ? '问题回答' :
+                                      key.includes('favorites') ? '收藏' :
+                                      key.includes('task') ? '任务进度' : '其他',
+                            数据条数: {
+                                array: JSON.parse(localStorage.getItem(key))?.length || 0,
+                                object: Object.keys(JSON.parse(localStorage.getItem(key)) || {}).length
+                            }
+                        };
+                    } catch (e) {
+                        allData[key] = { error: '无法解析' };
+                    }
+                }
+            });
+            
+            document.getElementById('allUserData').textContent = JSON.stringify(allData, null, 2);
+        }
+
+        // 复制所有数据
+        function copyAllData() {
+            const allData = {
+                userInfo: {
+                    当前用户ID: getCurrentUserId(),
+                    sessionStorage: {...sessionStorage}
+                },
+                localStorageKeys: getAllKeys(),
+                fullData: {}
+            };
+
+            getAllKeys().forEach(key => {
+                try {
+                    allData.fullData[key] = localStorage.getItem(key);
+                } catch (e) {
+                    allData.fullData[key] = 'Error reading';
+                }
+            });
+
+            const json = JSON.stringify(allData, null, 2);
+            navigator.clipboard.writeText(json).then(() => {
+                alert('✅ 数据已复制到剪贴板！请发送给开发者进行分析。');
+            });
+        }
+
+        // 导出数据
+        function exportData() {
+            const allData = {
+                userInfo: {
+                    当前用户ID: getCurrentUserId(),
+                    sessionStorage: {...sessionStorage}
+                },
+                localStorage: {}
+            };
+
+            getAllKeys().forEach(key => {
+                try {
+                    allData.localStorage[key] = localStorage.getItem(key);
+                } catch (e) {
+                    allData.localStorage[key] = 'Error reading';
+                }
+            });
+
+            const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `wanwan-data-backup-${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // 初始化
+        displayUserInfo();
+        displayLocalStorageKeys();
+        displayLogicData();
+        displayQuestionData();
+        displayAllUserData();
+    </script>
+</body>
+</html>

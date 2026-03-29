@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { answerTurtleSoupQuestion, isValidYesNoQuestion, getSuggestedQuestions, type QAPair } from '@/utils/turtleSoupAI';
 import { saveTurtleSoupRecord } from '@/utils/storage';
+import { updateDailyTaskProgress } from '@/utils/taskManager';
 
 export function TurtleSoupPage() {
   const navigate = useNavigate();
@@ -104,6 +105,9 @@ export function TurtleSoupPage() {
     };
 
     saveTurtleSoupRecord(record);
+
+    // 更新逻辑推理任务进度（完成一次海龟汤游戏）
+    updateDailyTaskProgress('daily-reasoning', 1);
 
     setShowTruth(true);
     setSolvedCount(prev => prev + 1);

@@ -1,4 +1,14 @@
+/**
+ * 本地存储工具（支持用户数据隔离）
+ * 所有数据都会根据当前登录用户进行隔离存储
+ *
+ * 存储策略：
+ * - 登录用户：优先使用本地存储，可手动同步到云端
+ * - 游客用户：始终使用本地存储
+ */
+
 import { Answer, SlotMachineResult, UserProgress, TurtleSoupRecord } from '@/types';
+import { getCurrentUserId, getUserStorageKey, setUserData, removeUserData, getUserDataSync } from '@/utils/userStorage';
 
 const STORAGE_KEYS = {
   ANSWERS: 'wwx-answers',
@@ -8,7 +18,25 @@ const STORAGE_KEYS = {
   YES_OR_NO: 'wwx-yes-or-no',
   GUESS_NUMBER: 'wwx-guess-number',
   PROGRESS: 'wwx-progress',
+  FAVORITES: 'wwx-favorites',
+  LATER: 'wwx-later',
+  COLLECTIONS: 'wwx-collections',
 } as const;
+
+/**
+ * 获取本地数据（同步，直接从 localStorage 读取）
+ */
+function getLocalData<T>(key: string, defaultValue: T): T {
+  const userKey = getUserStorageKey(key);
+  const data = localStorage.getItem(userKey);
+  if (!data) return defaultValue;
+
+  try {
+    return JSON.parse(data) as T;
+  } catch {
+    return defaultValue;
+  }
+}
 
 /**
  * 保存回答到本地存储
@@ -16,60 +44,19 @@ const STORAGE_KEYS = {
 export function saveAnswer(answer: Answer): void {
   const answers = getAnswers();
   answers.push(answer);
-  localStorage.setItem(STORAGE_KEYS.ANSWERS, JSON.stringify(answers));
+  setUserData(STORAGE_KEYS.ANSWERS, answers);
 }
 
 /**
  * 获取所有回答
  */
 export function getAnswers(): Answer[] {
-  const data = localStorage.getItem(STORAGE_KEYS.ANSWERS);
-  if (!data) return [];
-
-  try {
-    const answers = JSON.parse(data);
-    return answers.map((a: any) => ({
-      ...a,
-      createdAt: new Date(a.createdAt),
-      updatedAt: a.updatedAt ? new Date(a.updatedAt) : undefined,
-    }));
-  } catch {
-    return [];
-  }
-}
-
-/**
- * 根据问题ID获取回答
- */
-export function getAnswersByQuestionId(questionId: string): Answer[] {
-  const answers = getAnswers();
-  return answers.filter((a) => a.questionId === questionId);
-}
-
-/**
- * 更新回答
- */
-export function updateAnswer(answerId: string, updates: Partial<Omit<Answer, 'id' | 'questionId' | 'userId' | 'createdAt'>>): void {
-  const answers = getAnswers();
-  const index = answers.findIndex((a) => a.id === answerId);
-
-  if (index !== -1) {
-    answers[index] = {
-      ...answers[index],
-      ...updates,
-      updatedAt: new Date(),
-    };
-    localStorage.setItem(STORAGE_KEYS.ANSWERS, JSON.stringify(answers));
-  }
-}
-
-/**
- * 删除回答
- */
-export function deleteAnswer(answerId: string): void {
-  const answers = getAnswers();
-  const filteredAnswers = answers.filter((a) => a.id !== answerId);
-  localStorage.setItem(STORAGE_KEYS.ANSWERS, JSON.stringify(filteredAnswers));
+  const data = getLocalData<Answer[]>(STORAGE_KEYS.ANSWERS, []);
+  return data.map((a: any) => ({
+    ...a,
+    createdAt: new Date(a.createdAt),
+    updatedAt: a.updatedAt ? new Date(a.updatedAt) : undefined,
+  }));
 }
 
 /**
@@ -84,30 +71,49 @@ export function getRecentAnswers(days: number = 7): Answer[] {
 }
 
 /**
+ * 删除回答
+ */
+export function deleteAnswer(answerId: string): void {
+  const answers = getAnswers();
+  const filteredAnswers = answers.filter((a) => a.id !== answerId);
+  setUserData(STORAGE_KEYS.ANSWERS, filteredAnswers);
+}
+
+/**
+ * 更新回答
+ */
+export function updateAnswer(answerId: string, updates: Partial<Answer>): void {
+  const answers = getAnswers();
+  const index = answers.findIndex((a) => a.id === answerId);
+  if (index !== -1) {
+    answers[index] = {
+      ...answers[index],
+      ...updates,
+      updatedAt: new Date(),
+    };
+    setUserData(STORAGE_KEYS.ANSWERS, answers);
+  }
+}
+
+/**
  * 保存老虎机结果
  */
 export function saveSlotMachineResult(result: SlotMachineResult): void {
   const results = getSlotMachineResults();
   results.push(result);
-  localStorage.setItem(STORAGE_KEYS.SLOT_MACHINE, JSON.stringify(results));
+  setUserData(STORAGE_KEYS.SLOT_MACHINE, results);
 }
 
 /**
  * 获取所有老虎机结果
  */
 export function getSlotMachineResults(): SlotMachineResult[] {
-  const data = localStorage.getItem(STORAGE_KEYS.SLOT_MACHINE);
-  if (!data) return [];
+  const data = getUserDataSync<SlotMachineResult[]>(STORAGE_KEYS.SLOT_MACHINE, []);
 
-  try {
-    const results = JSON.parse(data);
-    return results.map((r: any) => ({
-      ...r,
-      createdAt: new Date(r.createdAt),
-    }));
-  } catch {
-    return [];
-  }
+  return data.map((r: any) => ({
+    ...r,
+    createdAt: new Date(r.createdAt),
+  }));
 }
 
 /**
@@ -116,25 +122,19 @@ export function getSlotMachineResults(): SlotMachineResult[] {
 export function saveTurtleSoupRecord(record: TurtleSoupRecord): void {
   const records = getTurtleSoupRecords();
   records.push(record);
-  localStorage.setItem(STORAGE_KEYS.TURTLE_SOUP, JSON.stringify(records));
+  setUserData(STORAGE_KEYS.TURTLE_SOUP, records);
 }
 
 /**
  * 获取所有海龟汤游戏记录
  */
 export function getTurtleSoupRecords(): TurtleSoupRecord[] {
-  const data = localStorage.getItem(STORAGE_KEYS.TURTLE_SOUP);
-  if (!data) return [];
+  const data = getUserDataSync<TurtleSoupRecord[]>(STORAGE_KEYS.TURTLE_SOUP, []);
 
-  try {
-    const records = JSON.parse(data);
-    return records.map((r: any) => ({
-      ...r,
-      completedAt: new Date(r.completedAt),
-    }));
-  } catch {
-    return [];
-  }
+  return data.map((r: any) => ({
+    ...r,
+    completedAt: new Date(r.completedAt),
+  }));
 }
 
 /**
@@ -143,25 +143,19 @@ export function getTurtleSoupRecords(): TurtleSoupRecord[] {
 export function saveRiddleRecord(record: any): void {
   const records = getRiddleRecords();
   records.push(record);
-  localStorage.setItem(STORAGE_KEYS.RIDDLE, JSON.stringify(records));
+  setUserData(STORAGE_KEYS.RIDDLE, records);
 }
 
 /**
  * 获取所有谜语人游戏记录
  */
 export function getRiddleRecords(): any[] {
-  const data = localStorage.getItem(STORAGE_KEYS.RIDDLE);
-  if (!data) return [];
+  const data = getUserDataSync<any[]>(STORAGE_KEYS.RIDDLE, []);
 
-  try {
-    const records = JSON.parse(data);
-    return records.map((r: any) => ({
-      ...r,
-      completedAt: new Date(r.completedAt),
-    }));
-  } catch {
-    return [];
-  }
+  return data.map((r: any) => ({
+    ...r,
+    completedAt: new Date(r.completedAt),
+  }));
 }
 
 /**
@@ -170,25 +164,19 @@ export function getRiddleRecords(): any[] {
 export function saveYesOrNoRecord(record: any): void {
   const records = getYesOrNoRecords();
   records.push(record);
-  localStorage.setItem(STORAGE_KEYS.YES_OR_NO, JSON.stringify(records));
+  setUserData(STORAGE_KEYS.YES_OR_NO, records);
 }
 
 /**
  * 获取所有Yes or No游戏记录
  */
 export function getYesOrNoRecords(): any[] {
-  const data = localStorage.getItem(STORAGE_KEYS.YES_OR_NO);
-  if (!data) return [];
+  const data = getUserDataSync<any[]>(STORAGE_KEYS.YES_OR_NO, []);
 
-  try {
-    const records = JSON.parse(data);
-    return records.map((r: any) => ({
-      ...r,
-      completedAt: new Date(r.completedAt),
-    }));
-  } catch {
-    return [];
-  }
+  return data.map((r: any) => ({
+    ...r,
+    completedAt: new Date(r.completedAt),
+  }));
 }
 
 /**
@@ -197,46 +185,33 @@ export function getYesOrNoRecords(): any[] {
 export function saveGuessNumberRecord(record: any): void {
   const records = getGuessNumberRecords();
   records.push(record);
-  localStorage.setItem(STORAGE_KEYS.GUESS_NUMBER, JSON.stringify(records));
+  setUserData(STORAGE_KEYS.GUESS_NUMBER, records);
 }
 
 /**
  * 获取所有猜数字游戏记录
  */
 export function getGuessNumberRecords(): any[] {
-  const data = localStorage.getItem(STORAGE_KEYS.GUESS_NUMBER);
-  if (!data) return [];
+  const data = getUserDataSync<any[]>(STORAGE_KEYS.GUESS_NUMBER, []);
 
-  try {
-    const records = JSON.parse(data);
-    return records.map((r: any) => ({
-      ...r,
-      completedAt: new Date(r.completedAt),
-    }));
-  } catch {
-    return [];
-  }
+  return data.map((r: any) => ({
+    ...r,
+    completedAt: new Date(r.completedAt),
+  }));
 }
 
 /**
  * 保存用户进度
  */
 export function saveProgress(progress: UserProgress): void {
-  localStorage.setItem(STORAGE_KEYS.PROGRESS, JSON.stringify(progress));
+  setUserData(STORAGE_KEYS.PROGRESS, progress);
 }
 
 /**
  * 获取用户进度
  */
 export function getProgress(): UserProgress | null {
-  const data = localStorage.getItem(STORAGE_KEYS.PROGRESS);
-  if (!data) return null;
-
-  try {
-    return JSON.parse(data);
-  } catch {
-    return null;
-  }
+  return getUserDataSync<UserProgress | null>(STORAGE_KEYS.PROGRESS, null);
 }
 
 /**
@@ -252,12 +227,20 @@ export function updateProgress(updates: Partial<UserProgress>): void {
 }
 
 /**
- * 清除所有数据
+ * 清除当前用户的所有数据
  */
 export function clearAllData(): void {
   Object.values(STORAGE_KEYS).forEach((key) => {
-    localStorage.removeItem(key);
+    removeUserData(key);
   });
+}
+
+/**
+ * 清除当前登录用户的所有数据（包括用户标识）
+ * 用于登出时清理
+ */
+export function clearCurrentUserAllData(): void {
+  clearCurrentUserData();
 }
 
 /**
@@ -267,6 +250,10 @@ export function exportDataAsJSON(): string {
   const data = {
     answers: getAnswers(),
     slotMachineResults: getSlotMachineResults(),
+    turtleSoup: getTurtleSoupRecords(),
+    riddles: getRiddleRecords(),
+    yesOrNo: getYesOrNoRecords(),
+    guessNumber: getGuessNumberRecords(),
     progress: getProgress(),
     exportedAt: new Date().toISOString(),
   };
@@ -282,18 +269,31 @@ export function importDataFromJSON(jsonString: string): boolean {
     const data = JSON.parse(jsonString);
 
     if (data.answers) {
-      localStorage.setItem(STORAGE_KEYS.ANSWERS, JSON.stringify(data.answers));
+      setUserData(STORAGE_KEYS.ANSWERS, data.answers);
     }
 
     if (data.slotMachineResults) {
-      localStorage.setItem(
-        STORAGE_KEYS.SLOT_MACHINE,
-        JSON.stringify(data.slotMachineResults)
-      );
+      setUserData(STORAGE_KEYS.SLOT_MACHINE, data.slotMachineResults);
+    }
+
+    if (data.turtleSoup) {
+      setUserData(STORAGE_KEYS.TURTLE_SOUP, data.turtleSoup);
+    }
+
+    if (data.riddles) {
+      setUserData(STORAGE_KEYS.RIDDLE, data.riddles);
+    }
+
+    if (data.yesOrNo) {
+      setUserData(STORAGE_KEYS.YES_OR_NO, data.yesOrNo);
+    }
+
+    if (data.guessNumber) {
+      setUserData(STORAGE_KEYS.GUESS_NUMBER, data.guessNumber);
     }
 
     if (data.progress) {
-      localStorage.setItem(STORAGE_KEYS.PROGRESS, JSON.stringify(data.progress));
+      setUserData(STORAGE_KEYS.PROGRESS, data.progress);
     }
 
     return true;
@@ -301,3 +301,88 @@ export function importDataFromJSON(jsonString: string): boolean {
     return false;
   }
 }
+
+/**
+ * 获取收藏的问题ID列表
+ */
+export function getFavoriteQuestionIds(): string[] {
+  return getUserDataSync<string[]>(STORAGE_KEYS.FAVORITES, []);
+}
+
+/**
+ * 保存收藏的问题ID列表
+ */
+export function saveFavoriteQuestionIds(ids: string[]): void {
+  setUserData(STORAGE_KEYS.FAVORITES, ids);
+}
+
+/**
+ * 添加收藏
+ */
+export function addFavorite(questionId: string): void {
+  const favorites = getFavoriteQuestionIds();
+  if (!favorites.includes(questionId)) {
+    favorites.push(questionId);
+    saveFavoriteQuestionIds(favorites);
+  }
+}
+
+/**
+ * 移除收藏
+ */
+export function removeFavorite(questionId: string): void {
+  const favorites = getFavoriteQuestionIds();
+  const filtered = favorites.filter((id) => id !== questionId);
+  saveFavoriteQuestionIds(filtered);
+}
+
+/**
+ * 获取"稍后阅读"的问题ID列表
+ */
+export function getLaterQuestionIds(): string[] {
+  return getUserDataSync<string[]>(STORAGE_KEYS.LATER, []);
+}
+
+/**
+ * 保存"稍后阅读"的问题ID列表
+ */
+export function saveLaterQuestionIds(ids: string[]): void {
+  setUserData(STORAGE_KEYS.LATER, ids);
+}
+
+/**
+ * 添加到稍后阅读
+ */
+export function addLater(questionId: string): void {
+  const later = getLaterQuestionIds();
+  if (!later.includes(questionId)) {
+    later.push(questionId);
+    saveLaterQuestionIds(later);
+  }
+}
+
+/**
+ * 从稍后阅读移除
+ */
+export function removeLater(questionId: string): void {
+  const later = getLaterQuestionIds();
+  const filtered = later.filter((id) => id !== questionId);
+  saveLaterQuestionIds(filtered);
+}
+
+/**
+ * 获取收藏夹列表
+ */
+export function getCollections(): any[] {
+  return getUserDataSync<any[]>(STORAGE_KEYS.COLLECTIONS, []);
+}
+
+/**
+ * 保存收藏夹列表
+ */
+export function saveCollections(collections: any[]): void {
+  setUserData(STORAGE_KEYS.COLLECTIONS, collections);
+}
+
+// 重新导出用户存储工具函数
+export { getUserData, getUserDataSync, setUserData, removeUserData } from '@/utils/userStorage';

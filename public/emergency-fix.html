@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>紧急修复 - 万万没想到</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; background: #f5f5f5; }
+        .card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { color: #e53e3e; }
+        .success { background: #c6f6d5; color: #22543d; padding: 15px; border-radius: 6px; margin: 10px 0; }
+        .error { background: #fed7d7; color: #c53030; padding: 15px; border-radius: 6px; margin: 10px 0; }
+        button { background: #3182ce; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 16px; margin: 5px; }
+        button:hover { background: #2c5282; }
+        button.danger { background: #f56565; }
+        button.danger:hover { background: #e53e3e; }
+        pre { background: #1a202c; color: #48bb78; padding: 15px; border-radius: 6px; overflow-x: auto; }
+        .data-item { background: #f7fafc; padding: 10px; margin: 5px 0; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>🚨 紧急数据修复工具</h1>
+
+    <div class="card">
+        <h2>问题诊断</h2>
+        <div id="diagnosis"></div>
+    </div>
+
+    <div class="card">
+        <h2>修复操作</h2>
+        <button onclick="fixGuestData()">✅ 修复游客数据并恢复</button>
+        <button class="danger" onclick="emergencyReset()">⚠️ 紧急重置（清除所有数据）</button>
+        <div id="fixResult"></div>
+    </div>
+
+    <div class="card">
+        <h2>操作日志</h2>
+        <pre id="log">正在初始化...</pre>
+    </div>
+
+    <script>
+        function log(msg) {
+            const logEl = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            logEl.textContent = `[${time}] ${msg}\n` + logEl.textContent;
+        }
+
+        function diagnose() {
+            log('开始诊断...');
+            const diagnosisEl = document.getElementById('diagnosis');
+            let html = '';
+
+            // 检查sessionStorage
+            const sessionUserId = sessionStorage.getItem('current-user-id');
+            html += `<div class="data-item"><strong>SessionStorage用户ID:</strong> ${sessionUserId || '❌ 无'}</div>`;
+
+            // 检查游客数据
+            const guestKeys = Object.keys(localStorage).filter(k => k.startsWith('guest-wwx-'));
+            const guestDataCount = guestKeys.reduce((sum, key) => {
+                try {
+                    const data = JSON.parse(localStorage.getItem(key));
+                    return sum + (Array.isArray(data) ? data.length : 0);
+                } catch (e) {
+                    return sum;
+                }
+            }, 0);
+
+            html += `<div class="data-item"><strong>游客数据键:</strong> ${guestKeys.length} 个</div>`;
+            html += `<div class="data-item"><strong>游客数据条目:</strong> ${guestDataCount} 条</div>`;
+
+            // 检查用户数据
+            const userKeys = Object.keys(localStorage).filter(k => k.startsWith('user-'));
+            html += `<div class="data-item"><strong>用户数据键:</strong> ${userKeys.length} 个</div>`;
+
+            // 检查数据一致性
+            if (!sessionUserId && guestKeys.length > 0) {
+                html += '<div class="error">❌ 问题：SessionStorage中无用户ID，但存在游客数据</div>';
+            } else if (sessionUserId) {
+                html += '<div class="success">✅ SessionStorage中有用户ID</div>';
+            }
+
+            diagnosisEl.innerHTML = html;
+            log('诊断完成');
+        }
+
+        function fixGuestData() {
+            const resultEl = document.getElementById('fixResult');
+            resultEl.innerHTML = '<div class="success">⏳ 正在修复...</div>';
+
+            log('开始修复游客数据...');
+
+            try {
+                // 1. 检测并读取所有游客数据
+                const guestKeys = Object.keys(localStorage).filter(k => k.startsWith('guest-wwx-'));
+                log(`发现 ${guestKeys.length} 个游客数据键`);
+
+                const guestData = {};
+                guestKeys.forEach(key => {
+                    const data = localStorage.getItem(key);
+                    if (data) {
+                        guestData[key] = JSON.parse(data);
+                        log(`读取: ${key} (${Array.isArray(guestData[key]) ? guestData[key].length : '?'} 条)`);
+                    }
+                });
+
+                // 2. 创建用户ID并设置到sessionStorage
+                const newUserId = 'user-' + Date.now();
+                sessionStorage.setItem('current-user-id', newUserId);
+                log(`设置用户ID: ${newUserId}`);
+
+                // 3. 迁移数据到新的用户存储
+                let migratedCount = 0;
+                Object.entries(guestData).forEach(([oldKey, data]) => {
+                    const newKey = oldKey.replace('guest-wwx-', `user-${newUserId}-wwx-`);
+                    localStorage.setItem(newKey, JSON.stringify(data));
+                    migratedCount++;
+                    log(`迁移: ${oldKey} -> ${newKey}`);
+
+                    // 删除旧数据
+                    localStorage.removeItem(oldKey);
+                    log(`删除: ${oldKey}`);
+                });
+
+                log(`✅ 迁移完成！共 ${migratedCount} 项`);
+
+                // 4. 修复storage.ts中的getUserData函数，确保使用正确的键
+                log('💡 提示：已设置用户ID，系统现在应该能正常读取数据');
+
+                resultEl.innerHTML = `
+                    <div class="success">
+                        ✅ 修复完成！<br>
+                        - 用户ID: ${newUserId}<br>
+                        - 迁移数据: ${migratedCount} 项<br>
+                        <br>
+                        <button onclick="window.location.href='http://localhost:5173'">🏠 返回首页测试</button>
+                    </div>
+                `;
+
+                log('✅ 修复成功！');
+
+            } catch (error) {
+                resultEl.innerHTML = `<div class="error">❌ 修复失败: ${error.message}</div>`;
+                log(`❌ 错误: ${error.message}`);
+            }
+        }
+
+        function emergencyReset() {
+            if (!confirm('⚠️ 警告：此操作将清除所有localStorage和sessionStorage数据！\n\n确定要继续吗？')) {
+                return;
+            }
+
+            log('开始紧急重置...');
+
+            try {
+                // 清除localStorage
+                const keys = Object.keys(localStorage);
+                keys.forEach(key => {
+                    localStorage.removeItem(key);
+                });
+                log(`清除 ${keys.length} 个localStorage键`);
+
+                // 清除sessionStorage
+                sessionStorage.clear();
+                log('清除sessionStorage');
+
+                document.getElementById('fixResult').innerHTML = `
+                    <div class="success">
+                        ✅ 重置完成！所有数据已清除。<br>
+                        <br>
+                        <button onclick="window.location.href='http://localhost:5173'">🏠 返回首页重新开始</button>
+                    </div>
+                `;
+
+                log('✅ 重置完成');
+
+            } catch (error) {
+                document.getElementById('fixResult').innerHTML = `<div class="error">❌ 重置失败: ${error.message}</div>`;
+                log(`❌ 错误: ${error.message}`);
+            }
+        }
+
+        // 初始化
+        diagnose();
+    </script>
+</body>
+</html>

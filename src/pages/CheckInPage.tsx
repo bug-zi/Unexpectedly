@@ -16,16 +16,21 @@ import {
   Target,
   TrendingUp
 } from 'lucide-react';
+import { getUserData, getUserDataSync, setUserData } from '@/utils/userStorage';
 
 interface CheckInRecord {
   date: string;
   timestamp: number;
 }
 
+// 存储键
+const STORAGE_KEYS = {
+  HISTORY: 'checkin-history',
+};
+
 export function CheckInPage() {
   const navigate = useNavigate();
   const [isCheckedIn, setIsCheckedIn] = useState(false);
-  const [consecutiveDays, setConsecutiveDays] = useState(0);
   const [totalDays, setTotalDays] = useState(0);
   const [lastCheckIn, setLastCheckIn] = useState<string | null>(null);
   const [checkInHistory, setCheckInHistory] = useState<CheckInRecord[]>([]);
@@ -35,58 +40,44 @@ export function CheckInPage() {
     checkTodayStatus();
   }, []);
 
+  // 监听用户数据变化事件（登录/登出时刷新）
+  useEffect(() => {
+    const handleDataChange = () => {
+      // 延迟一下，确保 sessionStorage 已更新
+      setTimeout(() => {
+        loadCheckInData();
+        checkTodayStatus();
+      }, 100);
+    };
+
+    window.addEventListener('user-data-changed', handleDataChange);
+    window.addEventListener('user-logged-out', handleDataChange);
+    window.addEventListener('user-logged-in', handleDataChange);
+
+    return () => {
+      window.removeEventListener('user-data-changed', handleDataChange);
+      window.removeEventListener('user-logged-out', handleDataChange);
+      window.removeEventListener('user-logged-in', handleDataChange);
+    };
+  }, []);
+
   const loadCheckInData = () => {
-    const historyJson = localStorage.getItem('checkin-history');
-    if (historyJson) {
-      try {
-        const history: CheckInRecord[] = JSON.parse(historyJson);
-        setCheckInHistory(history);
-        setTotalDays(history.length);
+    const history = getUserDataSync<CheckInRecord[]>(STORAGE_KEYS.HISTORY, []);
+    setCheckInHistory(history);
+    setTotalDays(history.length);
 
-        // 计算连续签到天数
-        const consecutive = calculateConsecutiveDays(history);
-        setConsecutiveDays(consecutive);
-
-        // 获取最后一次签到时间
-        if (history.length > 0) {
-          const lastRecord = history[history.length - 1];
-          setLastCheckIn(lastRecord.date);
-        }
-      } catch (error) {
-        console.error('加载签到记录失败:', error);
-      }
+    // 获取最后一次签到时间
+    if (history.length > 0) {
+      const lastRecord = history[history.length - 1];
+      setLastCheckIn(lastRecord.date);
     }
   };
 
   const checkTodayStatus = () => {
     const today = getTodayDateString();
-    const todayRecordJson = localStorage.getItem(`checkin-${today}`);
-    setIsCheckedIn(!!todayRecordJson);
-  };
-
-  const calculateConsecutiveDays = (history: CheckInRecord[]): number => {
-    if (history.length === 0) return 0;
-
-    let consecutive = 0;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    for (let i = 0; i < history.length; i++) {
-      const checkDate = new Date(today);
-      checkDate.setDate(checkDate.getDate() - i);
-
-      const dateString = checkDate.toISOString().split('T')[0];
-      const hasChecked = history.some(record => record.date === dateString);
-
-      if (hasChecked) {
-        consecutive++;
-      } else if (i > 0) {
-        // 如果不是今天第一天就没签到，说明连续中断了
-        break;
-      }
-    }
-
-    return consecutive;
+    const todayRecords = getUserDataSync<CheckInRecord[]>(STORAGE_KEYS.HISTORY, []);
+    const hasCheckedToday = todayRecords.some(record => record.date === today);
+    setIsCheckedIn(hasCheckedToday);
   };
 
   const getTodayDateString = () => {
@@ -102,33 +93,26 @@ export function CheckInPage() {
       timestamp: Date.now()
     };
 
-    // 保存今日签到
-    localStorage.setItem(`checkin-${today}`, JSON.stringify(record));
-
     // 更新历史记录
     const newHistory = [...checkInHistory, record];
-    localStorage.setItem('checkin-history', JSON.stringify(newHistory));
+    setUserData(STORAGE_KEYS.HISTORY, newHistory);
 
     // 更新状态
     setIsCheckedIn(true);
     setCheckInHistory(newHistory);
     setTotalDays(newHistory.length);
 
-    // 重新计算连续天数
-    const newConsecutive = calculateConsecutiveDays(newHistory);
-    setConsecutiveDays(newConsecutive);
-
-    // 保存连续天数记录
-    if (newConsecutive > (parseInt(localStorage.getItem('checkin-best') || '0'))) {
-      localStorage.setItem('checkin-best', newConsecutive.toString());
-    }
+    // 同步到任务系统 - 完成每日签到任务
+    import('@/utils/taskManager').then(({ updateDailyTaskProgress }) => {
+      updateDailyTaskProgress('daily-question', 1); // 签到算作完成一次问题思考
+    });
   };
 
   const getStreakMessage = () => {
-    if (consecutiveDays === 0) return '开始签到，培养好习惯！';
-    if (consecutiveDays < 7) return '继续坚持，养成习惯！';
-    if (consecutiveDays < 30) return '很棒！继续保持！';
-    if (consecutiveDays < 100) return '太厉害了！坚持不懈！';
+    if (totalDays === 0) return '开始签到，培养好习惯！';
+    if (totalDays < 7) return '继续坚持，养成习惯！';
+    if (totalDays < 30) return '很棒！继续保持！';
+    if (totalDays < 100) return '太厉害了！坚持不懈！';
     return '你是签到大师！';
   };
 
@@ -160,7 +144,6 @@ export function CheckInPage() {
 
   const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
   const monthData = getMonthData();
-  const bestStreak = parseInt(localStorage.getItem('checkin-best') || '0');
 
   return (
     <div className="min-h-screen noise-bg bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-gray-900 dark:via-green-900/20 dark:to-emerald-900/20">
@@ -199,19 +182,8 @@ export function CheckInPage() {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
+            className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8"
           >
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border-2 border-green-200 dark:border-green-800">
-              <div className="flex items-center gap-3 mb-2">
-                <Flame size={24} className="text-orange-500" />
-                <span className="text-sm text-gray-600 dark:text-gray-400">连续签到</span>
-              </div>
-              <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">
-                {consecutiveDays}
-                <span className="text-lg ml-1">天</span>
-              </p>
-            </div>
-
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border-2 border-green-200 dark:border-green-800">
               <div className="flex items-center gap-3 mb-2">
                 <Trophy size={24} className="text-yellow-500" />
@@ -226,11 +198,10 @@ export function CheckInPage() {
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border-2 border-green-200 dark:border-green-800">
               <div className="flex items-center gap-3 mb-2">
                 <Star size={24} className="text-green-500" />
-                <span className="text-sm text-gray-600 dark:text-gray-400">最佳纪录</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">今日状态</span>
               </div>
-              <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-                {bestStreak}
-                <span className="text-lg ml-1">天</span>
+              <p className={`text-2xl font-bold ${isCheckedIn ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'}`}>
+                {isCheckedIn ? '已签到 ✓' : '未签到'}
               </p>
             </div>
           </motion.div>
@@ -283,8 +254,8 @@ export function CheckInPage() {
                   )}
                 </motion.button>
 
-                {/* 连续签到提示 */}
-                {consecutiveDays > 0 && (
+                {/* 签到提示 */}
+                {totalDays > 0 && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -296,7 +267,7 @@ export function CheckInPage() {
                     <div className="flex items-center justify-center gap-2">
                       <TrendingUp size={20} className="text-green-500" />
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        已连续签到 <span className="font-bold text-green-600 dark:text-green-400">{consecutiveDays}</span> 天
+                        已累计签到 <span className="font-bold text-green-600 dark:text-green-400">{totalDays}</span> 天
                       </p>
                     </div>
                   </motion.div>

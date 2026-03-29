@@ -29,11 +29,62 @@ import { YesOrNoPage } from '@/pages/YesOrNoPage';
 import { GuessNumberPage } from '@/pages/GuessNumberPage';
 import { CheckInPage } from '@/pages/CheckInPage';
 import { ProfilePage } from '@/pages/ProfilePage';
+import { TaskPage } from '@/pages/TaskPage';
 import { useGlobalNotificationReminder } from '@/hooks/useGlobalNotificationReminder';
+import { useSync } from '@/hooks/useSync';
+import { useEffect, useRef } from 'react';
+import { syncOnLogin } from '@/services/syncService';
+import { autoMigrate } from '@/utils/dataMigration';
 
 function App() {
+  const syncTriggeredRef = useRef(false);
+
+  // 自动迁移旧数据
+  useEffect(() => {
+    autoMigrate();
+  }, []);
+
   // 在应用级别启动通知提醒，确保定时器始终运行
   useGlobalNotificationReminder();
+
+  // 启动自动数据同步（登录用户）- 定时同步
+  useSync(true);
+
+  // 监听登录事件，自动同步数据（使用 ref 防止重复触发）
+  useEffect(() => {
+    const handleLogin = () => {
+      // 防止重复触发同步
+      if (syncTriggeredRef.current) {
+        return;
+      }
+
+      console.log('检测到用户登录，开始自动同步...');
+      syncTriggeredRef.current = true;
+
+      // 延迟执行，确保用户状态已完全加载
+      setTimeout(() => {
+        syncOnLogin().finally(() => {
+          // 3秒后重置标志，允许下次登录时再次同步
+          setTimeout(() => {
+            syncTriggeredRef.current = false;
+          }, 3000);
+        });
+      }, 500);
+    };
+
+    const handleLogout = () => {
+      // 登出时重置标志
+      syncTriggeredRef.current = false;
+    };
+
+    window.addEventListener('user-logged-in', handleLogin);
+    window.addEventListener('user-logged-out', handleLogout);
+
+    return () => {
+      window.removeEventListener('user-logged-in', handleLogin);
+      window.removeEventListener('user-logged-out', handleLogout);
+    };
+  }, []);
 
   return (
     <BrowserRouter>
@@ -45,6 +96,7 @@ function App() {
         <Route path="/questions/question-generator" element={<QuestionGeneratorPage />} />
         <Route path="/question-generator" element={<QuestionGeneratorPage />} />
         <Route path="/question/:id" element={<QuestionPage />} />
+        <Route path="/questions/:id" element={<QuestionPage />} />
         <Route path="/writing" element={<WritingPage />} />
         <Route path="/slot-machine" element={<SlotMachinePage />} />
         <Route path="/writing-challenge" element={<WritingChallengePage />} />
@@ -59,6 +111,7 @@ function App() {
         <Route path="/logic-reasoning/yes-or-no" element={<YesOrNoPage />} />
         <Route path="/logic-reasoning/guess-number" element={<GuessNumberPage />} />
         <Route path="/checkin" element={<CheckInPage />} />
+        <Route path="/tasks" element={<TaskPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/knowledge-popularize" element={<KnowledgePopularizePage />} />
         <Route path="/knowledge-popularize/world-records" element={<WorldRecordsPage />} />
@@ -79,9 +132,9 @@ function App() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="colored"
-        toastClassName="!bg-gradient-to-r !from-yellow-500 !to-amber-500 !text-white !shadow-lg !border-0 !rounded-lg"
-        progressClassName="!bg-yellow-300"
+        theme="light"
+        toastClassName="!bg-white/90 !backdrop-blur-md !text-gray-800 !shadow-xl !border !border-gray-200/50 !rounded-xl"
+        progressClassName="!bg-gradient-to-r !from-gray-400 !to-gray-500"
         bodyClassName="!font-medium"
         closeButton={false}
       />

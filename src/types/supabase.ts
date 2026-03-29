@@ -45,6 +45,134 @@ export interface Database {
           updated_at?: string
         }
       }
+      turtle_soup_records: {
+        Row: {
+          id: string
+          user_id: string
+          soup_id: string
+          completed: boolean
+          time_spent: number | null
+          hints_used: number
+          created_at: string
+          synced_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          soup_id: string
+          completed?: boolean
+          time_spent?: number | null
+          hints_used?: number
+          created_at?: string
+          synced_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          soup_id?: string
+          completed?: boolean
+          time_spent?: number | null
+          hints_used?: number
+          created_at?: string
+          synced_at?: string
+        }
+      }
+      riddle_records: {
+        Row: {
+          id: string
+          user_id: string
+          riddle_id: string
+          completed: boolean
+          hints_used: number
+          created_at: string
+          synced_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          riddle_id: string
+          completed?: boolean
+          hints_used?: number
+          created_at?: string
+          synced_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          riddle_id?: string
+          completed?: boolean
+          hints_used?: number
+          created_at?: string
+          synced_at?: string
+        }
+      }
+      yes_or_no_records: {
+        Row: {
+          id: string
+          user_id: string
+          target_word: string
+          category: string
+          questions_count: number
+          completed: boolean
+          time_spent: number | null
+          created_at: string
+          synced_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          target_word: string
+          category: string
+          questions_count?: number
+          completed?: boolean
+          time_spent?: number | null
+          created_at?: string
+          synced_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          target_word?: string
+          category?: string
+          questions_count?: number
+          completed?: boolean
+          time_spent?: number | null
+          created_at?: string
+          synced_at?: string
+        }
+      }
+      guess_number_records: {
+        Row: {
+          id: string
+          user_id: string
+          secret_number: string
+          attempts_count: number
+          completed: boolean
+          time_spent: number | null
+          created_at: string
+          synced_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          secret_number: string
+          attempts_count?: number
+          completed?: boolean
+          time_spent?: number | null
+          created_at?: string
+          synced_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          secret_number?: string
+          attempts_count?: number
+          completed?: boolean
+          time_spent?: number | null
+          created_at?: string
+          synced_at?: string
+        }
+      }
       questions: {
         Row: {
           id: string

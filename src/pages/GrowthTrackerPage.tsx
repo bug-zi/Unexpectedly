@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 // 使用 Iconify 高级图标
 import { Icon } from '@iconify/react';
-import { getAnswers, getSlotMachineResults, getTurtleSoupRecords, updateAnswer, deleteAnswer } from '@/utils/storage';
+import { getAnswers, updateAnswer, deleteAnswer } from '@/utils/storage';
 import { Answer, Activity } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -46,6 +46,7 @@ export function GrowthTrackerPage() {
   const [editingAnswer, setEditingAnswer] = useState<Answer | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [showRethinkDialog, setShowRethinkDialog] = useState(false);
 
   // 从云端加载数据（如果已登录）
   useEffect(() => {
@@ -65,33 +66,43 @@ export function GrowthTrackerPage() {
     loadData();
   }, [isAuthenticated, user]);
 
+  // 监听用户数据变化事件（登录/登出时刷新）
+  useEffect(() => {
+    const handleDataChange = () => {
+      // 延迟一下，确保 sessionStorage 已更新
+      setTimeout(() => {
+        if (isAuthenticated && user) {
+          loadFromCloud();
+        } else {
+          const local = getAnswers();
+          setAnswers(local);
+          loadAllActivities();
+        }
+      }, 100);
+    };
+
+    window.addEventListener('user-data-changed', handleDataChange);
+    window.addEventListener('user-logged-out', handleDataChange);
+    window.addEventListener('user-logged-in', handleDataChange);
+
+    return () => {
+      window.removeEventListener('user-data-changed', handleDataChange);
+      window.removeEventListener('user-logged-out', handleDataChange);
+      window.removeEventListener('user-logged-in', handleDataChange);
+    };
+  }, [isAuthenticated, user]);
+
   // 加载所有类型的活动记录
   const loadAllActivities = () => {
     const answersData = getAnswers();
-    const slotMachineResults = getSlotMachineResults();
-    const turtleSoupRecords = getTurtleSoupRecords();
 
-    // 转换为统一的活动格式
-    const allActivities: Activity[] = [
-      ...answersData.map(a => ({
-        id: a.id,
-        type: 'answer' as const,
-        timestamp: a.createdAt,
-        data: a,
-      })),
-      ...slotMachineResults.map(r => ({
-        id: r.id,
-        type: 'slotMachine' as const,
-        timestamp: r.createdAt,
-        data: r,
-      })),
-      ...turtleSoupRecords.map(r => ({
-        id: r.id,
-        type: 'turtleSoup' as const,
-        timestamp: r.completedAt,
-        data: r,
-      })),
-    ];
+    // 转换为统一的活动格式 - 只保留问答记录
+    const allActivities: Activity[] = answersData.map(a => ({
+      id: a.id,
+      type: 'answer' as const,
+      timestamp: a.createdAt,
+      data: a,
+    }));
 
     // 按时间倒序排序
     allActivities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
@@ -191,26 +202,23 @@ export function GrowthTrackerPage() {
     const answerActivities = filteredActivities.filter(a => a.type === 'answer');
     const totalAnswers = answerActivities.length;
 
-    // 计算总字数：包含问答和老虎机
-    let totalWords = answerActivities.reduce(
+    // 计算总字数：只包含问答
+    const totalWords = answerActivities.reduce(
       (sum, activity) => sum + (activity.data as Answer).metadata.wordCount,
       0
     );
 
-    // 添加老虎机的字数
-    const slotMachineActivities = filteredActivities.filter(a => a.type === 'slotMachine');
-    slotMachineActivities.forEach(activity => {
-      const slotResult = activity.data as any;
-      if (slotResult.response) {
-        totalWords += slotResult.response.length;
-      }
-    });
+    // 获取唯一回答的问题数量（再思考）
+    const uniqueQuestions = new Set(answerActivities.map(a => (a.data as Answer).questionId)).size;
+
+    // 从 localStorage 获取创建的问题数（如果有）
+    const createdQuestionsCount = parseInt(localStorage.getItem('user-created-questions-count') || '0', 10);
 
     return {
       totalAnswers,
       totalWords,
-      totalSlotMachines: slotMachineActivities.length,
-      totalTurtleSoups: filteredActivities.filter(a => a.type === 'turtleSoup').length,
+      uniqueQuestions,
+      createdQuestionsCount,
     };
   }, [filteredActivities]);
 
@@ -243,8 +251,8 @@ export function GrowthTrackerPage() {
   };
 
   const handleActivityClick = (activity: Activity) => {
-    // 只有问答和老虎机有详细内容可以展示
-    if (activity.type === 'answer' || activity.type === 'slotMachine') {
+    // 只展示问答记录的详细内容
+    if (activity.type === 'answer') {
       setSelectedActivity(activity);
     }
   };
@@ -350,8 +358,8 @@ export function GrowthTrackerPage() {
                 <div className="flex items-center gap-1 text-xs">
                   {syncStatus === 'syncing' && (
                     <>
-                      <Icon icon="ph:arrow-clockwise" width={16} height={16} className="animate-spin text-blue-500" />
-                      <span className="text-blue-500">同步中...</span>
+                      <Icon icon="ph:arrow-clockwise" width={16} height={16} className="animate-spin text-amber-500" />
+                      <span className="text-amber-500">同步中...</span>
                     </>
                   )}
                   {syncStatus === 'success' && (
@@ -362,8 +370,8 @@ export function GrowthTrackerPage() {
                   )}
                   {syncStatus === 'error' && (
                     <>
-                      <Icon icon="ph:cloud-warning" width={16} height={16} className="text-red-500" />
-                      <span className="text-red-500">同步失败</span>
+                      <Icon icon="ph:cloud-warning" width={16} height={16} className="text-orange-500" />
+                      <span className="text-orange-500">同步失败</span>
                     </>
                   )}
                 </div>
@@ -431,7 +439,7 @@ export function GrowthTrackerPage() {
           </motion.div>
 
           {/* 统计卡片 */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             {[
               {
                 label: '累计回答',
@@ -448,18 +456,20 @@ export function GrowthTrackerPage() {
                 bgColor: 'bg-orange-50 dark:bg-orange-900/20',
               },
               {
-                label: '灵感次数',
-                value: stats.totalSlotMachines,
-                icon: 'ph:lightbulb',
+                label: '创建问题数',
+                value: stats.createdQuestionsCount,
+                icon: 'ph:plus-circle',
                 gradient: 'from-yellow-500 to-amber-500',
                 bgColor: 'bg-yellow-50 dark:bg-yellow-900/20',
               },
               {
-                label: '海龟汤',
-                value: stats.totalTurtleSoups,
-                icon: 'ph:bowl-food',
-                gradient: 'from-amber-500 to-yellow-500',
+                label: '再思考',
+                value: stats.uniqueQuestions,
+                icon: 'ph:arrow-u-up-left',
+                gradient: 'from-amber-600 to-yellow-500',
                 bgColor: 'bg-amber-50 dark:bg-amber-900/20',
+                action: () => setShowRethinkDialog(true),
+                isButton: true,
               },
             ].map((stat, index) => (
               <motion.div
@@ -467,8 +477,9 @@ export function GrowthTrackerPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -4, scale: 1.02 }}
-                className="cursor-default"
+                whileHover={stat.isButton ? { y: -4, scale: 1.02 } : { y: -4, scale: 1.02 }}
+                onClick={stat.action}
+                className={stat.isButton ? 'cursor-pointer' : 'cursor-default'}
               >
                 <Card className="overflow-hidden h-full">
                   <div className={`p-5 bg-gradient-to-br ${stat.bgColor} h-full`}>
@@ -522,7 +533,7 @@ export function GrowthTrackerPage() {
                       <button
                         key={index}
                         onClick={() => setShowComparison(pair)}
-                        className="w-full text-left p-4 bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-800 dark:to-blue-900/20 rounded-xl hover:shadow-md transition-all border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700"
+                        className="w-full text-left p-4 bg-gradient-to-r from-gray-50 to-amber-50 dark:from-gray-800 dark:to-amber-900/20 rounded-xl hover:shadow-md transition-all border border-gray-200 dark:border-gray-700 hover:border-amber-300 dark:hover:border-amber-700"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex-1 min-w-0">
@@ -574,15 +585,20 @@ export function GrowthTrackerPage() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-              📅 活动时间线
-            </h3>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2.5 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl shadow-lg">
+                <Icon icon="ph:clock-counter-clockwise-duotone" width={28} height={28} className="text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                活动时间线
+              </h3>
+            </div>
 
             {Object.keys(activitiesByDate).length === 0 ? (
               <Card className="p-12 text-center">
                 <div className="flex flex-col items-center gap-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 rounded-full flex items-center justify-center">
-                    <Icon icon="ph:calendar-x" width={36} height={36} className="text-amber-500 dark:text-amber-400" />
+                  <div className="w-20 h-20 bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 rounded-2xl flex items-center justify-center shadow-lg">
+                    <Icon icon="ph:calendar-x-duotone" width={40} height={40} className="text-amber-500 dark:text-amber-400" />
                   </div>
                   <div>
                     <p className="text-lg font-medium text-gray-900 dark:text-white mb-1">
@@ -610,8 +626,8 @@ export function GrowthTrackerPage() {
                         <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                              <div className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                                <Icon icon="ph:calendar-blank-duotone" width={22} height={22} className="text-blue-500" />
+                              <div className="p-2.5 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl shadow-lg">
+                                <Icon icon="ph:calendar-check-duotone" width={24} height={24} className="text-white" />
                               </div>
                               <div>
                                 <p className="font-bold text-gray-900 dark:text-white">
@@ -624,7 +640,7 @@ export function GrowthTrackerPage() {
                                 </p>
                               </div>
                             </div>
-                            <div className="px-4 py-2 bg-amber-100 dark:bg-amber-900/30 rounded-full">
+                            <div className="px-4 py-2 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 rounded-full border border-amber-200 dark:border-amber-700">
                               <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
                                 {dayActivities.length} 个活动
                               </span>
@@ -635,7 +651,7 @@ export function GrowthTrackerPage() {
                         {/* 活动列表 */}
                         <div className="divide-y divide-gray-100 dark:divide-gray-700">
                           {dayActivities.map((activity) => {
-                            // 根据活动类型渲染不同的内容
+                            // 只渲染问答记录
                             if (activity.type === 'answer') {
                               const answer = activity.data as Answer;
                               const question = getQuestionById(answer.questionId);
@@ -649,8 +665,8 @@ export function GrowthTrackerPage() {
                                 {/* 问题标题 */}
                                 <div className="flex items-start gap-3">
                                   <div className="flex-shrink-0 mt-1">
-                                    <div className="p-2 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-lg">
-                                      <Icon icon="ph:question-duotone" width={18} height={18} className="text-orange-500" />
+                                    <div className="p-2.5 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-xl shadow-md">
+                                      <Icon icon="ph:question-duotone" width={20} height={20} className="text-white" />
                                     </div>
                                   </div>
                                   <div className="flex-1 min-w-0">
@@ -658,124 +674,24 @@ export function GrowthTrackerPage() {
                                       {question?.content || '未知问题'}
                                     </p>
                                     <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                                      <span className="flex items-center gap-1">
-                                        <Icon icon="ph:text-aa" width={14} height={14} />
-                                        {answer.metadata.wordCount} 字
+                                      <span className="flex items-center gap-1.5 px-2 py-1 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-full border border-amber-200 dark:border-amber-700">
+                                        <Icon icon="ph:text-t-duotone" width={16} height={16} className="text-amber-600 dark:text-amber-400" />
+                                        <span className="font-medium text-amber-700 dark:text-amber-300">{answer.metadata.wordCount} 字</span>
                                       </span>
-                                      <span className="flex items-center gap-1">
-                                        <Icon icon="ph:clock" width={14} height={14} />
-                                        {format(new Date(answer.createdAt), 'HH:mm')}
+                                      <span className="flex items-center gap-1.5 px-2 py-1 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-full border border-amber-200 dark:border-amber-700">
+                                        <Icon icon="ph:clock-duotone" width={16} height={16} className="text-amber-600 dark:text-amber-400" />
+                                        <span className="font-medium text-amber-700 dark:text-amber-300">{format(new Date(answer.createdAt), 'HH:mm')}</span>
                                       </span>
                                       {question?.category && (
-                                        <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full">
+                                        <span className="px-2.5 py-1 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-full border border-orange-200 dark:border-orange-700 text-orange-700 dark:text-orange-300 font-medium">
                                           {getCategoryConfig(question.category.primary)?.label || question.category.primary}
                                         </span>
                                       )}
                                     </div>
                                   </div>
                                   <div className="flex-shrink-0">
-                                    <Icon icon="ph:caret-right" width={20} height={20} className="text-gray-400" />
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          } else if (activity.type === 'slotMachine') {
-                            const slotResult = activity.data as any;
-                            return (
-                              <div
-                                key={activity.id}
-                                onClick={() => handleActivityClick(activity)}
-                                className="p-5 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
-                              >
-                                <div className="flex items-start gap-3">
-                                  <div className="flex-shrink-0 mt-1">
-                                    <div className="p-2 bg-gradient-to-br from-orange-100 to-yellow-100 dark:from-orange-900/30 dark:to-yellow-900/30 rounded-lg">
-                                      <Icon icon="ph:lightbulb-duotone" width={18} height={18} className="text-orange-500" />
-                                    </div>
-                                  </div>
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <span className="font-medium text-gray-900 dark:text-white">灵感老虎机</span>
-                                      {slotResult.easterEgg && (
-                                        <span className="px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-full text-xs">
-                                          彩蛋
-                                        </span>
-                                      )}
-                                    </div>
-                                    <div className="flex flex-wrap gap-2 mb-2">
-                                      {slotResult.words.map((word: string, i: number) => (
-                                        <span key={i} className="px-3 py-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg text-sm font-medium">
-                                          {word}
-                                        </span>
-                                      ))}
-                                    </div>
-                                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                                      <span className="flex items-center gap-1">
-                                        <Icon icon="ph:clock" width={14} height={14} />
-                                        {format(new Date(activity.timestamp), 'HH:mm')}
-                                      </span>
-                                      {slotResult.response && (
-                                        <span className="flex items-center gap-1">
-                                          <Icon icon="ph:text-aa" width={14} height={14} />
-                                          {slotResult.response.length} 字
-                                        </span>
-                                      )}
-                                    </div>
-                                  </div>
-                                  {slotResult.response && (
-                                    <div className="flex-shrink-0">
-                                      <Icon icon="ph:caret-right" width={20} height={20} className="text-gray-400" />
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          } else if (activity.type === 'turtleSoup') {
-                            const soupRecord = activity.data as any;
-                            const difficultyColor = {
-                              '简单': 'text-lime-600 dark:text-lime-400 bg-lime-50 dark:bg-lime-900/20',
-                              '中等': 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20',
-                              '困难': 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20',
-                            }[soupRecord.difficulty];
-                            return (
-                              <div key={activity.id} className="p-5 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                <div className="flex items-start gap-3">
-                                  <div className="flex-shrink-0 mt-1">
-                                    <div className="p-2 bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 rounded-lg">
-                                      <Icon icon="ph:bowl-food" width={18} height={18} className="text-amber-500" />
-                                    </div>
-                                  </div>
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <span className="font-medium text-gray-900 dark:text-white">海龟汤</span>
-                                      <span className={`px-2 py-0.5 rounded-full text-xs ${difficultyColor}`}>
-                                        {soupRecord.difficulty}
-                                      </span>
-                                      <span className="px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs">
-                                        {soupRecord.category}
-                                      </span>
-                                    </div>
-                                    <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">{soupRecord.puzzleTitle}</p>
-                                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                                      <span className="flex items-center gap-1">
-                                        <Icon icon="ph:clock" width={14} height={14} />
-                                        {format(new Date(activity.timestamp), 'HH:mm')}
-                                      </span>
-                                      <span className="flex items-center gap-1">
-                                        <Icon icon="ph:chat-circle-dots" width={14} height={14} />
-                                        {soupRecord.questionsAsked} 个问题
-                                      </span>
-                                      {soupRecord.hintsUsed > 0 && (
-                                        <span className="flex items-center gap-1">
-                                          <Icon icon="ph:lightbulb" width={14} height={14} />
-                                          {soupRecord.hintsUsed} 个提示
-                                        </span>
-                                      )}
-                                      {soupRecord.solved && (
-                                        <span className="px-2 py-0.5 bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-300 rounded-full text-xs">
-                                          已完成
-                                        </span>
-                                      )}
+                                    <div className="p-2 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-lg">
+                                      <Icon icon="ph:arrow-right-duotone" width={20} height={20} className="text-gray-600 dark:text-gray-400" />
                                     </div>
                                   </div>
                                 </div>
@@ -829,37 +745,33 @@ export function GrowthTrackerPage() {
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {selectedActivity.type === 'answer' ? '问题回答' : '灵感联想'}
+                问题回答
               </h2>
               <div className="flex items-center gap-2">
-                {selectedActivity.type === 'answer' && (
-                  <>
-                    <button
-                      onClick={() => handleEditAnswer(selectedActivity.data as Answer)}
-                      className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
-                    >
-                      <Icon icon="ph:pencil-simple" width={18} height={18} />
-                      <span>编辑</span>
-                    </button>
-                    <button
-                      onClick={() => handleDeleteAnswer(selectedActivity.id)}
-                      className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
-                    >
-                      <Icon icon="ph:trash" width={18} height={18} />
-                      <span>删除</span>
-                    </button>
-                  </>
-                )}
+                <button
+                  onClick={() => handleEditAnswer(selectedActivity.data as Answer)}
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl transition-all shadow-md hover:shadow-lg"
+                >
+                  <Icon icon="ph:pencil-simple-line" width={18} height={18} />
+                  <span>编辑</span>
+                </button>
+                <button
+                  onClick={() => handleDeleteAnswer(selectedActivity.id)}
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-xl transition-all shadow-md hover:shadow-lg"
+                >
+                  <Icon icon="ph:trash-duotone" width={18} height={18} />
+                  <span>删除</span>
+                </button>
                 <button
                   onClick={() => setSelectedActivity(null)}
-                  className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                  className="p-2 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 hover:from-gray-200 hover:to-gray-300 rounded-xl transition-all"
                 >
-                  ✕
+                  <Icon icon="ph:x" width={20} height={20} className="text-gray-600 dark:text-gray-400" />
                 </button>
               </div>
             </div>
 
-            {selectedActivity.type === 'answer' && (() => {
+            {(() => {
               const answer = selectedActivity.data as Answer;
               const question = getQuestionById(answer.questionId);
               return (
@@ -867,20 +779,20 @@ export function GrowthTrackerPage() {
                   {/* 问题 */}
                   <div>
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="p-2 bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-lg">
-                        <Icon icon="ph:question-duotone" width={20} height={20} className="text-orange-500" />
+                      <div className="p-2.5 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-xl shadow-md">
+                        <Icon icon="ph:question-duotone" width={22} height={22} className="text-white" />
                       </div>
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">问题</h3>
                     </div>
                     <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
                       <p className="text-gray-900 dark:text-white font-medium mb-2">{question?.content || '未知问题'}</p>
                       <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                        <span className="flex items-center gap-1">
-                          <Icon icon="ph:clock" width={14} height={14} />
-                          {format(new Date(answer.createdAt), 'yyyy年MM月dd日 HH:mm')}
+                        <span className="flex items-center gap-1.5 px-2 py-1 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-full border border-amber-200 dark:border-amber-700">
+                          <Icon icon="ph:calendar-blank-duotone" width={16} height={16} className="text-amber-600 dark:text-amber-400" />
+                          <span className="font-medium text-amber-700 dark:text-amber-300">{format(new Date(answer.createdAt), 'yyyy年MM月dd日 HH:mm')}</span>
                         </span>
                         {question?.category && (
-                          <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 rounded-full">
+                          <span className="px-2.5 py-1 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-full border border-orange-200 dark:border-orange-700 text-orange-700 dark:text-orange-300 font-medium">
                             {getCategoryConfig(question.category.primary)?.label || question.category.primary}
                           </span>
                         )}
@@ -891,17 +803,17 @@ export function GrowthTrackerPage() {
                   {/* 回答 */}
                   <div>
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="p-2 bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 rounded-lg">
-                        <Icon icon="ph:chat-circle-dots" width={20} height={20} className="text-blue-500" />
+                      <div className="p-2.5 bg-gradient-to-br from-amber-600 to-orange-500 rounded-xl shadow-md">
+                        <Icon icon="ph:chat-circle-text-duotone" width={22} height={22} className="text-white" />
                       </div>
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">我的回答</h3>
                     </div>
                     <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
                       <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">{answer.content}</p>
                       <div className="flex items-center gap-3 mt-4 text-xs text-gray-500 dark:text-gray-400">
-                        <span className="flex items-center gap-1">
-                          <Icon icon="ph:text-aa" width={14} height={14} />
-                          {answer.metadata.wordCount} 字
+                        <span className="flex items-center gap-1.5 px-2 py-1 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-full border border-amber-200 dark:border-amber-700">
+                          <Icon icon="ph:text-t-duotone" width={16} height={16} className="text-amber-600 dark:text-amber-400" />
+                          <span className="font-medium text-amber-700 dark:text-amber-300">{answer.metadata.wordCount} 字</span>
                         </span>
                         {answer.metadata.tags && answer.metadata.tags.length > 0 && (
                           <div className="flex flex-wrap gap-2">
@@ -915,64 +827,6 @@ export function GrowthTrackerPage() {
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-            })()}
-
-            {selectedActivity.type === 'slotMachine' && (() => {
-              const slotResult = selectedActivity.data as any;
-              return (
-                <div className="space-y-6">
-                  {/* 词语组合 */}
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="p-2 bg-gradient-to-br from-orange-100 to-yellow-100 dark:from-orange-900/30 dark:to-yellow-900/30 rounded-lg">
-                        <Icon icon="ph:lightbulb-duotone" width={20} height={20} className="text-orange-500" />
-                      </div>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">灵感词语</h3>
-                      {slotResult.easterEgg && (
-                        <span className="px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-full text-xs">
-                          {slotResult.easterEgg.title}
-                        </span>
-                      )}
-                    </div>
-                    <div className="p-4 bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 rounded-xl border border-orange-200 dark:border-orange-800">
-                      <div className="flex flex-wrap justify-center gap-3 mb-3">
-                        {slotResult.words.map((word: string, i: number) => (
-                          <span key={i} className="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg text-lg font-bold">
-                            {word}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="text-center text-xs text-gray-500 dark:text-gray-400">
-                        <span className="flex items-center justify-center gap-1">
-                          <Icon icon="ph:clock" width={14} height={14} />
-                          {format(new Date(selectedActivity.timestamp), 'yyyy年MM月dd日 HH:mm')}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 联想内容 */}
-                  {slotResult.response && (
-                    <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="p-2 bg-gradient-to-br from-yellow-100 to-amber-100 dark:from-yellow-900/30 dark:to-amber-900/30 rounded-lg">
-                          <Icon icon="ph:lightbulb" width={20} height={20} className="text-pink-500" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">我的联想</h3>
-                      </div>
-                      <div className="p-4 bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-xl border border-yellow-200 dark:border-yellow-800">
-                        <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">{slotResult.response}</p>
-                        <div className="flex items-center gap-3 mt-4 text-xs text-gray-500 dark:text-gray-400">
-                          <span className="flex items-center gap-1">
-                            <Icon icon="ph:text-aa" width={14} height={14} />
-                            {slotResult.response.length} 字
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               );
             })()}
@@ -1017,8 +871,9 @@ export function GrowthTrackerPage() {
                   className="w-full px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-amber-500 dark:focus:border-amber-400 focus:outline-none transition-colors text-gray-900 dark:text-gray-100 min-h-[200px] resize-y"
                   placeholder="在这里修改你的回答..."
                 />
-                <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                  {editingAnswer.content.length} 字
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg border border-amber-200 dark:border-amber-700">
+                  <Icon icon="ph:text-t-duotone" width={16} height={16} className="text-amber-600 dark:text-amber-400" />
+                  <span className="text-sm font-medium text-amber-700 dark:text-amber-300">{editingAnswer.content.length} 字</span>
                 </div>
               </div>
 
@@ -1053,8 +908,8 @@ export function GrowthTrackerPage() {
             className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6"
           >
             <div className="text-center">
-              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Icon icon="ph:warning-circle" width={32} height={32} className="text-red-500" />
+              <div className="w-16 h-16 bg-orange-100 dark:bg-orange-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Icon icon="ph:warning-circle" width={32} height={32} className="text-orange-500" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                 确认删除
@@ -1065,7 +920,7 @@ export function GrowthTrackerPage() {
               <div className="flex gap-3">
                 <Button
                   onClick={confirmDelete}
-                  className="flex-1 bg-red-500 hover:bg-red-600"
+                  className="flex-1 bg-orange-600 hover:bg-orange-700"
                 >
                   确认删除
                 </Button>
@@ -1079,6 +934,139 @@ export function GrowthTrackerPage() {
                 >
                   取消
                 </Button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* 再思考对话框 */}
+      {showRethinkDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+          >
+            {/* 标题栏 */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-gradient-to-br from-amber-600 to-orange-500 rounded-xl shadow-md">
+                  <Icon icon="ph:arrow-u-up-left" width={28} height={28} className="text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    再思考
+                  </h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    选择一个问题，重新思考你的回答
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowRethinkDialog(false)}
+                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors p-2"
+              >
+                <Icon icon="ph:x" width={24} height={24} />
+              </button>
+            </div>
+
+            {/* 问题列表 */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {(() => {
+                // 获取所有已回答的问题，按时间倒序
+                const answeredQuestions = answers
+                  .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+                  .reduce((unique, answer) => {
+                    // 按问题ID去重，保留最新的回答
+                    if (!unique.some(u => u.questionId === answer.questionId)) {
+                      unique.push(answer);
+                    }
+                    return unique;
+                  }, [] as Answer[]);
+
+                if (answeredQuestions.length === 0) {
+                  return (
+                    <div className="flex flex-col items-center justify-center h-full text-center py-12">
+                      <div className="w-20 h-20 bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-900/30 dark:to-yellow-900/30 rounded-full flex items-center justify-center mb-4">
+                        <Icon icon="ph:question" width={40} height={40} className="text-amber-500" />
+                      </div>
+                      <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                        还没有回答过问题
+                      </p>
+                      <p className="text-gray-500 dark:text-gray-400">
+                        去问题思考页面开始你的第一次思考吧！
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="space-y-3">
+                    {answeredQuestions.map((answer) => {
+                      const question = getQuestionById(answer.questionId);
+                      return (
+                        <motion.button
+                          key={answer.questionId}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          whileHover={{ scale: 1.01, x: 4 }}
+                          whileTap={{ scale: 0.99 }}
+                          onClick={() => {
+                            setShowRethinkDialog(false);
+                            navigate(`/questions/${answer.questionId}`);
+                          }}
+                          className="w-full text-left p-5 bg-gradient-to-r from-gray-50 to-amber-50 dark:from-gray-800 dark:to-amber-900/20 rounded-xl hover:shadow-md transition-all border border-gray-200 dark:border-gray-700 hover:border-amber-300 dark:hover:border-amber-600 group"
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="p-2 bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-900/30 dark:to-yellow-900/30 rounded-lg">
+                                  <Icon icon="ph:question-duotone" width={18} height={18} className="text-amber-500" />
+                                </div>
+                                {question?.category && (
+                                  <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-full text-xs font-medium">
+                                    {getCategoryConfig(question.category.primary)?.label || question.category.primary}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="font-medium text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                                {question?.content || '未知问题'}
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                <span className="flex items-center gap-1">
+                                  <Icon icon="ph:text-aa" width={14} height={14} />
+                                  {answer.metadata.wordCount} 字
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Icon icon="ph:calendar-blank" width={14} height={14} />
+                                  {format(new Date(answer.createdAt), 'yyyy年MM月dd日')}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Icon icon="ph:clock" width={14} height={14} />
+                                  {format(new Date(answer.createdAt), 'HH:mm')}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex-shrink-0">
+                              <div className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm group-hover:bg-amber-50 dark:group-hover:bg-amber-900/30 transition-colors">
+                                <Icon icon="ph:arrow-right" width={20} height={20} className="text-amber-500" />
+                              </div>
+                            </div>
+                          </div>
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* 底部提示 */}
+            <div className="p-4 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <Icon icon="ph:info" width={18} height={18} className="text-amber-500" />
+                <span>点击问题即可查看并重新思考，系统会保留你的所有回答记录</span>
               </div>
             </div>
           </motion.div>

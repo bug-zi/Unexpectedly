@@ -5,7 +5,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { Gamepad2, CircleDashed, Brain, Sparkles, Star, Clock, Bell, TrendingUp, ArrowRight, Lightbulb, Puzzle, Zap, Copy, RefreshCw, BookOpen, Info, Calendar, User } from 'lucide-react';
+import { Gamepad2, CircleDashed, Brain, Sparkles, Star, Clock, Bell, TrendingUp, ArrowRight, Lightbulb, Puzzle, Zap, Copy, RefreshCw, BookOpen, Info, Calendar, User, Target } from 'lucide-react';
 import { getRandomQuestion } from '@/constants/questions';
 import { useAppStore } from '@/stores/appStore';
 import { Icon } from '@/components/ui/Icon';
@@ -220,8 +220,9 @@ export function HomePage() {
               <motion.div
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0"
               >
-                <Icon name="Sparkles" size={28} gradient={true} />
+                <img src="/favicon.png" alt="Logo" className="w-full h-full object-cover" />
               </motion.div>
               <div className="flex flex-col">
                 <h1 className="text-xl font-bold bg-gradient-to-r from-red-500 via-amber-400 to-blue-500 bg-clip-text text-transparent">
@@ -255,6 +256,15 @@ export function HomePage() {
               >
                 <Calendar size={18} />
                 <span>签到</span>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05, rotate: 2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/tasks')}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+              >
+                <Target size={18} />
+                <span>任务</span>
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05, rotate: 3 }}

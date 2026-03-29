@@ -144,6 +144,42 @@ When working with files, data, or any content that requires storage:
 - For large file operations, use `D:\Code\data\files`
 - For database dumps or exports, use `D:\Code\data\exports`
 
+### Documentation Generation (MANDATORY)
+**在我没有明确要求你生成说明文档的情况下，不要自己生成.md说明文档。**
+
+1. **No automatic documentation** - Do NOT create .md documentation files unless explicitly requested
+2. **Code comments only** - Use code comments and JSDoc for inline documentation instead
+3. **User-requested only** - Only generate documentation when the user explicitly asks for it
+4. **Avoid file clutter** - Keep the project directory clean by minimizing documentation files
+
+**Examples:**
+- ❌ Don't create: `FIX_GUIDE.md`, `SETUP_INSTRUCTIONS.md`, `FEATURE_EXPLANATION.md`
+- ✅ Use instead: Code comments, JSDoc annotations, inline explanations
+- ✅ Only when requested: "请生成一个使用指南" → Then create documentation
+
+### Debugging and Testing (MANDATORY)
+**你会自行调用浏览器工具调试修复，而不是让使用者自己去调试操作。**
+
+1. **Automated browser testing** - Use browser automation tools to test and debug issues yourself
+2. **Active debugging** - Proactively use Chrome DevTools or browser automation to identify and fix problems
+3. **No user debugging** - Do NOT ask users to perform debugging steps or manual testing
+4. **Full responsibility** - Take complete ownership of testing and debugging tasks
+
+**Available tools:**
+- Chrome DevTools integration via MCP tools
+- Browser automation (navigate, click, fill forms, take screenshots)
+- Console log inspection
+- Network request monitoring
+- Element inspection and interaction
+
+**Process:**
+1. Reproduce the issue in the browser
+2. Use browser tools to diagnose the problem
+3. Identify the root cause
+4. Fix the issue in code
+5. Verify the fix works in browser
+6. Only report back when the issue is resolved
+
 ## Path Aliases
 
 The project uses path aliases defined in both `vite.config.ts` and `tsconfig.json`:

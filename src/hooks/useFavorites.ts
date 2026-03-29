@@ -13,11 +13,6 @@ export function useFavorites(filters?: FavoriteFilters) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 自动加载收藏列表
-  useEffect(() => {
-    fetchFavorites();
-  }, [filters]);
-
   /**
    * 获取收藏列表
    */
@@ -79,6 +74,31 @@ export function useFavorites(filters?: FavoriteFilters) {
       setLoading(false);
     }
   }, [filters]);
+
+  // 自动加载收藏列表
+  useEffect(() => {
+    fetchFavorites();
+  }, [fetchFavorites]);
+
+  // 监听用户数据变化事件（登录/登出时刷新）
+  useEffect(() => {
+    const handleDataChange = () => {
+      // 延迟一下，确保 sessionStorage 已更新
+      setTimeout(() => {
+        fetchFavorites();
+      }, 100);
+    };
+
+    window.addEventListener('user-data-changed', handleDataChange);
+    window.addEventListener('user-logged-out', handleDataChange);
+    window.addEventListener('user-logged-in', handleDataChange);
+
+    return () => {
+      window.removeEventListener('user-data-changed', handleDataChange);
+      window.removeEventListener('user-logged-out', handleDataChange);
+      window.removeEventListener('user-logged-in', handleDataChange);
+    };
+  }, [fetchFavorites]);
 
   /**
    * 添加收藏
@@ -338,11 +358,6 @@ export function useFavorites(filters?: FavoriteFilters) {
       ).size,
     };
   }, [favorites]);
-
-  // 初始加载
-  useEffect(() => {
-    fetchFavorites();
-  }, [fetchFavorites]);
 
   return {
     favorites,

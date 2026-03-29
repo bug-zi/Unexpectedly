@@ -1,254 +1,157 @@
 /**
- * 数据同步服务
- * 负责在本地存储和 Supabase 之间同步数据
+ * 数据同步服务（新版）
+ *
+ * 同步策略：
+ * - 手动同步：用户点击"同步至云端"时执行
+ * - 自动同步：退出登录或退出程序时执行
+ * - 游客模式：不同步到云端
  */
 
 import { supabase } from '@/lib/supabase';
-import type { Answer, Question, SlotMachineResult } from '@/types';
-import { getAnswers, getSlotMachineResults } from '@/utils/storage';
-import { saveAnswer, saveSlotMachineResult } from '@/utils/storage';
+import { syncLocalDataToCloud, loadCloudDataToLocal, getCurrentUserId, clearCurrentLocalData } from '@/utils/userStorage';
+
+/**
+ * 同步状态枚举
+ */
+export enum SyncStatus {
+  IDLE = 'idle',
+  SYNCING = 'syncing',
+  SUCCESS = 'success',
+  ERROR = 'error',
+}
 
 export interface SyncResult {
   success: boolean;
   uploaded?: number;
-  downloaded?: number;
+  loaded?: number;
   error?: string;
 }
 
 /**
- * 初始化数据库表（导入问题库）
+ * 详细同步结果（用于 useSync hook）
  */
-export async function initializeDatabase(questions: Question[]): Promise<SyncResult> {
+export interface DetailedSyncResult {
+  status: SyncStatus;
+  error?: string;
+  answers: { uploaded: number; downloaded: number };
+  slotMachine: { uploaded: number; downloaded: number };
+  turtleSoup: { uploaded: number; downloaded: number };
+  riddles: { uploaded: number; downloaded: number };
+  yesOrNo: { uploaded: number; downloaded: number };
+  guessNumber: { uploaded: number; downloaded: number };
+}
+
+const LAST_SYNC_KEY = 'wwx-last-sync-time';
+
+/**
+ * 获取最后同步时间
+ */
+export function getLastSyncTime(): Date | null {
+  const data = localStorage.getItem(LAST_SYNC_KEY);
+  if (!data) return null;
   try {
-    // 批量插入问题
-    const { error } = await supabase
-      .from('questions')
-      .upsert(
-        questions.map(q => ({
-          id: q.id,
-          category_primary: q.category.primary,
-          category_secondary: q.category.secondary || null,
-          content: q.content,
-          difficulty: q.difficulty,
-          tags: q.tags,
-          created_at: q.createdAt.toISOString(),
-          updated_at: (q.updatedAt || q.createdAt).toISOString(),
-          answer_count: q.answerCount,
-        })),
-        { onConflict: 'id' }
-      );
-
-    if (error) throw error;
-
-    console.log('✅ 数据库初始化成功');
-    return { success: true };
-  } catch (error) {
-    console.error('数据库初始化失败:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : '数据库初始化失败',
-    };
+    return new Date(JSON.parse(data));
+  } catch {
+    return null;
   }
 }
 
 /**
- * 上传本地数据到云端
+ * 设置最后同步时间
  */
-export async function uploadLocalData(): Promise<SyncResult> {
+function setLastSyncTime(date: Date): void {
+  localStorage.setItem(LAST_SYNC_KEY, JSON.stringify(date.toISOString()));
+}
+
+/**
+ * 检查是否需要同步
+ */
+export function needsSync(): boolean {
+  const userId = getCurrentUserId();
+  if (!userId) return false; // 游客模式不需要同步
+
+  return checkUnsyncedData();
+}
+
+/**
+ * 同步所有数据（简化版，调用 manualSync）
+ */
+export async function syncAllData(): Promise<DetailedSyncResult> {
+  const result: DetailedSyncResult = {
+    status: SyncStatus.IDLE,
+    answers: { uploaded: 0, downloaded: 0 },
+    slotMachine: { uploaded: 0, downloaded: 0 },
+    turtleSoup: { uploaded: 0, downloaded: 0 },
+    riddles: { uploaded: 0, downloaded: 0 },
+    yesOrNo: { uploaded: 0, downloaded: 0 },
+    guessNumber: { uploaded: 0, downloaded: 0 },
+  };
+
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('未登录');
+    const syncResult = await manualSync();
 
-    // 获取本地数据
-    const localAnswers = getAnswers();
-    const localSlotMachine = getSlotMachineResults();
+    if (syncResult.success) {
+      result.status = SyncStatus.SUCCESS;
+      const uploaded = syncResult.uploaded || 0;
 
-    let uploadedCount = 0;
-
-    // 上传回答
-    if (localAnswers.length > 0) {
-      const { error: answersError } = await supabase
-        .from('answers')
-        .upsert(
-          localAnswers.map(answer => ({
-            id: answer.id,
-            user_id: user.id,
-            question_id: answer.questionId,
-            content: answer.content,
-            metadata: {
-              wordCount: answer.metadata.wordCount,
-              readingTime: answer.metadata.readingTime,
-              writingTime: answer.metadata.writingTime,
-              mood: answer.metadata.mood,
-              tags: answer.metadata.tags,
-            },
-            is_public: false, // 默认私有
-            created_at: answer.createdAt.toISOString(),
-            updated_at: (answer.updatedAt || answer.createdAt).toISOString(),
-          })),
-          { onConflict: 'id' }
-        );
-
-      if (answersError) throw answersError;
-      uploadedCount += localAnswers.length;
+      // 简化处理：将所有上传的数据分配给 answers
+      result.answers.uploaded = uploaded;
+      setLastSyncTime(new Date());
+    } else {
+      result.status = SyncStatus.ERROR;
+      result.error = syncResult.error;
     }
-
-    // 上传老虎机结果
-    if (localSlotMachine.length > 0) {
-      const { error: slotError } = await supabase
-        .from('slot_machine_results')
-        .upsert(
-          localSlotMachine.map(result => ({
-            id: result.id,
-            user_id: user.id,
-            words: result.words,
-            response: result.response,
-            easter_egg: result.easterEgg,
-            created_at: result.createdAt.toISOString(),
-          })),
-          { onConflict: 'id' }
-        );
-
-      if (slotError) throw slotError;
-      uploadedCount += localSlotMachine.length;
-    }
-
-    console.log(`✅ 上传成功: ${uploadedCount} 条记录`);
-    return { success: true, uploaded: uploadedCount };
   } catch (error) {
-    console.error('上传失败:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : '上传失败',
-    };
+    result.status = SyncStatus.ERROR;
+    result.error = error instanceof Error ? error.message : '同步失败';
+  }
+
+  return result;
+}
+
+/**
+ * 登录时同步（从云端下载数据到本地）
+ */
+export async function syncOnLogin(): Promise<void> {
+  try {
+    const userId = getCurrentUserId();
+    if (!userId) {
+      console.log('🏠 游客模式，跳过登录同步');
+      return;
+    }
+
+    console.log('🔄 登录同步：从云端下载数据...');
+    await loadFromCloud();
+    console.log('✅ 登录同步完成');
+  } catch (error) {
+    console.error('❌ 登录同步失败:', error);
+    // 不抛出错误，避免阻止登录流程
   }
 }
 
 /**
- * 从云端下载数据并合并本地数据
+ * 手动同步：上传本地数据到云端并清空本地
  */
-export async function downloadCloudData(): Promise<SyncResult> {
+export async function manualSync(): Promise<SyncResult> {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('未登录');
-
-    let downloadedCount = 0;
-
-    // 获取本地现有数据
-    const localAnswers = getAnswers();
-    const localAnswerIds = new Set(localAnswers.map(a => a.id));
-
-    // 下载回答
-    const { data: answers, error: answersError } = await supabase
-      .from('answers')
-      .select('*')
-      .eq('user_id', user.id)
-      .is('deleted_at', null);
-
-    if (answersError) throw answersError;
-
-    if (answers && answers.length > 0) {
-      // 合并云端和本地数据，使用 Set 去重
-      const mergedAnswers = [...localAnswers];
-
-      for (const answer of (answers as any[])) {
-        // 如果云端数据在本地不存在，则添加
-        if (!localAnswerIds.has(answer.id)) {
-          const formattedAnswer: Answer = {
-            id: answer.id,
-            questionId: answer.question_id,
-            userId: answer.user_id,
-            content: answer.content,
-            metadata: {
-              wordCount: (answer.metadata as any).wordCount || 0,
-              readingTime: (answer.metadata as any).readingTime || 0,
-              writingTime: (answer.metadata as any).writingTime || 0,
-              mood: (answer.metadata as any).mood,
-              tags: (answer.metadata as any).tags,
-            },
-            createdAt: new Date(answer.created_at),
-            updatedAt: new Date(answer.updated_at),
-          };
-          mergedAnswers.push(formattedAnswer);
-          downloadedCount++;
-        }
-      }
-
-      // 一次性保存合并后的数据
-      localStorage.setItem('wwx-answers', JSON.stringify(mergedAnswers));
+    const userId = getCurrentUserId();
+    if (!userId) {
+      throw new Error('未登录，无法同步数据');
     }
 
-    // 获取本地老虎机结果
-    const localSlotResults = getSlotMachineResults();
-    const localSlotIds = new Set(localSlotResults.map(r => r.id));
+    console.log('🔄 开始手动同步...', { userId });
 
-    // 下载老虎机结果
-    const { data: slotResults, error: slotError } = await supabase
-      .from('slot_machine_results')
-      .select('*')
-      .eq('user_id', user.id);
+    // 1. 上传本地数据到云端
+    const result = await syncLocalDataToCloud(userId);
 
-    if (slotError) throw slotError;
-
-    if (slotResults && slotResults.length > 0) {
-      // 合并云端和本地数据
-      const mergedSlotResults = [...localSlotResults];
-
-      for (const result of (slotResults as any[])) {
-        if (!localSlotIds.has(result.id)) {
-          const formattedResult: SlotMachineResult = {
-            id: result.id,
-            words: result.words as [string, string, string],
-            userId: result.user_id,
-            response: result.response || undefined,
-            easterEgg: result.easter_egg as any,
-            createdAt: new Date(result.created_at),
-          };
-          mergedSlotResults.push(formattedResult);
-          downloadedCount++;
-        }
-      }
-
-      // 一次性保存合并后的数据
-      localStorage.setItem('wwx-slot-machine', JSON.stringify(mergedSlotResults));
-    }
-
-    console.log(`✅ 下载成功: ${downloadedCount} 条新记录`);
-    return { success: true, downloaded: downloadedCount };
-  } catch (error) {
-    console.error('下载失败:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : '下载失败',
-    };
-  }
-}
-
-/**
- * 双向同步（合并本地和云端数据）
- *
- * 同步策略：
- * 1. 先上传本地所有数据到云端（upsert 会处理重复）
- * 2. 再下载云端数据并合并到本地（基于 ID 去重）
- * 3. 确保本地和云端数据最终一致
- */
-export async function syncData(): Promise<SyncResult> {
-  try {
-    // 步骤1: 先上传本地数据到云端
-    const uploadResult = await uploadLocalData();
-    if (!uploadResult.success) return uploadResult;
-
-    // 步骤2: 下载云端数据并合并到本地
-    const downloadResult = await downloadCloudData();
-    if (!downloadResult.success) return downloadResult;
+    console.log('✅ 同步完成', result);
 
     return {
       success: true,
-      uploaded: uploadResult.uploaded,
-      downloaded: downloadResult.downloaded,
+      uploaded: result.uploaded,
     };
   } catch (error) {
-    console.error('同步失败:', error);
+    console.error('❌ 同步失败:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : '同步失败',
@@ -257,20 +160,86 @@ export async function syncData(): Promise<SyncResult> {
 }
 
 /**
- * 监听云端数据变化（实时同步）
+ * 自动同步：退出登录时调用
+ * @param userId 可选的用户ID，如果提供则使用该ID，否则从getCurrentUserId获取
  */
-export function subscribeToAnswersChanges(callback: () => void) {
-  return supabase
-    .channel('answers_changes')
-    .on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'answers',
-        filter: `user_id=eq.${(supabase.auth.getUser() as any).data?.user?.id}`,
-      },
-      callback
-    )
-    .subscribe();
+export async function autoSyncOnLogout(userId?: string): Promise<void> {
+  try {
+    // 如果没有提供userId，尝试获取
+    const targetUserId = userId || getCurrentUserId();
+    if (!targetUserId) {
+      console.log('🏠 游客模式，无需同步');
+      return;
+    }
+
+    console.log('🔄 退出登录，自动同步数据...', { userId: targetUserId });
+
+    // 上传本地数据到云端（使用传入的用户ID）
+    await syncLocalDataToCloud(targetUserId);
+
+    // 清空本地数据（使用传入的用户ID确定前缀）
+    clearCurrentLocalData();
+
+    console.log('✅ 自动同步完成');
+  } catch (error) {
+    console.error('❌ 自动同步失败:', error);
+    // 不抛出错误，避免阻止退出流程
+  }
+}
+
+/**
+ * 从云端加载数据到本地
+ */
+export async function loadFromCloud(): Promise<SyncResult> {
+  try {
+    const userId = getCurrentUserId();
+    if (!userId) {
+      throw new Error('未登录，无法加载数据');
+    }
+
+    console.log('📥 从云端加载数据...', { userId });
+
+    const result = await loadCloudDataToLocal(userId);
+
+    console.log('✅ 数据加载完成', result);
+
+    return {
+      success: true,
+      loaded: result.loaded,
+    };
+  } catch (error) {
+    console.error('❌ 加载数据失败:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : '加载数据失败',
+    };
+  }
+}
+
+/**
+ * 检查本地是否有未同步的数据
+ */
+export function checkUnsyncedData(): boolean {
+  const userId = getCurrentUserId();
+  if (!userId) return false;
+
+  const prefix = `user-${userId}-`;
+  const keys = Object.keys(localStorage);
+  return keys.some(key => key.startsWith(prefix));
+}
+
+/**
+ * 获取本地数据统计
+ */
+export function getLocalDataStats(): { count: number; keys: string[] } {
+  const userId = getCurrentUserId();
+  if (!userId) {
+    // 游客模式
+    const guestKeys = Object.keys(localStorage).filter(key => key.startsWith('guest-'));
+    return { count: guestKeys.length, keys: guestKeys };
+  }
+
+  // 登录用户
+  const userKeys = Object.keys(localStorage).filter(key => key.startsWith(`user-${userId}-`));
+  return { count: userKeys.length, keys: userKeys };
 }

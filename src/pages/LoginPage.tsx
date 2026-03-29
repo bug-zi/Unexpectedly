@@ -48,21 +48,62 @@ export function LoginPage() {
     setLoading(false);
 
     if (result.success) {
+      // 检查是否需要邮箱确认
+      if (!isLogin && result.data?.needsEmailConfirmation) {
+        toast.info('📧 注册成功！请检查你的邮箱并点击确认链接完成注册', {
+          position: 'top-right',
+          autoClose: 5000,
+        });
+        setError('');
+        // 切换到登录模式
+        setIsLogin(true);
+        return;
+      }
+
       if (!isLogin) {
         // 注册成功，显示成功提示
-        toast.success('🎉 注册成功！欢迎加入 Unexpectedly', {
+        toast.success('🎉 注册成功！欢迎加入万万没想到', {
           position: 'top-right',
           autoClose: 2000,
         });
       }
+      // 登录成功的提示由useAuth hook处理，这里不重复显示
 
       // 延迟跳转，让用户看到成功提示
       setTimeout(() => {
         const from = (location.state as any)?.from?.pathname || '/';
         navigate(from, { replace: true });
-      }, isLogin ? 0 : 1500);
+      }, isLogin ? 500 : 1500);
     } else {
-      setError(result.error || '操作失败');
+      // 显示详细错误信息
+      const errorMessage = result.error || '操作失败';
+
+      // 根据错误类型提供更友好的提示
+      if (errorMessage.includes('邮箱确认')) {
+        setError(errorMessage);
+        toast.info('📧 请检查你的邮箱并点击确认链接', {
+          position: 'top-right',
+          autoClose: 5000,
+        });
+      } else if (errorMessage.includes('已存在') || errorMessage.includes('already been registered')) {
+        setError('该邮箱已注册，请直接登录');
+        toast.info('💡 该邮箱已注册，请直接登录', {
+          position: 'top-right',
+          autoClose: 3000,
+        });
+      } else if (errorMessage.includes('Invalid login credentials')) {
+        setError('邮箱或密码错误');
+        toast.error('❌ 邮箱或密码错误', {
+          position: 'top-right',
+          autoClose: 3000,
+        });
+      } else {
+        setError(errorMessage);
+        toast.error(`❌ ${errorMessage}`, {
+          position: 'top-right',
+          autoClose: 4000,
+        });
+      }
     }
   };
 
@@ -74,10 +115,7 @@ export function LoginPage() {
     setLoading(false);
 
     if (result.success) {
-      toast.success('✅ GitHub 登录成功！', {
-        position: 'top-right',
-        autoClose: 2000,
-      });
+      // GitHub 登录成功的提示由useAuth hook处理，这里不重复显示
     } else {
       setError(result.error || 'GitHub 登录失败');
     }
@@ -144,9 +182,9 @@ export function LoginPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl shadow-xl mb-6 warm-glow"
+              className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl shadow-xl mb-6 overflow-hidden warm-glow"
             >
-              <Sparkles size={40} className="text-white" />
+              <img src="/favicon.png" alt="Logo" className="w-full h-full object-cover" />
             </motion.div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
               {isLogin ? '欢迎回来' : '加入 Unexpectedly'}

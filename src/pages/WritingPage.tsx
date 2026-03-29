@@ -5,7 +5,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Sparkles, PenTool, BookOpen, BarChart3, Shuffle, X } from 'lucide-react';
+import { ArrowLeft, Sparkles, PenTool, BookOpen, BarChart3, Shuffle, X, History, Clock, Edit, Trash2, Save } from 'lucide-react';
+import { getSlotMachineResults } from '@/utils/storage';
+import { setUserData, getUserData, getUserDataSync } from '@/utils/userStorage';
 
 // 自定义动画
 const customEasing = {
@@ -17,11 +19,15 @@ export function WritingPage() {
   const navigate = useNavigate();
   const [showInstructions, setShowInstructions] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [writingStats, setWritingStats] = useState({
     totalSlotMachines: 0,
     totalChallenges: 0,
     totalWords: 0
   });
+  const [historyRecords, setHistoryRecords] = useState<any[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState('');
 
   // 写作模块配置
   const writingModules = [
@@ -44,14 +50,43 @@ export function WritingPage() {
     loadWritingStats();
   }, []);
 
-  const loadWritingStats = () => {
-    // 从localStorage加载创作统计
-    const slotMachineRecords = JSON.parse(localStorage.getItem('slotMachineRecords') || '[]');
-    const challengeRecords = JSON.parse(localStorage.getItem('writingChallengeRecords') || '[]');
+  // 监听用户数据变化事件（登录/登出时刷新）
+  useEffect(() => {
+    const handleDataChange = () => {
+      // 延迟一下，确保 sessionStorage 已更新
+      setTimeout(() => {
+        loadWritingStats();
+      }, 100);
+    };
 
-    // 计算总字数
-    const totalWords = slotMachineRecords.reduce((sum: number, r: any) => sum + (r.wordCount || 0), 0) +
-                      challengeRecords.reduce((sum: number, r: any) => sum + (r.wordCount || 0), 0);
+    window.addEventListener('user-data-changed', handleDataChange);
+    window.addEventListener('user-logged-out', handleDataChange);
+    window.addEventListener('user-logged-in', handleDataChange);
+
+    return () => {
+      window.removeEventListener('user-data-changed', handleDataChange);
+      window.removeEventListener('user-logged-out', handleDataChange);
+      window.removeEventListener('user-logged-in', handleDataChange);
+    };
+  }, []);
+
+  const loadWritingStats = () => {
+    // 从工具函数加载老虎机记录
+    const slotMachineRecords = getSlotMachineResults();
+
+    // 使用getUserDataSync加载文笔挑战记录（同步版本）
+    const challengeRecords = getUserDataSync<any[]>('writing-challenge-works', []);
+
+    // 计算总字数（老虎机使用response字段，文笔挑战使用content字段）
+    const slotMachineWords = slotMachineRecords.reduce((sum: number, r: any) => {
+      return sum + (r.response?.length || 0);
+    }, 0);
+
+    const challengeWords = challengeRecords.reduce((sum: number, r: any) => {
+      return sum + (r.content?.length || 0);
+    }, 0);
+
+    const totalWords = slotMachineWords + challengeWords;
 
     setWritingStats({
       totalSlotMachines: slotMachineRecords.length,
@@ -63,6 +98,95 @@ export function WritingPage() {
   const startRandomModule = () => {
     const randomIndex = Math.floor(Math.random() * writingModules.length);
     navigate(writingModules[randomIndex].path);
+  };
+
+  const loadHistoryRecords = () => {
+    // 加载老虎机记录
+    const slotMachineRecords = getSlotMachineResults().map((r: any) => ({
+      ...r,
+      type: 'slot-machine' as const,
+      title: '灵感老虎机',
+      words: r.words || [],
+      content: r.response || '',
+      timestamp: new Date(r.createdAt).getTime()
+    }));
+
+    // 加载文笔挑战记录（使用getUserData以支持用户隔离）
+    const challengeRecords = getUserDataSync<any[]>('writing-challenge-works', [])
+      .map((r: any) => ({
+        ...r,
+        type: 'writing-challenge' as const,
+        title: '文笔挑战',
+        prompt: r.prompt || '',
+        content: r.content || '',
+        timestamp: new Date(r.createdAt).getTime()
+      }));
+
+    // 合并并按时间倒序排列（最新的在前）
+    const allRecords = [...slotMachineRecords, ...challengeRecords]
+      .sort((a: any, b: any) => b.timestamp - a.timestamp);
+
+    setHistoryRecords(allRecords);
+  };
+
+  // 删除记录
+  const handleDeleteRecord = (record: any) => {
+    if (!confirm('确定要删除这条创作记录吗？此操作不可恢复。')) {
+      return;
+    }
+
+    if (record.type === 'slot-machine') {
+      // 删除老虎机记录
+      const records = getSlotMachineResults();
+      const updatedRecords = records.filter((r: any) => r.id !== record.id);
+      setUserData('wwx-slot-machine', updatedRecords);
+    } else if (record.type === 'writing-challenge') {
+      // 删除文笔挑战记录
+      const records = getUserData<any[]>('writing-challenge-works', []);
+      const updatedRecords = records.filter((r: any) => r.id !== record.id);
+      setUserData('writing-challenge-works', updatedRecords);
+    }
+
+    // 重新加载历史记录和统计
+    loadHistoryRecords();
+    loadWritingStats();
+  };
+
+  // 编辑记录 - 进入编辑模式
+  const handleEditRecord = (record: any) => {
+    setEditingId(record.id || record.promptId);
+    setEditingContent(record.content || record.response || '');
+  };
+
+  // 保存编辑
+  const handleSaveEdit = (record: any) => {
+    if (record.type === 'slot-machine') {
+      // 更新老虎机记录
+      const records = getSlotMachineResults();
+      const updatedRecords = records.map((r: any) =>
+        r.id === record.id ? { ...r, response: editingContent } : r
+      );
+      setUserData('wwx-slot-machine', updatedRecords);
+    } else if (record.type === 'writing-challenge') {
+      // 更新文笔挑战记录
+      const challengeRecords = getUserDataSync<any[]>('writing-challenge-works', []);
+      const updatedRecords = challengeRecords.map((r: any) =>
+        r.id === record.id ? { ...r, content: editingContent } : r
+      );
+      setUserData('writing-challenge-works', updatedRecords);
+    }
+
+    // 退出编辑模式并重新加载数据
+    setEditingId(null);
+    setEditingContent('');
+    loadHistoryRecords();
+    loadWritingStats();
+  };
+
+  // 取消编辑
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditingContent('');
   };
 
   return (
@@ -106,6 +230,17 @@ export function WritingPage() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => setShowInstructions(true)}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
+                title="模式说明"
+              >
+                <BookOpen size={18} />
+                <span className="hidden md:inline">模式说明</span>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={startRandomModule}
                 className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
                 title="随机开始创作"
@@ -131,12 +266,15 @@ export function WritingPage() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setShowInstructions(true)}
+                onClick={() => {
+                  loadHistoryRecords();
+                  setShowHistory(true);
+                }}
                 className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
-                title="模式说明"
+                title="查看历史记录"
               >
-                <BookOpen size={18} />
-                <span className="hidden md:inline">模式说明</span>
+                <History size={18} />
+                <span className="hidden md:inline">历史记录</span>
               </motion.button>
             </div>
           </div>
@@ -298,6 +436,197 @@ export function WritingPage() {
                   </p>
                 </div>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 历史记录弹窗 */}
+      <AnimatePresence>
+        {showHistory && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowHistory(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 20, stiffness: 300 }}
+              className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden border-2 border-blue-200 dark:border-blue-800 flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* 头部 */}
+              <div className="bg-gradient-to-r from-blue-500 to-cyan-500 px-6 py-4 flex items-center justify-between flex-shrink-0">
+                <div className="flex items-center gap-3">
+                  <History size={24} className="text-white" />
+                  <h3 className="text-xl font-bold text-white">历史创作记录</h3>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowHistory(false)}
+                  className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
+                >
+                  <X size={24} />
+                </motion.button>
+              </div>
+
+              {/* 内容 */}
+              <div className="p-6 overflow-y-auto flex-1">
+                {historyRecords.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Clock size={48} className="mx-auto text-gray-400 mb-4" />
+                    <p className="text-gray-600 dark:text-gray-400">
+                      还没有创作记录，开始你的第一次创作吧！✨
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {historyRecords.map((record: any, index: number) => (
+                      <motion.div
+                        key={record.id || index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800"
+                      >
+                        {/* 类型标签和操作按钮 */}
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <span className="px-3 py-1 text-sm font-medium rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
+                              {record.title}
+                            </span>
+                            {record.category && (
+                              <span className="text-xs px-2 py-1 bg-blue-200 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-full">
+                                {record.category}
+                              </span>
+                            )}
+                          </div>
+                          {editingId !== (record.id || record.promptId) && (
+                            <div className="flex items-center gap-1">
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => handleEditRecord(record)}
+                                className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-all"
+                                title="编辑"
+                              >
+                                <Edit size={16} />
+                              </motion.button>
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => handleDeleteRecord(record)}
+                                className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-all"
+                                title="删除"
+                              >
+                                <Trash2 size={16} />
+                              </motion.button>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* 老虎机：词语标签 */}
+                        {record.type === 'slot-machine' && record.words && (
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {record.words.map((word: string, i: number) => (
+                              <span
+                                key={i}
+                                className="px-3 py-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm font-medium rounded-full"
+                              >
+                                {word}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* 文笔挑战：题目 */}
+                        {record.type === 'writing-challenge' && record.prompt && (
+                          <div className="bg-blue-100 dark:bg-blue-900/30 rounded-lg p-3 mb-2 border-l-4 border-blue-500">
+                            <p className="text-sm text-blue-700 dark:text-blue-300 font-medium mb-1">题目：</p>
+                            <p className="text-gray-700 dark:text-gray-300">{record.prompt}</p>
+                          </div>
+                        )}
+
+                        {/* 创作内容 */}
+                        <div className="bg-white dark:bg-gray-800 rounded-lg p-3 mb-2">
+                          {editingId === (record.id || record.promptId) ? (
+                            // 编辑模式
+                            <div className="space-y-2">
+                              <textarea
+                                value={editingContent}
+                                onChange={(e) => setEditingContent(e.target.value)}
+                                className="w-full min-h-[120px] p-3 border border-blue-300 dark:border-blue-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-200 resize-y"
+                                placeholder="编辑你的创作内容..."
+                              />
+                              <div className="flex items-center gap-2 justify-end">
+                                <motion.button
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={handleCancelEdit}
+                                  className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all"
+                                >
+                                  取消
+                                </motion.button>
+                                <motion.button
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={() => handleSaveEdit(record)}
+                                  className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-lg transition-all shadow-md"
+                                >
+                                  保存
+                                </motion.button>
+                              </div>
+                            </div>
+                          ) : (
+                            // 查看模式
+                            <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                              {record.content || record.response || '暂无内容'}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* 时间和字数 */}
+                        <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                          <div className="flex items-center gap-1">
+                            <Clock size={14} />
+                            <span>
+                              {new Date(record.createdAt || record.timestamp).toLocaleString('zh-CN', {
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
+                          </div>
+                          <span>{(record.content || record.response || '').length} 字</span>
+                        </div>
+
+                        {/* 彩蛋提示 */}
+                        {record.easterEgg && (
+                          <div className="mt-2 px-3 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 text-sm rounded-lg">
+                            ✨ {record.easterEgg.title}
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 底部统计 */}
+              {historyRecords.length > 0 && (
+                <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                    共 <span className="font-bold text-blue-600 dark:text-blue-400">{historyRecords.length}</span> 条创作记录
+                  </p>
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}

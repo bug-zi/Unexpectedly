@@ -109,7 +109,7 @@ export function getCategories(): string[] {
 
 /**
  * 分析问题并返回答案
- * 基于简单的关键词匹配逻辑
+ * 核心逻辑：使用智能规则引擎判断问题与答案的关系
  */
 export function analyzeYesNoQuestion(question: string, targetWord: string, category: string): {
   answer: 'yes' | 'no';
@@ -119,78 +119,161 @@ export function analyzeYesNoQuestion(question: string, targetWord: string, categ
   const questionLower = question.toLowerCase();
   const targetLower = targetWord.toLowerCase();
 
-  // 检查是否包含目标词
-  const hasTargetWord = questionLower.includes(targetLower) || targetLower.includes(questionLower);
+  // 1. 检查是否直接猜测目标词
+  const directGuessPatterns = [
+    /是(.{1,5})吗?$/,
+    /是(.{1,5})$/,
+    /答案[是为](.{1,5})/
+  ];
 
-  // 类别相关的关键词
+  for (const pattern of directGuessPatterns) {
+    const match = question.match(pattern);
+    if (match) {
+      const guessedWord = match[1].trim();
+      if (guessedWord === targetWord || guessedWord.includes(targetWord) || targetWord.includes(guessedWord)) {
+        return {
+          answer: 'yes',
+          confidence: 1.0,
+          reason: `正确！答案就是"${targetWord}"`
+        };
+      } else if (questionLower.includes('不') || questionLower.includes('没')) {
+        return {
+          answer: 'no',
+          confidence: 0.9,
+          reason: `答案不是"${guessedWord}"`
+        };
+      }
+    }
+  }
+
+  // 2. 检查否定词
+  const negativePatterns = [
+    /\b不是\b/,
+    /\b没有\b/,
+    /\b没\b/,
+    /\b无\b/,
+    /\b非\b/
+  ];
+  const hasNegative = negativePatterns.some(pattern => pattern.test(questionLower));
+
+  // 3. 智能语义分析 - 判断问题是否询问特定类别或属性
+  const semanticResult = analyzeQuestionSemantics(question, targetWord, category, hasNegative);
+  if (semanticResult) {
+    return semanticResult;
+  }
+
+  // 4. 默认回退策略
+  return {
+    answer: 'no',
+    confidence: 0.5,
+    reason: '无法确定，请换一种问法'
+  };
+}
+
+/**
+ * 智能语义分析
+ * 分析问题的语义意图，判断是否与目标词匹配
+ */
+function analyzeQuestionSemantics(
+  question: string,
+  targetWord: string,
+  category: string,
+  hasNegative: boolean
+): { answer: 'yes' | 'no'; confidence: number; reason: string } | null {
+  const questionLower = question.toLowerCase();
+
+  // 定义类别关键词映射（中文）
   const categoryKeywords: Record<string, string[]> = {
-    '动物': ['动物', '生物', '活', '动', '宠物'],
-    '植物': ['植物', '花', '草', '树', '蔬菜', '水果'],
-    '食物': ['吃', '食物', '喝', '美味', '好吃'],
-    '物品': ['东西', '物品', '用品', '工具', '东西'],
-    '职业': ['人', '工作', '职业', '做', '干'],
-    '地点': ['地方', '地点', '地方', '场所', '位置'],
-    '运动': ['运动', '玩', '比赛', '竞技'],
-    '自然现象': ['自然', '现象', '天气', '天空', '景象']
+    '动物': ['动物', '生物', '生物', '活物', '宠物', '兽', '禽', '兽类', '禽类'],
+    '植物': ['植物', '花草', '树木', '花卉', '草木', '蔬菜', '水果', '农作物'],
+    '食物': ['食物', '食品', '吃', '喝', '可以吃', '可以喝', '菜肴', '主食', '零食'],
+    '物品': ['物品', '东西', '用具', '工具', '器具', '设备', '产品'],
+    '职业': ['职业', '工作', '职', '行业', '工种', '职位', '岗位'],
+    '地点': ['地点', '地方', '场所', '位置', '地点', '地方', '区域', '场所'],
+    '运动': ['运动', '体育', '运动', '锻炼', '比赛', '竞技', '赛事'],
+    '自然现象': ['自然', '现象', '天气', '气象', '天文', '地理', '自然现象']
   };
 
-  const keywords = categoryKeywords[category] || [];
+  // 检查问题中是否包含类别关键词
+  for (const [catName, keywords] of Object.entries(categoryKeywords)) {
+    for (const keyword of keywords) {
+      if (questionLower.includes(keyword)) {
+        // 找到类别关键词，检查目标词是否属于该类别
+        const isCorrectCategory = (catName === category);
+        const finalAnswer = hasNegative ? !isCorrectCategory : isCorrectCategory;
 
-  // 检查问题是否包含类别相关关键词
-  const hasCategoryKeyword = keywords.some(kw => questionLower.includes(kw));
-
-  // 否定词
-  const negativeWords = ['不', '没', '无', '非', '否', '不是', '没有'];
-  const hasNegative = negativeWords.some(word => questionLower.includes(word));
-
-  // 如果问题中直接包含目标词
-  if (hasTargetWord) {
-    if (hasNegative) {
-      return {
-        answer: 'no',
-        confidence: 0.9,
-        reason: '答案不是这个词'
-      };
-    } else {
-      return {
-        answer: 'yes',
-        confidence: 0.9,
-        reason: '正确！'
-      };
+        return {
+          answer: finalAnswer ? 'yes' : 'no',
+          confidence: 0.85,
+          reason: finalAnswer
+            ? `是${catName}类`
+            : `不是${catName}类`
+        };
+      }
     }
   }
 
-  // 如果问题涉及类别
-  if (hasCategoryKeyword) {
-    if (hasNegative) {
-      return {
-        answer: 'no',
-        confidence: 0.7,
-        reason: `确实是${category}`
-      };
-    } else {
-      return {
-        answer: 'yes',
-        confidence: 0.7,
-        reason: `它属于${category}类`
-      };
+  // 特定词汇的属性判断
+  const attributeChecks = checkWordAttributes(question, targetWord, category, hasNegative);
+  if (attributeChecks) {
+    return attributeChecks;
+  }
+
+  return null;
+}
+
+/**
+ * 检查词汇属性
+ * 根据目标词的具体属性判断问题的答案
+ */
+function checkWordAttributes(
+  question: string,
+  targetWord: string,
+  category: string,
+  hasNegative: boolean
+): { answer: 'yes' | 'no'; confidence: number; reason: string } | null {
+  const questionLower = question.toLowerCase();
+
+  // 定义属性关键词和对应的类别判断
+  const attributeMap: Record<string, string[]> = {
+    '动物': ['活的', '有生命', '会动', '能呼吸', '生物'],
+    '植物': ['植物', '有叶', '有根', '光合作用'],
+    '食物': ['能吃', '可以吃', '食物', '喝'],
+    '物品': ['人造', '工具', '用品', '用具'],
+    '职业': ['人', '工作', '职业'],
+    '地点': ['地方', '场所', '位置', '去', '在'],
+    '运动': ['运动', '比赛', '竞技'],
+    '自然现象': ['自然', '天气', '现象', '天文']
+  };
+
+  // 检查问题是否询问特定属性
+  for (const [attrCat, attrKeywords] of Object.entries(attributeMap)) {
+    for (const keyword of attrKeywords) {
+      if (questionLower.includes(keyword)) {
+        const matches = (attrCat === category);
+        const finalAnswer = hasNegative ? !matches : matches;
+
+        return {
+          answer: finalAnswer ? 'yes' : 'no',
+          confidence: 0.8,
+          reason: finalAnswer ? `是${attrCat}` : `不是${attrCat}`
+        };
+      }
     }
   }
 
-  // 默认策略：根据问题的否定词来决定
-  if (hasNegative) {
-    return {
-      answer: 'no',
-      confidence: 0.6,
-      reason: '不是这样'
-    };
-  } else {
-    return {
-      answer: 'yes',
-      confidence: 0.5,
-      reason: '继续猜测吧'
-    };
-  }
+  return null;
+}
+
+/**
+ * 检查词语是否属于指定类别
+ */
+function targetWordBelongsToCategory(word: string, category: string): boolean {
+  // 从词汇库中获取该类别的所有词汇
+  const categoryData = yesOrNoCategories.find(cat => cat.name === category);
+  if (!categoryData) return false;
+
+  return categoryData.words.includes(word);
 }
 
 /**

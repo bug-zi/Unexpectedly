@@ -6,6 +6,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, PenTool, RotateCw, Save, Eye, EyeOff } from 'lucide-react';
+import { setUserData, getUserData, getUserDataSync } from '@/utils/userStorage';
+import { updateDailyTaskProgress } from '@/utils/taskManager';
 
 // 自定义动画
 const customEasing = {
@@ -147,14 +149,29 @@ export function WritingChallengePage() {
 
   // 从 localStorage 加载保存的作品
   useEffect(() => {
-    const saved = localStorage.getItem('writing-challenge-works');
-    if (saved) {
-      try {
-        setSavedWorks(JSON.parse(saved));
-      } catch (e) {
-        console.error('Failed to parse saved works:', e);
-      }
-    }
+    const saved = getUserDataSync<any[]>('writing-challenge-works', []);
+    setSavedWorks(saved);
+  }, []);
+
+  // 监听用户数据变化事件（登录/登出时刷新）
+  useEffect(() => {
+    const handleDataChange = () => {
+      // 延迟一下，确保 sessionStorage 已更新
+      setTimeout(() => {
+        const saved = getUserDataSync<any[]>('writing-challenge-works', []);
+        setSavedWorks(saved);
+      }, 100);
+    };
+
+    window.addEventListener('user-data-changed', handleDataChange);
+    window.addEventListener('user-logged-out', handleDataChange);
+    window.addEventListener('user-logged-in', handleDataChange);
+
+    return () => {
+      window.removeEventListener('user-data-changed', handleDataChange);
+      window.removeEventListener('user-logged-out', handleDataChange);
+      window.removeEventListener('user-logged-in', handleDataChange);
+    };
   }, []);
 
   // 切换到下一个题目
@@ -188,7 +205,11 @@ export function WritingChallengePage() {
 
     const updatedWorks = [newWork, ...savedWorks];
     setSavedWorks(updatedWorks);
-    localStorage.setItem('writing-challenge-works', JSON.stringify(updatedWorks));
+    setUserData('writing-challenge-works', updatedWorks);
+
+    // 更新每日任务进度（写作创作）
+    updateDailyTaskProgress('daily-writing', 1);
+
     alert('作品已保存！');
   };
 
