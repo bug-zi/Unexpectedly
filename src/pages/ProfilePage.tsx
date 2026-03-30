@@ -47,11 +47,17 @@ interface CheckInRecord {
 
 export function ProfilePage() {
   const navigate = useNavigate();
-  const { signOut: authSignOut, user: authUser, profile: authProfile, isAuthenticated: authIsAuthenticated } = useAuth();
+  const { signOut: authSignOut, user, profile: authProfile, isAuthenticated, loading: authLoading } = useAuth();
 
-  const [user, setUser] = useState<any>(null);
+  // 用于编辑的本地 profile 状态，从 useAuth 同步
   const [profile, setProfile] = useState<any>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // 同步 authProfile 到本地 profile
+  useEffect(() => {
+    if (authProfile) {
+      setProfile(authProfile);
+    }
+  }, [authProfile]);
 
   // 编辑状态
   const [isEditing, setIsEditing] = useState(false);
@@ -84,31 +90,11 @@ export function ProfilePage() {
   const { syncStatus, lastSync, manualSync: oldManualSync } = useSync(true);
 
   useEffect(() => {
-    // Load user data directly from Supabase
-    const loadUserData = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser(session.user);
-        setIsAuthenticated(true);
-
-        // Load user profile
-        const { data } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-
-        setProfile(data);
-      }
-    };
-
-    loadUserData();
-  }, []);
-
-  useEffect(() => {
-    loadStats();
-    checkLocalData();
-  }, []);
+    if (!authLoading) {
+      loadStats();
+      checkLocalData();
+    }
+  }, [authLoading]);
 
   // 检查本地数据状态
   const checkLocalData = () => {
