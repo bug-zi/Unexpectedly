@@ -90,11 +90,11 @@ export function ProfilePage() {
   const { syncStatus, lastSync, manualSync: oldManualSync } = useSync(true);
 
   useEffect(() => {
-    if (!authLoading) {
+    if (!authLoading && user) {
       loadStats();
       checkLocalData();
     }
-  }, [authLoading]);
+  }, [authLoading, user]);
 
   // 检查本地数据状态
   const checkLocalData = () => {
