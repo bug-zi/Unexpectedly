@@ -102,10 +102,7 @@ export function CheckInPage() {
     setCheckInHistory(newHistory);
     setTotalDays(newHistory.length);
 
-    // 同步到任务系统 - 完成每日签到任务
-    import('@/utils/taskManager').then(({ updateDailyTaskProgress }) => {
-      updateDailyTaskProgress('daily-question', 1); // 签到算作完成一次问题思考
-    });
+    // 签到不自动完成其他任务
   };
 
   const getStreakMessage = () => {

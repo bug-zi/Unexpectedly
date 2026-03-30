@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Sparkles, Lightbulb, Save } from 'lucide-react';
 import { EasterEgg } from '@/types';
 import { saveSlotMachineResult } from '@/utils/storage';
+import { updateDailyTaskProgress } from '@/utils/taskManager';
 import { TextArea } from '@/components/ui/TextArea';
 import { Button } from '@/components/ui/Button';
 
@@ -53,6 +54,9 @@ export function SlotMachineAnswerPage() {
     };
 
     saveSlotMachineResult(result);
+
+    // 更新写作创作任务进度
+    updateDailyTaskProgress('daily-writing', 1);
 
     setTimeout(() => {
       setIsSaving(false);
