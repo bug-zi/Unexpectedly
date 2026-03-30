@@ -182,9 +182,24 @@ export function useAuth() {
     let mounted = true;
 
     const initializeAuth = async () => {
-      // 如果已经初始化过，直接跳过
+      // 如果已经初始化过，为新组件实例同步当前 session
       if (hasAuthInitialized) {
-        console.log('✅ 认证已初始化，跳过重复初始化');
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user && mounted) {
+            setSession(session);
+            setUser(session.user);
+            const { data } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+            if (data) setProfile(data);
+          }
+        } catch (e) {
+          console.warn('同步已有 session 失败:', e);
+        }
+        setLoading(false);
         return;
       }
 
