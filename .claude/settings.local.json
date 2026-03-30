@@ -111,7 +111,9 @@
       "Bash(vercel whoami:*)",
       "Bash(tee build.log)",
       "Bash(timeout 3)",
-      "Bash(timeout 2)"
+      "Bash(timeout 2)",
+      "mcp__zai-mcp-server__ui_diff_check",
+      "Bash(mkdir:*)"
     ]
   }
 }
