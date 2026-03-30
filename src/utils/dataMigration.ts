@@ -6,6 +6,67 @@
 import { getCurrentUserId, setCurrentUserId, getUserStorageKey } from '@/utils/userStorage';
 
 /**
+ * 修复 2026-03-30 被签到错误标记的任务数据（一次性迁移）
+ * daily-question 被签到错误计为已完成，需重置为 0
+ * daily-targets: question=1, writing=1, reasoning=2
+ */
+function fix20260330TaskData(): void {
+  const fixKey = 'task-fix-20260330';
+  if (localStorage.getItem(fixKey)) return;
+
+  const today = new Date().toISOString().split('T')[0];
+  if (today !== '2026-03-30') {
+    localStorage.setItem(fixKey, 'skipped');
+    return;
+  }
+
+  const taskKey = getUserStorageKey('wanwan-task-progress');
+  const raw = localStorage.getItem(taskKey);
+  if (!raw) {
+    localStorage.setItem(fixKey, 'done');
+    return;
+  }
+
+  try {
+    const allProgress = JSON.parse(raw);
+    const todayData = allProgress['2026-03-30'];
+    if (!todayData || !todayData.dailyTasks) {
+      localStorage.setItem(fixKey, 'done');
+      return;
+    }
+
+    let changed = false;
+
+    // 修正：签到不应该自动完成 daily-question，重置为 0
+    if (todayData.dailyTasks['daily-question'] > 0) {
+      todayData.dailyTasks['daily-question'] = 0;
+      changed = true;
+    }
+
+    if (changed) {
+      // 重新检查每日任务完成状态 (targets: question=1, writing=1, reasoning=2)
+      const targets: Record<string, number> = {
+        'daily-question': 1,
+        'daily-writing': 1,
+        'daily-reasoning': 2,
+      };
+      const allCompleted = Object.entries(targets).every(
+        ([id, target]) => (todayData.dailyTasks[id] || 0) >= target
+      );
+      todayData.dailyCompleted = allCompleted;
+
+      allProgress['2026-03-30'] = todayData;
+      localStorage.setItem(taskKey, JSON.stringify(allProgress));
+      console.log('✅ 已修复 2026-03-30 任务数据');
+    }
+
+    localStorage.setItem(fixKey, 'done');
+  } catch {
+    localStorage.setItem(fixKey, 'done');
+  }
+}
+
+/**
  * 检测是否需要迁移数据
  */
 export function needsMigration(): boolean {
@@ -165,6 +226,9 @@ export function getMigrationReport(): {
  * 自动迁移（在应用启动时调用）
  */
 export function autoMigrate(): void {
+  // 一次性修复任务数据
+  fix20260330TaskData();
+
   const report = getMigrationReport();
 
   if (report.needsMigration) {
