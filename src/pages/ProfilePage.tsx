@@ -59,6 +59,41 @@ export function ProfilePage() {
     }
   }, [authProfile]);
 
+  // 如果 authProfile 为空但用户已登录，尝试从数据库加载
+  useEffect(() => {
+    const loadProfileFromDB = async () => {
+      // 只在以下情况执行：
+      // 1. 认证加载完成
+      // 2. 用户已登录
+      // 3. authProfile 为空
+      // 4. 本地 profile 也为空
+      if (authLoading || !user || authProfile || profile) return;
+
+      console.log('🔄 ProfilePage: 尝试从数据库加载 profile');
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (error) {
+          console.error('加载 profile 失败:', error);
+          return;
+        }
+
+        if (data) {
+          console.log('✅ ProfilePage: 从数据库加载 profile 成功');
+          setProfile(data);
+        }
+      } catch (err) {
+        console.error('加载 profile 出错:', err);
+      }
+    };
+
+    loadProfileFromDB();
+  }, [authLoading, user, authProfile, profile]);
+
   // 编辑状态
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
@@ -141,21 +176,19 @@ export function ProfilePage() {
   }, []);
 
   const loadStats = () => {
-    const answers = getAnswers();
-
     // 使用 userStorage 统一读取签到数据
     const checkInHistory = getUserDataSync<CheckInRecord[]>('checkin-history', []);
 
+    // 加载思考记录统计（同时计算 totalAnswers）
+    const { totalAnswers } = loadThinkingStats();
+
     setStats({
-      totalAnswers: answers.length,
+      totalAnswers,
       totalCheckIns: checkInHistory.length,
     });
-
-    // 加载思考记录统计
-    loadThinkingStats();
   };
 
-  const loadThinkingStats = () => {
+  const loadThinkingStats = (): { totalAnswers: number } => {
     // 逻辑推理统计
     const turtleSoupRecords = getTurtleSoupRecords();
     const riddleRecords = getRiddleRecords();
@@ -176,11 +209,16 @@ export function ProfilePage() {
     const writingChallengeRecords = getUserDataSync<any[]>('writing-challenge-works', []);
     const writingTotal = slotMachineRecords.length + writingChallengeRecords.length;
 
+    // 计算总答题数 = 思维逻辑 + 问题思考 + 写作创造
+    const totalAnswers = logicTotal + questionTotal + writingTotal;
+
     setThinkingStats({
       logicReasoning: logicTotal,
       questionThinking: questionTotal,
       writingCreation: writingTotal,
     });
+
+    return { totalAnswers };
   };
 
   const handleEditProfile = () => {
@@ -283,15 +321,15 @@ export function ProfilePage() {
 
   const handleLogout = async () => {
     if (confirm('确定要退出登录吗？')) {
-      // 使用useAuth hook中的signOut函数，确保数据正确清除
+      // 使用useAuth hook中的signOut函数
+      // signOut 会在成功后自动刷新页面，不需要手动导航
       const result = await authSignOut();
-      if (result.success) {
-        navigate('/');
-      } else {
+      if (!result.success) {
         console.error('登出失败:', result.error);
-        // 即使失败也尝试导航到首页
-        navigate('/');
+        // 如果失败，手动刷新页面
+        window.location.reload();
       }
+      // 如果成功，signOut 内部会在 500ms 后刷新页面
     }
   };
 

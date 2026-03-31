@@ -2,7 +2,7 @@
  * 登录/注册页面
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Github, ArrowLeft, Loader2, Sparkles, Mail, Lock, User } from 'lucide-react';
@@ -21,7 +21,7 @@ const customEasing = {
 export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -30,11 +30,13 @@ export function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // 如果已登录，重定向到首页
-  if (isAuthenticated) {
-    navigate('/');
-    return null;
-  }
+  // 等待认证初始化完成后，如果已登录则重定向到首页
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      const from = (location.state as any)?.from?.pathname || '/';
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, authLoading, navigate, location]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

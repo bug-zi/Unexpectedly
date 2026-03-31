@@ -24,7 +24,7 @@ export function QuestionPage() {
   const navigate = useNavigate();
   const { currentQuestion, addAnswer, answers } = useAppStore();
   const { user, isAuthenticated } = useAuth();
-  const { addFavorite, removeFavorite, isFavorited } = useFavorites();
+  const { addFavorite, removeFavorite, isFavorited, markAsAnswered } = useFavorites();
   const { addToLater, removeFromLater, isLater } = useLater();
 
   const [content, setContent] = useState('');

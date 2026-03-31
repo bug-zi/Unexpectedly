@@ -135,7 +135,7 @@ function App() {
         theme="light"
         toastClassName="!bg-white/90 !backdrop-blur-md !text-gray-800 !shadow-xl !border !border-gray-200/50 !rounded-xl"
         progressClassName="!bg-gradient-to-r !from-gray-400 !to-gray-500"
-        bodyClassName="!font-medium"
+        className="!font-medium"
         closeButton={false}
       />
     </BrowserRouter>

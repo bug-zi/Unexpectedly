@@ -249,6 +249,7 @@ export function migrateGuestDataToUser(userId: string): void {
 
 /**
  * 将本地数据同步到云端（不清空本地数据）
+ * 优化版本：批量上传，减少网络请求
  */
 export async function syncLocalDataToCloud(userId?: string): Promise<{ uploaded: number }> {
   const targetUserId = userId || getCurrentUserId();
@@ -259,8 +260,15 @@ export async function syncLocalDataToCloud(userId?: string): Promise<{ uploaded:
   const prefix = `user-${targetUserId}-`;
   const keys = Object.keys(localStorage).filter(key => key.startsWith(prefix));
 
-  let uploadedCount = 0;
+  if (keys.length === 0) {
+    console.log('📭 没有需要同步的数据');
+    return { uploaded: 0 };
+  }
 
+  console.log(`📤 开始同步 ${keys.length} 条数据到云端...`);
+
+  // 收集所有数据
+  const records = [];
   for (const key of keys) {
     try {
       const data = localStorage.getItem(key);
@@ -269,29 +277,47 @@ export async function syncLocalDataToCloud(userId?: string): Promise<{ uploaded:
       const dataKey = key.replace(prefix, '');
       const parsedData = JSON.parse(data);
 
-      // 上传到云端
-      await supabase
-        .from('user_data')
-        .upsert({
-          user_id: targetUserId,
-          key: dataKey,
-          data: parsedData,
-          updated_at: new Date().toISOString(),
-        }, {
-          onConflict: 'user_id,key'
-        });
-
-      uploadedCount++;
+      records.push({
+        user_id: targetUserId,
+        key: dataKey,
+        data: parsedData,
+        updated_at: new Date().toISOString(),
+      });
     } catch (err) {
-      console.warn(`同步数据 ${key} 失败:`, err);
+      console.warn(`解析数据 ${key} 失败:`, err);
     }
   }
 
-  // 不再清空本地数据，保持本地优先
+  if (records.length === 0) {
+    return { uploaded: 0 };
+  }
 
-  return {
-    uploaded: uploadedCount,
-  };
+  // 批量上传（每次最多 100 条）
+  const batchSize = 100;
+  let uploadedCount = 0;
+
+  for (let i = 0; i < records.length; i += batchSize) {
+    const batch = records.slice(i, i + batchSize);
+    try {
+      const { error } = await supabase
+        .from('user_data')
+        .upsert(batch, {
+          onConflict: 'user_id,key'
+        });
+
+      if (error) {
+        console.warn(`批量上传失败 (${i}-${i + batch.length}):`, error);
+      } else {
+        uploadedCount += batch.length;
+        console.log(`✅ 已上传 ${uploadedCount}/${records.length} 条数据`);
+      }
+    } catch (err) {
+      console.warn(`批量上传异常 (${i}-${i + batch.length}):`, err);
+    }
+  }
+
+  console.log(`✅ 同步完成，共上传 ${uploadedCount} 条数据`);
+  return { uploaded: uploadedCount };
 }
 
 /**

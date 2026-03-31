@@ -8,40 +8,35 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { User, LogOut, Settings, Cloud, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useAuth } from '@/hooks/useAuth';
-import { signOut } from '@/services/authService';
-import { syncData } from '@/services/syncService';
+import { manualSync } from '@/services/syncService';
 import { Button } from '@/components/ui/Button';
 
 export function UserMenu() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
   const handleSignOut = async () => {
-    await signOut();
-    window.location.href = '/';
+    setIsOpen(false);
+    const result = await signOut();
+    if (result.success) {
+      toast.success('已退出登录', { autoClose: 1500 });
+    }
   };
 
   const handleSync = async () => {
     setSyncing(true);
-    const result = await syncData();
-    setSyncing(false);
-
-    if (result.success) {
-      const uploaded = result.uploaded || 0;
-      const downloaded = result.downloaded || 0;
-
-      if (uploaded === 0 && downloaded === 0) {
-        toast.info('📱 数据已是最新，无需同步');
+    try {
+      const result = await manualSync();
+      if (result.success) {
+        toast.success(`✅ 已同步 ${result.uploaded || 0} 条数据到云端`);
       } else {
-        toast.success(
-          `☁️ 同步成功！${uploaded > 0 ? ` 上传 ${uploaded} 条` : ''}${downloaded > 0 ? ` 下载 ${downloaded} 条` : ''}\n请刷新页面查看最新数据`,
-          { autoClose: 4000 }
-        );
+        toast.error('❌ 同步失败：' + result.error);
       }
-    } else {
-      toast.error('❌ 同步失败：' + result.error);
+    } catch {
+      toast.error('❌ 同步失败，请稍后重试');
     }
+    setSyncing(false);
     setIsOpen(false);
   };
 
