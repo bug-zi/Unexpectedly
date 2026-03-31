@@ -240,7 +240,7 @@ export function clearAllData(): void {
  * 用于登出时清理
  */
 export function clearCurrentUserAllData(): void {
-  clearCurrentUserData();
+  clearAllData();
 }
 
 /**

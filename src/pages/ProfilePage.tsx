@@ -89,12 +89,26 @@ export function ProfilePage() {
   // 云端同步状态
   const { syncStatus, lastSync, manualSync: oldManualSync } = useSync(true);
 
+  // 加载统计数据：使用多种机制确保数据能被加载
   useEffect(() => {
-    if (!authLoading && user) {
+    // 如果还在加载认证状态，跳过
+    if (authLoading) return;
+    // 如果没有用户，跳过
+    if (!user) return;
+
+    // 直接尝试加载
+    loadStats();
+    checkLocalData();
+
+    // 延迟再次尝试，确保 handleLogin 等异步流程完成
+    const timer = setTimeout(() => {
       loadStats();
+      loadThinkingStats();
       checkLocalData();
-    }
-  }, [authLoading, user]);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [authLoading, user?.id, profile?.id]);
 
   // 检查本地数据状态
   const checkLocalData = () => {
