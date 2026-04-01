@@ -540,7 +540,7 @@ export function CheckInPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              className="glass-panel w-full max-w-[500px] rounded-[24px] shadow-glass flex flex-col items-center justify-center relative overflow-hidden p-8 md:p-12"
+              className="glass-panel w-full max-w-[560px] rounded-[24px] shadow-glass flex flex-col items-center justify-center relative overflow-hidden p-8 md:p-12"
               style={{ minHeight: '320px' }}
               onClick={(e) => e.stopPropagation()}
             >
