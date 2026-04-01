@@ -108,10 +108,21 @@ function getCompletedDaysKey(): string {
 }
 
 /**
- * 获取当前日期的日期字符串 (YYYY-MM-DD)
+ * 获取当前日期的日期字符串 (YYYY-MM-DD)，使用本地时区
  */
 export function getCurrentDateString(): string {
-  return new Date().toISOString().split('T')[0];
+  return toLocalDateString(new Date());
+}
+
+/**
+ * 从日期/时间戳提取本地日期字符串 (YYYY-MM-DD)
+ */
+function toLocalDateString(date: Date | string): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 /**
@@ -394,11 +405,14 @@ export function repairTaskProgressFromRecords(): void {
   const progress = getTodayTaskProgress();
   let changed = false;
 
+  console.log('🔧 [repair] 开始修复任务进度, today(本地):', today, '当前进度:', progress.dailyTasks);
+
   // 1. 统计问题思考 (daily-question): 从 answers 记录中找今天的回答
   const answers = findDataForKey('wwx-answers');
+  console.log('🔧 [repair] wwx-answers 记录数:', answers.length);
   const todayAnswers = answers.filter((a: any) => {
     if (!a.createdAt) return false;
-    return a.createdAt.split('T')[0] === today;
+    return toLocalDateString(a.createdAt) === today;
   });
   const questionCount = todayAnswers.length;
   if (questionCount > (progress.dailyTasks['daily-question'] || 0)) {
@@ -412,14 +426,14 @@ export function repairTaskProgressFromRecords(): void {
   const todaySlot = slotResults.filter((r: any) => {
     const dateField = r.savedAt || r.createdAt || r.timestamp;
     if (!dateField) return false;
-    return new Date(dateField).toISOString().split('T')[0] === today;
+    return toLocalDateString(dateField) === today;
   });
   // 写作挑战记录存在 app-storage 中
   const writingWorks = findDataForKey('writing-challenge-works');
   const todayWriting = writingWorks.filter((w: any) => {
     const dateField = w.savedAt || w.createdAt || w.timestamp;
     if (!dateField) return false;
-    return new Date(dateField).toISOString().split('T')[0] === today;
+    return toLocalDateString(dateField) === today;
   });
   const writingCount = todaySlot.length + todayWriting.length;
   if (writingCount > (progress.dailyTasks['daily-writing'] || 0)) {
@@ -432,31 +446,33 @@ export function repairTaskProgressFromRecords(): void {
   const turtleSoups = findDataForKey('wwx-turtle-soup');
   const todayTurtle = turtleSoups.filter((r: any) => {
     if (!r.completedAt) return false;
-    return r.solved && new Date(r.completedAt).toISOString().split('T')[0] === today;
+    return r.solved && toLocalDateString(r.completedAt) === today;
   });
 
   const guessNumbers = findDataForKey('wwx-guess-number');
   const todayGuess = guessNumbers.filter((r: any) => {
     const dateField = r.completedAt;
     if (!dateField) return false;
-    return r.solved && new Date(dateField).toISOString().split('T')[0] === today;
+    return r.solved && toLocalDateString(dateField) === today;
   });
 
   const riddles = findDataForKey('wwx-riddle');
+  console.log('🔧 [repair] wwx-riddle 记录数:', riddles.length, riddles.map((r: any) => ({ solved: r.solved, completedAt: r.completedAt })));
   const todayRiddles = riddles.filter((r: any) => {
     const dateField = r.completedAt || r.solvedAt;
     if (!dateField) return false;
-    return r.solved && new Date(dateField).toISOString().split('T')[0] === today;
+    return r.solved && toLocalDateString(dateField) === today;
   });
 
   const yesOrNo = findDataForKey('wwx-yes-or-no');
   const todayYesOrNo = yesOrNo.filter((r: any) => {
     const dateField = r.completedAt || r.timestamp;
     if (!dateField) return false;
-    return r.solved && new Date(dateField).toISOString().split('T')[0] === today;
+    return r.solved && toLocalDateString(dateField) === today;
   });
 
   const reasoningCount = todayTurtle.length + todayGuess.length + todayRiddles.length + todayYesOrNo.length;
+  console.log('🔧 [repair] 推理统计:', { turtle: todayTurtle.length, guess: todayGuess.length, riddle: todayRiddles.length, yesNo: todayYesOrNo.length, total: reasoningCount });
   if (reasoningCount > (progress.dailyTasks['daily-reasoning'] || 0)) {
     progress.dailyTasks['daily-reasoning'] = reasoningCount;
     changed = true;
