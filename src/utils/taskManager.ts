@@ -16,19 +16,49 @@ let cachedTaskKey: string | null = null;
 let cachedCompletedDaysKey: string | null = null;
 
 /**
- * 查找包含任务数据的存储键
- * 当会话丢失但 localStorage 中仍有用户数据时，能回退到正确的键
+ * 将旧 key 的数据迁移到当前用户的 key
+ * 确保数据始终存储在 user-{userId}- 前缀下，以便云端同步能识别
  */
-function findStorageKeyWithData(baseKey: string): string {
+function migrateToCurrentKey(baseKey: string, oldKey: string): string {
   const currentKey = getUserStorageKey(baseKey);
+  if (oldKey === currentKey) return currentKey;
 
-  // 优先使用当前用户键
+  const data = localStorage.getItem(oldKey);
+  if (data) {
+    // 合并：如果当前 key 已有数据，以更完整的数据为准
+    const existingData = localStorage.getItem(currentKey);
+    let useData = data;
+    if (existingData) {
+      try {
+        const oldParsed = Object.keys(JSON.parse(data)).length;
+        const curParsed = Object.keys(JSON.parse(existingData)).length;
+        useData = oldParsed >= curParsed ? data : existingData;
+      } catch { /* use old data */ }
+    }
+    localStorage.setItem(currentKey, useData);
+    localStorage.removeItem(oldKey);
+    console.log(`🔄 迁移任务数据: ${oldKey} -> ${currentKey}`);
+  }
+  return currentKey;
+}
+
+/**
+ * 获取当前应使用的任务进度存储键
+ * 始终返回当前用户的 key，如有旧数据自动迁移
+ */
+function getTaskProgressKey(): string {
+  const currentKey = getUserStorageKey(TASK_PROGRESS_KEY);
+  // 缓存命中
+  if (cachedTaskKey === currentKey) return cachedTaskKey;
+
+  // 当前键有数据，直接用
   if (localStorage.getItem(currentKey)) {
+    cachedTaskKey = currentKey;
     return currentKey;
   }
 
-  // 当前键无数据，扫描所有包含该 baseKey 的键
-  const suffix = '-' + baseKey;
+  // 当前键无数据，扫描旧 key 并迁移
+  const suffix = '-' + TASK_PROGRESS_KEY;
   for (const key of Object.keys(localStorage)) {
     if (key.endsWith(suffix) && key !== currentKey) {
       const val = localStorage.getItem(key);
@@ -36,40 +66,16 @@ function findStorageKeyWithData(baseKey: string): string {
         try {
           const parsed = JSON.parse(val);
           if (parsed && typeof parsed === 'object') {
-            console.log('🔄 任务数据回退: 使用已有数据键', key);
-            return key;
+            cachedTaskKey = migrateToCurrentKey(TASK_PROGRESS_KEY, key);
+            return cachedTaskKey;
           }
         } catch { /* ignore */ }
       }
     }
   }
 
-  return currentKey; // 无已有数据，使用当前键
-}
-
-/**
- * 获取当前应使用的任务进度存储键
- * 带缓存，避免每次都扫描 localStorage
- */
-function getTaskProgressKey(): string {
-  const currentKey = getUserStorageKey(TASK_PROGRESS_KEY);
-  // 如果缓存与当前键一致，直接返回
-  if (cachedTaskKey === currentKey) return cachedTaskKey;
-
-  // 当前键有数据，使用当前键
-  if (localStorage.getItem(currentKey)) {
-    cachedTaskKey = currentKey;
-    return currentKey;
-  }
-
-  // 缓存有值且仍有数据，继续使用缓存
-  if (cachedTaskKey && localStorage.getItem(cachedTaskKey)) {
-    return cachedTaskKey;
-  }
-
-  // 扫描查找
-  cachedTaskKey = findStorageKeyWithData(TASK_PROGRESS_KEY);
-  return cachedTaskKey;
+  cachedTaskKey = currentKey;
+  return currentKey;
 }
 
 function getCompletedDaysKey(): string {
@@ -81,12 +87,24 @@ function getCompletedDaysKey(): string {
     return currentKey;
   }
 
-  if (cachedCompletedDaysKey && localStorage.getItem(cachedCompletedDaysKey)) {
-    return cachedCompletedDaysKey;
+  const suffix = '-' + TASK_COMPLETED_DAYS_KEY;
+  for (const key of Object.keys(localStorage)) {
+    if (key.endsWith(suffix) && key !== currentKey) {
+      const val = localStorage.getItem(key);
+      if (val) {
+        try {
+          const parsed = JSON.parse(val);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            cachedCompletedDaysKey = migrateToCurrentKey(TASK_COMPLETED_DAYS_KEY, key);
+            return cachedCompletedDaysKey;
+          }
+        } catch { /* ignore */ }
+      }
+    }
   }
 
-  cachedCompletedDaysKey = findStorageKeyWithData(TASK_COMPLETED_DAYS_KEY);
-  return cachedCompletedDaysKey;
+  cachedCompletedDaysKey = currentKey;
+  return currentKey;
 }
 
 /**
