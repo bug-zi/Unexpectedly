@@ -106,10 +106,10 @@ export function useSync(autoSync: boolean = true) {
       }
     }, 2000); // 延迟 2 秒，等待认证初始化完成
 
-    // 每5分钟检查一次是否需要同步
+    // 每5分钟执行双向同步（不管本地是否有变更，都要从云端拉取最新数据）
     const interval = setInterval(() => {
-      if (needsSync() && !syncInProgress.current) {
-        console.log('🔄 定时同步触发...');
+      if (!syncInProgress.current) {
+        console.log('🔄 定时双向同步触发...');
         sync(false);
       }
     }, 5 * 60 * 1000);
@@ -125,7 +125,8 @@ export function useSync(autoSync: boolean = true) {
     if (!autoSync) return;
 
     const handleFocus = () => {
-      if (needsSync() && !syncInProgress.current) {
+      if (!syncInProgress.current) {
+        console.log('🔄 窗口切换双向同步触发...');
         sync(false);
       }
     };
