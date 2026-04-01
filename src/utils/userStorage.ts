@@ -357,9 +357,14 @@ export async function loadCloudDataToLocal(userId?: string): Promise<{ loaded: n
             const existingData = JSON.parse(existingRaw);
 
             if (Array.isArray(existingData)) {
-              // 合并数组，基于 id 去重（本地数据优先）
-              const existingIds = new Set(existingData.map((d: any) => d.id));
-              const newItems = item.data.filter((d: any) => !existingIds.has(d.id));
+              // 智能去重：优先用 id，没有 id 则用 date，都没有则用整个对象
+              const getUniqueKey = (d: any): any => {
+                if (d.id !== undefined) return d.id;
+                if (d.date !== undefined) return d.date;
+                return JSON.stringify(d);
+              };
+              const existingKeys = new Set(existingData.map((d: any) => getUniqueKey(d)));
+              const newItems = item.data.filter((d: any) => !existingKeys.has(getUniqueKey(d)));
               const merged = [...existingData, ...newItems];
               localStorage.setItem(key, JSON.stringify(merged));
               loadedCount++;
