@@ -567,7 +567,7 @@ export function CheckInPage() {
                 此刻心情如何？
               </motion.h2>
 
-              {/* 心情按钮 */}
+              {/* 心情选择按钮 + 标签 */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -575,32 +575,25 @@ export function CheckInPage() {
                 className="flex flex-wrap justify-center gap-5 md:gap-8 relative z-10"
               >
                 {MOODS.map((mood, index) => (
-                  <motion.button
+                  <motion.div
                     key={mood.type}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 + index * 0.1 }}
-                    whileHover={{ y: -10, scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleSelectMood(mood.type)}
-                    className={`w-16 h-16 md:w-[80px] md:h-[80px] rounded-full ${mood.bgClass} ${mood.shadowClass} flex items-center justify-center focus:outline-none focus:ring-4 ${mood.ringClass} transition-all`}
+                    className="flex flex-col items-center gap-2"
                   >
-                    {mood.icon}
-                  </motion.button>
-                ))}
-              </motion.div>
-
-              {/* 心情标签 */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="flex flex-wrap justify-center gap-5 md:gap-8 mt-4 relative z-10"
-              >
-                {MOODS.map((mood) => (
-                  <span key={mood.type} className="text-xs text-[#636E72] w-16 md:w-[80px] text-center font-medium">
-                    {mood.labelCn}
-                  </span>
+                    <motion.button
+                      whileHover={{ y: -10, scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handleSelectMood(mood.type)}
+                      className={`w-16 h-16 md:w-[80px] md:h-[80px] rounded-full ${mood.bgClass} ${mood.shadowClass} flex items-center justify-center focus:outline-none focus:ring-4 ${mood.ringClass} transition-all`}
+                    >
+                      {mood.icon}
+                    </motion.button>
+                    <span className="text-xs text-[#636E72] text-center font-medium">
+                      {mood.labelCn}
+                    </span>
+                  </motion.div>
                 ))}
               </motion.div>
             </motion.div>
