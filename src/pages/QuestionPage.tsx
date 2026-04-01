@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Bookmark, Check, Clock, Download, Heart, Plus } from 'lucide-react';
+import { ArrowLeft, Bookmark, Check, Clock, Download, Heart, Plus, Lightbulb } from 'lucide-react';
 import { getQuestionById } from '@/constants/questions';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
@@ -16,16 +16,26 @@ import { TextArea } from '@/components/ui/TextArea';
 import { CategoryIcon } from '@/components/ui/Icon';
 import { getCategoryConfig } from '@/constants/categories';
 import { ExportDialog } from '@/components/features/ExportDialog';
+import { useRoundtableStore } from '@/stores/roundtableStore';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-toastify';
 
 export function QuestionPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const roundtableSessionId = searchParams.get('roundtable');
   const { currentQuestion, addAnswer, answers } = useAppStore();
   const { user, isAuthenticated } = useAuth();
   const { addFavorite, removeFavorite, isFavorited, markAsAnswered } = useFavorites();
   const { addToLater, removeFromLater, isLater } = useLater();
+  const { sessions } = useRoundtableStore();
+
+  // 获取关联的圆桌会话
+  const roundtableSession = roundtableSessionId
+    ? sessions.find(s => s.id === roundtableSessionId)
+    : undefined;
+  const [showRoundtableInspiration, setShowRoundtableInspiration] = useState(!!roundtableSession);
 
   const [content, setContent] = useState('');
   const [writingTime, setWritingTime] = useState(0);
@@ -313,6 +323,33 @@ export function QuestionPage() {
       {/* 主要内容 - 单栏布局 */}
       <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
+          {/* 圆桌启发卡片 */}
+          {roundtableSession && showRoundtableInspiration && roundtableSession.summary && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-2 border-amber-200 dark:border-amber-700 rounded-2xl p-4"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Lightbulb size={16} className="text-amber-500" />
+                  <span className="text-sm font-bold text-amber-700 dark:text-amber-300">
+                    圆桌讨论启发
+                  </span>
+                </div>
+                <button
+                  onClick={() => setShowRoundtableInspiration(false)}
+                  className="text-xs text-gray-400 hover:text-gray-600"
+                >
+                  收起
+                </button>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap leading-relaxed">
+                {roundtableSession.summary}
+              </p>
+            </motion.div>
+          )}
+
           {/* 回答输入区 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}

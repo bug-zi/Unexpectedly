@@ -12,6 +12,12 @@ export function useSync(autoSync: boolean = true) {
   const [lastSync, setLastSync] = useState<Date | null>(getLastSyncTime());
   const [syncResult, setSyncResult] = useState<DetailedSyncResult | null>(null);
   const syncInProgress = useRef(false);
+  const syncStatusRef = useRef<SyncStatus>(SyncStatus.IDLE);
+
+  // 保持 ref 与 state 同步
+  useEffect(() => {
+    syncStatusRef.current = syncStatus;
+  }, [syncStatus]);
 
   /**
    * 执行同步
@@ -72,12 +78,12 @@ export function useSync(autoSync: boolean = true) {
 
       // 3秒后重置状态
       setTimeout(() => {
-        if (syncStatus === SyncStatus.SUCCESS || syncStatus === SyncStatus.ERROR) {
+        if (syncStatusRef.current === SyncStatus.SUCCESS || syncStatusRef.current === SyncStatus.ERROR) {
           setSyncStatus(SyncStatus.IDLE);
         }
       }, 3000);
     }
-  }, [syncStatus]);
+  }, []);
 
   /**
    * 手动触发同步

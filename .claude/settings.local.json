@@ -113,7 +113,23 @@
       "Bash(timeout 3)",
       "Bash(timeout 2)",
       "mcp__zai-mcp-server__ui_diff_check",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "mcp__chrome-devtools__fill_form",
+      "Bash(cat dist/assets/index-*.js)",
+      "Skill(browse)",
+      "Bash(npx vercel:*)",
+      "Bash(vercel --prod)",
+      "Bash(vercel --prod --yes)",
+      "Bash(vercel inspect:*)",
+      "Bash(wmic process:*)",
+      "mcp__chrome-devtools__resize_page",
+      "Bash(xargs -I {} taskkill /PID {} /F)",
+      "Bash(rm -rf C:UsersAdministrator.cachechrome-devtools-mcp)",
+      "mcp__chrome-devtools__emulate",
+      "Bash(powershell -Command \"Get-Process chrome -ErrorAction SilentlyContinue | Stop-Process -Force\")",
+      "Bash(powershell -Command \"Stop-Process -Name chrome -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 3; 'done'\")",
+      "Bash(xargs grep:*)",
+      "Bash(xxd:*)"
     ]
   }
 }

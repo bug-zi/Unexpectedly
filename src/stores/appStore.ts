@@ -42,6 +42,9 @@ const initialState = {
 // 当前存储键名（用于追踪变化）
 let currentStorageKey: string | null = null;
 
+// 同步标记 key，与 syncService.ts 中的 SYNCED_KEYS_KEY 保持一致
+const SYNCED_KEYS_KEY = 'wwx-synced-keys';
+
 // 自定义存储，根据当前用户动态选择存储键
 const createUserAwareStorage = (): StateStorage => {
   return {
@@ -54,6 +57,8 @@ const createUserAwareStorage = (): StateStorage => {
       const userKey = getUserStorageKey(name);
       currentStorageKey = userKey;
       localStorage.setItem(userKey, value);
+      // 数据变更，清除同步标记以便 checkUnsyncedData 能检测到
+      localStorage.removeItem(SYNCED_KEYS_KEY);
     },
     removeItem: (name: string): void => {
       const userKey = getUserStorageKey(name);

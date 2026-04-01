@@ -95,10 +95,15 @@ export function getUserDataSync<T>(key: string, defaultValue: T): T {
   return defaultValue;
 }
 
+// 同步标记 key，与 syncService.ts / appStore.ts 中的保持一致
+const SYNCED_KEYS_KEY = 'wwx-synced-keys';
+
 // 设置用户数据（只存储到本地）
 export function setUserData<T>(key: string, data: T): void {
   const userKey = getUserStorageKey(key);
   localStorage.setItem(userKey, JSON.stringify(data));
+  // 数据变更，清除同步标记以便 checkUnsyncedData 能检测到
+  localStorage.removeItem(SYNCED_KEYS_KEY);
 }
 
 // 删除用户数据（本地和云端）
@@ -343,6 +348,29 @@ export async function loadCloudDataToLocal(userId?: string): Promise<{ loaded: n
     if (data) {
       data.forEach(item => {
         const key = `${prefix}${item.key}`;
+
+        // 如果本地已有该 key 的数据，合并而非覆盖
+        // 对于数组类型数据（如 answers, records），合并去重
+        const existingRaw = localStorage.getItem(key);
+        if (existingRaw && Array.isArray(item.data)) {
+          try {
+            const existingData = JSON.parse(existingRaw);
+
+            if (Array.isArray(existingData)) {
+              // 合并数组，基于 id 去重（本地数据优先）
+              const existingIds = new Set(existingData.map((d: any) => d.id));
+              const newItems = item.data.filter((d: any) => !existingIds.has(d.id));
+              const merged = [...existingData, ...newItems];
+              localStorage.setItem(key, JSON.stringify(merged));
+              loadedCount++;
+              return;
+            }
+          } catch {
+            // 解析失败，直接用云端数据覆盖
+          }
+        }
+
+        // 本地无数据或非数组类型，直接写入云端数据
         localStorage.setItem(key, JSON.stringify(item.data));
         loadedCount++;
       });

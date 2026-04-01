@@ -28,6 +28,7 @@ import {
   getTaskStreak,
   getTodayTaskProgress,
   getCompletedDaysCount,
+  repairTaskProgressFromRecords,
 } from '@/utils/taskManager';
 import { WeeklyTask } from '@/types/tasks';
 import { toast } from 'react-toastify';
@@ -62,12 +63,34 @@ export function TaskPage() {
 
   // 加载完成日期
   const loadCompletedDates = () => {
-    // 获取当前用户ID
+    // 扫描所有可能的任务进度键，找到有数据的那个
+    const taskSuffix = 'wanwan-task-progress';
+    let saved: string | null = null;
+
+    // 先尝试当前用户的键
     const userId = sessionStorage.getItem('current-user-id');
     const prefix = userId ? `user-${userId}-` : 'guest-';
-    const taskProgressKey = prefix + 'wanwan-task-progress';
+    const currentKey = prefix + taskSuffix;
+    saved = localStorage.getItem(currentKey);
 
-    const saved = localStorage.getItem(taskProgressKey);
+    // 如果当前键没有数据，扫描其他用户键
+    if (!saved) {
+      for (const key of Object.keys(localStorage)) {
+        if (key.endsWith(taskSuffix) && key !== currentKey) {
+          const val = localStorage.getItem(key);
+          if (val) {
+            try {
+              const parsed = JSON.parse(val);
+              if (parsed && typeof parsed === 'object') {
+                saved = val;
+                break;
+              }
+            } catch { /* ignore */ }
+          }
+        }
+      }
+    }
+
     if (!saved) {
       setCompletedDates(new Set());
       return;
@@ -91,6 +114,8 @@ export function TaskPage() {
   };
 
   useEffect(() => {
+    // 先从游戏记录中修复可能丢失的任务进度
+    repairTaskProgressFromRecords();
     loadTasks();
 
     // 每5秒刷新一次任务状态

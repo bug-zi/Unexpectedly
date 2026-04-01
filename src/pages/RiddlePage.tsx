@@ -76,6 +76,7 @@ export function RiddlePage() {
         id: `riddle-${Date.now()}`,
         riddleId: currentRiddle.id,
         riddleQuestion: currentRiddle.question,
+        answer: currentRiddle.answer,
         category: currentRiddle.category,
         difficulty: currentRiddle.difficulty,
         attempts: attempts + 1,

@@ -3,18 +3,90 @@
  */
 
 import { DAILY_TASKS_CONFIG, WEEKLY_TASKS_CONFIG, TaskProgress } from '@/types/tasks';
-import { getUserData, getUserDataSync, setUserData, getUserStorageKey } from '@/utils/userStorage';
+import { getUserStorageKey } from '@/utils/userStorage';
 
 const TASK_PROGRESS_KEY = 'wanwan-task-progress';
 const TASK_COMPLETED_DAYS_KEY = 'wanwan-task-completed-days';
 
-// 获取用户专属的存储键
+// 同步标记 key，与 userStorage.ts 中的保持一致
+const SYNCED_KEYS_KEY = 'wwx-synced-keys';
+
+// 缓存找到的存储键，避免重复扫描
+let cachedTaskKey: string | null = null;
+let cachedCompletedDaysKey: string | null = null;
+
+/**
+ * 查找包含任务数据的存储键
+ * 当会话丢失但 localStorage 中仍有用户数据时，能回退到正确的键
+ */
+function findStorageKeyWithData(baseKey: string): string {
+  const currentKey = getUserStorageKey(baseKey);
+
+  // 优先使用当前用户键
+  if (localStorage.getItem(currentKey)) {
+    return currentKey;
+  }
+
+  // 当前键无数据，扫描所有包含该 baseKey 的键
+  const suffix = '-' + baseKey;
+  for (const key of Object.keys(localStorage)) {
+    if (key.endsWith(suffix) && key !== currentKey) {
+      const val = localStorage.getItem(key);
+      if (val) {
+        try {
+          const parsed = JSON.parse(val);
+          if (parsed && typeof parsed === 'object') {
+            console.log('🔄 任务数据回退: 使用已有数据键', key);
+            return key;
+          }
+        } catch { /* ignore */ }
+      }
+    }
+  }
+
+  return currentKey; // 无已有数据，使用当前键
+}
+
+/**
+ * 获取当前应使用的任务进度存储键
+ * 带缓存，避免每次都扫描 localStorage
+ */
 function getTaskProgressKey(): string {
-  return getUserStorageKey(TASK_PROGRESS_KEY);
+  const currentKey = getUserStorageKey(TASK_PROGRESS_KEY);
+  // 如果缓存与当前键一致，直接返回
+  if (cachedTaskKey === currentKey) return cachedTaskKey;
+
+  // 当前键有数据，使用当前键
+  if (localStorage.getItem(currentKey)) {
+    cachedTaskKey = currentKey;
+    return currentKey;
+  }
+
+  // 缓存有值且仍有数据，继续使用缓存
+  if (cachedTaskKey && localStorage.getItem(cachedTaskKey)) {
+    return cachedTaskKey;
+  }
+
+  // 扫描查找
+  cachedTaskKey = findStorageKeyWithData(TASK_PROGRESS_KEY);
+  return cachedTaskKey;
 }
 
 function getCompletedDaysKey(): string {
-  return getUserStorageKey(TASK_COMPLETED_DAYS_KEY);
+  const currentKey = getUserStorageKey(TASK_COMPLETED_DAYS_KEY);
+  if (cachedCompletedDaysKey === currentKey) return cachedCompletedDaysKey;
+
+  if (localStorage.getItem(currentKey)) {
+    cachedCompletedDaysKey = currentKey;
+    return currentKey;
+  }
+
+  if (cachedCompletedDaysKey && localStorage.getItem(cachedCompletedDaysKey)) {
+    return cachedCompletedDaysKey;
+  }
+
+  cachedCompletedDaysKey = findStorageKeyWithData(TASK_COMPLETED_DAYS_KEY);
+  return cachedCompletedDaysKey;
 }
 
 /**
@@ -46,13 +118,27 @@ function getWeekNumber(date: Date): number {
 }
 
 /**
+ * 从 localStorage 直接读取任务进度（使用解析后的键）
+ */
+function readTaskProgress(): Record<string, TaskProgress> {
+  const key = getTaskProgressKey();
+  const raw = localStorage.getItem(key);
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw) as Record<string, TaskProgress>;
+  } catch {
+    return {};
+  }
+}
+
+/**
  * 获取今天的任务进度
  */
 export function getTodayTaskProgress(): TaskProgress {
   const date = getCurrentDateString();
   const week = getCurrentWeekString();
 
-  const saved = getUserDataSync<Record<string, TaskProgress>>(TASK_PROGRESS_KEY, {});
+  const saved = readTaskProgress();
   // 检查是否有今天的记录
   if (saved[date]) {
     return saved[date];
@@ -77,10 +163,10 @@ export function getTodayTaskProgress(): TaskProgress {
 }
 
 /**
- * 保存任务进度
+ * 保存任务进度（直接写入 localStorage，使用解析后的键）
  */
 export function saveTaskProgress(progress: TaskProgress): void {
-  const saved = getUserDataSync<Record<string, TaskProgress>>(TASK_PROGRESS_KEY, {});
+  const saved = readTaskProgress();
   const allProgress = { ...saved };
 
   allProgress[progress.date] = progress;
@@ -96,7 +182,12 @@ export function saveTaskProgress(progress: TaskProgress): void {
     }
   });
 
-  setUserData(TASK_PROGRESS_KEY, allProgress);
+  // 使用解析后的键保存（确保写入到有数据的那个键）
+  const key = getTaskProgressKey();
+  localStorage.setItem(key, JSON.stringify(allProgress));
+
+  // 同步标记清除，以便云端同步能检测到变更
+  localStorage.removeItem(SYNCED_KEYS_KEY);
 }
 
 /**
@@ -196,7 +287,7 @@ export function isToday(dateString: string): boolean {
  * 获取连续完成天数
  */
 export function getTaskStreak(): number {
-  const saved = getUserDataSync<Record<string, TaskProgress>>(TASK_PROGRESS_KEY, {});
+  const saved = readTaskProgress();
 
   let streak = 0;
   const today = getCurrentDateString();
@@ -225,12 +316,14 @@ export function getTaskStreak(): number {
  * 记录完成任务的一天
  */
 function recordCompletedDay(date: string): void {
-  const completedDays = getUserDataSync<string[]>(TASK_COMPLETED_DAYS_KEY, []);
+  const key = getCompletedDaysKey();
+  const raw = localStorage.getItem(key);
+  const completedDays: string[] = raw ? JSON.parse(raw) : [];
 
   // 如果这一天还没有被记录，添加它
   if (!completedDays.includes(date)) {
     completedDays.push(date);
-    setUserData(TASK_COMPLETED_DAYS_KEY, completedDays);
+    localStorage.setItem(key, JSON.stringify(completedDays));
   }
 }
 
@@ -238,6 +331,137 @@ function recordCompletedDay(date: string): void {
  * 获取累计完成任务的天数
  */
 export function getCompletedDaysCount(): number {
-  const completedDays = getUserDataSync<string[]>(TASK_COMPLETED_DAYS_KEY, []);
-  return completedDays.length;
+  const key = getCompletedDaysKey();
+  const raw = localStorage.getItem(key);
+  if (!raw) {
+    // 没有专门的完成天数记录，从任务进度中计算
+    const progress = readTaskProgress();
+    return Object.values(progress).filter(p => p.dailyCompleted).length;
+  }
+  try {
+    return (JSON.parse(raw) as string[]).length;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * 从所有 localStorage 键中查找包含指定 baseKey 的数据
+ */
+function findDataForKey(baseKey: string): any[] {
+  const results: any[] = [];
+
+  for (const key of Object.keys(localStorage)) {
+    if (key.endsWith('-' + baseKey)) {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            results.push(...parsed);
+          }
+        } catch { /* ignore */ }
+      }
+    }
+  }
+  return results;
+}
+
+/**
+ * 从实际游戏记录中修复今天的任务进度
+ * 解决因会话丢失导致的任务进度数据丢失问题
+ */
+export function repairTaskProgressFromRecords(): void {
+  const today = getCurrentDateString();
+  const progress = getTodayTaskProgress();
+  let changed = false;
+
+  // 1. 统计问题思考 (daily-question): 从 answers 记录中找今天的回答
+  const answers = findDataForKey('wwx-answers');
+  const todayAnswers = answers.filter((a: any) => {
+    if (!a.createdAt) return false;
+    return a.createdAt.split('T')[0] === today;
+  });
+  const questionCount = todayAnswers.length;
+  if (questionCount > (progress.dailyTasks['daily-question'] || 0)) {
+    progress.dailyTasks['daily-question'] = questionCount;
+    changed = true;
+    console.log('🔧 修复 daily-question:', questionCount);
+  }
+
+  // 2. 统计写作创作 (daily-writing): 从 slot machine 和 writing challenge 记录中找
+  const slotResults = findDataForKey('wwx-slot-machine');
+  const todaySlot = slotResults.filter((r: any) => {
+    const dateField = r.savedAt || r.createdAt || r.timestamp;
+    if (!dateField) return false;
+    return new Date(dateField).toISOString().split('T')[0] === today;
+  });
+  // 写作挑战记录存在 app-storage 中
+  const writingWorks = findDataForKey('writing-challenge-works');
+  const todayWriting = writingWorks.filter((w: any) => {
+    const dateField = w.savedAt || w.createdAt || w.timestamp;
+    if (!dateField) return false;
+    return new Date(dateField).toISOString().split('T')[0] === today;
+  });
+  const writingCount = todaySlot.length + todayWriting.length;
+  if (writingCount > (progress.dailyTasks['daily-writing'] || 0)) {
+    progress.dailyTasks['daily-writing'] = writingCount;
+    changed = true;
+    console.log('🔧 修复 daily-writing:', writingCount);
+  }
+
+  // 3. 统计逻辑推理 (daily-reasoning): turtle soup + guess number + riddle + yes-or-no
+  const turtleSoups = findDataForKey('wwx-turtle-soup');
+  const todayTurtle = turtleSoups.filter((r: any) => {
+    if (!r.completedAt) return false;
+    return r.solved && new Date(r.completedAt).toISOString().split('T')[0] === today;
+  });
+
+  const guessNumbers = findDataForKey('wwx-guess-number');
+  const todayGuess = guessNumbers.filter((r: any) => {
+    const dateField = r.completedAt;
+    if (!dateField) return false;
+    return r.solved && new Date(dateField).toISOString().split('T')[0] === today;
+  });
+
+  const riddles = findDataForKey('wwx-riddle');
+  const todayRiddles = riddles.filter((r: any) => {
+    const dateField = r.completedAt || r.solvedAt;
+    if (!dateField) return false;
+    return r.solved && new Date(dateField).toISOString().split('T')[0] === today;
+  });
+
+  const yesOrNo = findDataForKey('wwx-yes-or-no');
+  const todayYesOrNo = yesOrNo.filter((r: any) => {
+    const dateField = r.completedAt || r.timestamp;
+    if (!dateField) return false;
+    return r.solved && new Date(dateField).toISOString().split('T')[0] === today;
+  });
+
+  const reasoningCount = todayTurtle.length + todayGuess.length + todayRiddles.length + todayYesOrNo.length;
+  if (reasoningCount > (progress.dailyTasks['daily-reasoning'] || 0)) {
+    progress.dailyTasks['daily-reasoning'] = reasoningCount;
+    changed = true;
+    console.log('🔧 修复 daily-reasoning:', reasoningCount, {
+      turtle: todayTurtle.length,
+      guess: todayGuess.length,
+      riddle: todayRiddles.length,
+      yesNo: todayYesOrNo.length,
+    });
+  }
+
+  if (changed) {
+    // 检查是否所有每日任务都完成
+    progress.dailyCompleted = DAILY_TASKS_CONFIG.every(task => {
+      const current = progress.dailyTasks[task.id] || 0;
+      return current >= task.target;
+    });
+
+    if (progress.dailyCompleted) {
+      recordCompletedDay(progress.date);
+    }
+
+    saveTaskProgress(progress);
+    console.log('✅ 任务进度已从游戏记录中修复:', progress.dailyTasks);
+  }
 }

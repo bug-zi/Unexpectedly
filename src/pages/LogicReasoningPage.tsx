@@ -105,7 +105,7 @@ export function LogicReasoningPage() {
 
     // 合并并按时间倒序排列（最新的在前）
     const allRecords = [...turtleSoupRecords, ...riddleRecords, ...yesOrNoRecords, ...guessNumberRecords]
-      .sort((a: any, b: any) => new Date(b.createdAt || b.syncedAt).getTime() - new Date(a.createdAt || a.syncedAt).getTime());
+      .sort((a: any, b: any) => new Date(b.completedAt || b.createdAt || b.syncedAt).getTime() - new Date(a.completedAt || a.createdAt || a.syncedAt).getTime());
 
     setGameRecords(allRecords);
   };
@@ -600,14 +600,41 @@ export function LogicReasoningPage() {
                         {/* 谜语人特有信息 */}
                         {record.gameType === '谜语人' && record.riddleId && (
                           <div className="bg-white dark:bg-gray-800 rounded-lg p-3 mb-2">
-                            <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                              📝 谜题 #{record.riddleId}
-                            </div>
+                            {record.riddleQuestion && (
+                              <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                📝 {record.riddleQuestion}
+                              </div>
+                            )}
+                            {!record.riddleQuestion && (
+                              <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                📝 谜题 #{record.riddleId}
+                              </div>
+                            )}
                             {record.answer && (
                               <div className="text-sm text-gray-600 dark:text-gray-400">
                                 💡 答案：{record.answer}
                               </div>
                             )}
+                            <div className="flex items-center gap-4 mt-1">
+                              {record.category && (
+                                <span className="text-xs px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded-full">
+                                  {record.category}
+                                </span>
+                              )}
+                              {record.difficulty && (
+                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                  难度：{record.difficulty}
+                                </span>
+                              )}
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                🎯 尝试 {record.attempts || 0} 次
+                              </span>
+                              {record.hintsUsed !== undefined && record.hintsUsed > 0 && (
+                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                  💡 提示 {record.hintsUsed} 次
+                                </span>
+                              )}
+                            </div>
                           </div>
                         )}
 
@@ -623,7 +650,7 @@ export function LogicReasoningPage() {
                               </span>
                             </div>
                             <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                              ❓ 提问次数：{record.questionsCount || 0} 次
+                              ❓ 提问次数：{record.questionsAsked || 0} 次
                             </div>
                             {record.timeSpent !== undefined && (
                               <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -641,15 +668,15 @@ export function LogicReasoningPage() {
                                 🔢 神秘数字：{record.secretNumber}
                               </span>
                               <span className={`text-xs px-2 py-1 rounded-full ${
-                                record.completed
+                                record.solved
                                   ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                                   : 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
                               }`}>
-                                {record.completed ? '✓ 猜中' : '✗ 未猜中'}
+                                {record.solved ? '✓ 猜中' : '✗ 未猜中'}
                               </span>
                             </div>
                             <div className="text-sm text-gray-600 dark:text-gray-400">
-                              🎲 尝试次数：{record.attemptsCount || 0} 次
+                              🎲 尝试次数：{record.attempts || 0} 次
                             </div>
                             {record.timeSpent !== undefined && (
                               <div className="text-sm text-gray-600 dark:text-gray-400">

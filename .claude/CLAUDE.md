@@ -114,14 +114,23 @@ You must ONLY use port 5173 for the development server. If port 5173 is already 
 - Windows: `netstat -ano | findstr :5173` then `taskkill /PID <pid> /F`
 - Unix/Linux/Mac: `lsof -ti:5173 | xargs kill -9`
 
-### Code Modification Safety
-**修改代码的时候，一定不能影响原来的其他功能正常实现，你在修改完代码后会自动检查其他功能是否仍然能够正常实现，如果不行想办法修复。**
+### Code Modification Safety (MANDATORY)
+**所有修改一定不能影响与本次修改无关的、功能已经正常实现的那些部分的代码。修改代码的时候，一定不能影响原来的其他功能正常实现，你在修改完代码后会自动检查其他功能是否仍然能够正常实现，如果不行想办法修复。**
 
 When modifying code:
-1. **Preserve all existing functionality** - Changes must NOT break any currently working features
-2. **Automatic verification** - After making changes, you must automatically verify that other features still work correctly
-3. **Fix any issues** - If something breaks, you MUST fix it before considering the task complete
-4. **Test thoroughly** - Don't just test the modified code - test related features and user flows
+1. **Zero impact on unrelated code** - You MUST NOT modify, refactor, or alter any code that is unrelated to the current task, even if you think it could be "improved." If it works, leave it alone.
+2. **Preserve all existing functionality** - Changes must NOT break any currently working features
+3. **Automatic verification** - After making changes, you must automatically verify that other features still work correctly
+4. **Fix any issues** - If something breaks, you MUST fix it before considering the task complete
+5. **Test thoroughly** - Don't just test the modified code - test related features and user flows
+
+**What "no impact on unrelated code" means:**
+- Do NOT refactor code outside the scope of the task
+- Do NOT rename variables, functions, or files that are not part of the change
+- Do NOT add comments, type annotations, or formatting changes to unrelated code
+- Do NOT change import statements in files not affected by the task
+- Do NOT modify working utility functions to "improve" them
+- If a file needs only a 1-line change, only change that 1 line — nothing else in that file
 
 **Verification approach:**
 - Identify all features that could be affected by your changes

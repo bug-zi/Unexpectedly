@@ -42,6 +42,7 @@ export interface DetailedSyncResult {
 }
 
 const LAST_SYNC_KEY = 'wwx-last-sync-time';
+const SYNCED_KEYS_KEY = 'wwx-synced-keys';
 
 /**
  * 获取最后同步时间
@@ -144,6 +145,11 @@ export async function manualSync(): Promise<SyncResult> {
     // 1. 上传本地数据到云端
     const result = await syncLocalDataToCloud(userId);
 
+    // 2. 记录已同步的 key 集合，用于 checkUnsyncedData 判断
+    if (result.uploaded > 0) {
+      markKeysAsSynced(userId);
+    }
+
     console.log('✅ 同步完成', result);
 
     return {
@@ -218,14 +224,53 @@ export async function loadFromCloud(): Promise<SyncResult> {
 
 /**
  * 检查本地是否有未同步的数据
+ * 通过对比当前 localStorage keys 与上次成功同步时记录的 keys
  */
 export function checkUnsyncedData(): boolean {
   const userId = getCurrentUserId();
   if (!userId) return false;
 
   const prefix = `user-${userId}-`;
-  const keys = Object.keys(localStorage);
-  return keys.some(key => key.startsWith(prefix));
+  const currentKeys = Object.keys(localStorage)
+    .filter(key => key.startsWith(prefix))
+    .sort();
+
+  if (currentKeys.length === 0) return false;
+
+  // 获取上次同步时记录的 keys
+  const syncedKeys = getSyncedKeys(userId);
+
+  // 如果没有同步记录，说明从未同步过
+  if (!syncedKeys) return true;
+
+  // 对比：如果当前 keys 和已同步 keys 不同，说明有新数据或数据变了
+  if (currentKeys.length !== syncedKeys.length) return true;
+
+  return !currentKeys.every((key, index) => key === syncedKeys[index]);
+}
+
+/**
+ * 标记当前用户的 localStorage keys 为已同步
+ */
+function markKeysAsSynced(userId: string): void {
+  const prefix = `user-${userId}-`;
+  const keys = Object.keys(localStorage)
+    .filter(key => key.startsWith(prefix))
+    .sort();
+  localStorage.setItem(SYNCED_KEYS_KEY, JSON.stringify(keys));
+}
+
+/**
+ * 获取已同步的 keys 列表
+ */
+function getSyncedKeys(userId: string): string[] | null {
+  const data = localStorage.getItem(SYNCED_KEYS_KEY);
+  if (!data) return null;
+  try {
+    return JSON.parse(data);
+  } catch {
+    return null;
+  }
 }
 
 /**

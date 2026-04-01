@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Star, Clock } from 'lucide-react';
+import { Star, Clock, Users } from 'lucide-react';
 import { Question } from '@/types';
 import { getCategoryConfig } from '@/constants/categories';
 import { Button } from '@/components/ui/Button';
@@ -16,6 +16,7 @@ interface QuestionCardProps {
   onStart: () => void;
   onSkip: () => void;
   showFavorite?: boolean;
+  onRoundtable?: () => void;
 }
 
 export function QuestionCard({
@@ -23,6 +24,7 @@ export function QuestionCard({
   onStart,
   onSkip,
   showFavorite = true,
+  onRoundtable,
 }: QuestionCardProps) {
   const { isFavorited, addFavorite, removeFavorite } = useFavorites();
   const { isLater, addToLater, removeFromLater } = useLater();
@@ -262,6 +264,17 @@ export function QuestionCard({
         >
           开始思考
         </Button>
+        {onRoundtable && (
+          <Button
+            variant="ghost"
+            onClick={onRoundtable}
+            fullWidth
+            className="border-2 border-amber-400 dark:border-amber-600 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+          >
+            <Users size={16} className="mr-1" />
+            大咖圆桌
+          </Button>
+        )}
         <Button
           variant="ghost"
           onClick={onSkip}

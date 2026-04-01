@@ -30,6 +30,8 @@ import { GuessNumberPage } from '@/pages/GuessNumberPage';
 import { CheckInPage } from '@/pages/CheckInPage';
 import { ProfilePage } from '@/pages/ProfilePage';
 import { TaskPage } from '@/pages/TaskPage';
+import { RoundtableSetupPage } from '@/pages/RoundtableSetupPage';
+import { RoundtablePage } from '@/pages/RoundtablePage';
 import { useGlobalNotificationReminder } from '@/hooks/useGlobalNotificationReminder';
 import { useSync } from '@/hooks/useSync';
 import { useEffect, useRef } from 'react';
@@ -113,6 +115,8 @@ function App() {
         <Route path="/checkin" element={<CheckInPage />} />
         <Route path="/tasks" element={<TaskPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/roundtable/setup" element={<RoundtableSetupPage />} />
+        <Route path="/roundtable/discuss" element={<RoundtablePage />} />
         <Route path="/knowledge-popularize" element={<KnowledgePopularizePage />} />
         <Route path="/knowledge-popularize/world-records" element={<WorldRecordsPage />} />
         <Route path="/knowledge-popularize/systems-thinking" element={<SystemsThinkingPage />} />

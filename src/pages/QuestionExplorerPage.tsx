@@ -30,6 +30,11 @@ export function QuestionExplorerPage() {
     navigate(`/question/${currentQuestion.id}`);
   };
 
+  const handleRoundtable = () => {
+    setCurrentQuestion(currentQuestion);
+    navigate(`/roundtable/setup?q=${currentQuestion.id}`);
+  };
+
   const handleSkipQuestion = () => {
     if (selectedCategory) {
       const question = getRandomQuestion(selectedCategory);
@@ -154,6 +159,7 @@ export function QuestionExplorerPage() {
                 question={currentQuestion}
                 onStart={handleStartThinking}
                 onSkip={handleSkipQuestion}
+                onRoundtable={handleRoundtable}
               />
             </motion.div>
 

@@ -198,3 +198,80 @@ export interface Activity {
  * 导出格式类型
  */
 export type ExportFormat = 'pdf' | 'markdown' | 'json';
+
+// ===== 大咖圆桌相关类型 =====
+
+/**
+ * 大咖领域
+ */
+export type ThinkerDomain =
+  | 'philosophy' | 'strategy' | 'business' | 'psychology'
+  | 'science' | 'literature' | 'art' | 'economics'
+  | 'politics' | 'technology' | 'religion' | 'education';
+
+/**
+ * 大咖/思想家
+ */
+export interface Thinker {
+  id: string;
+  name: string;
+  nameEn: string;
+  era: string;
+  domain: ThinkerDomain[];
+  avatar: string;
+  color: string;
+  systemPrompt: string;
+  thinkingStyle: ThinkingDimension | LifeScenario;
+  quote?: string;
+}
+
+/**
+ * 圆桌消息
+ */
+export interface RoundtableMessage {
+  id: string;
+  role: 'user' | 'thinker' | 'system';
+  thinkerId?: string;
+  content: string;
+  round?: number;
+  createdAt: Date;
+}
+
+/**
+ * 圆桌会话
+ */
+export interface RoundtableSession {
+  id: string;
+  questionId: string;
+  userId: string;
+  thinkers: string[];
+  messages: RoundtableMessage[];
+  rounds: number;
+  summary?: string;
+  status: 'active' | 'completed';
+  createdAt: Date;
+  completedAt?: Date;
+}
+
+/**
+ * LLM 提供商
+ */
+export type LLMProvider = 'deepseek' | 'qwen' | 'glm' | 'kimi' | 'doubao';
+
+/**
+ * LLM 配置
+ */
+export interface LLMConfig {
+  provider: LLMProvider;
+  apiKey: string;
+  model: string;
+  baseUrl?: string;
+}
+
+/**
+ * LLM 聊天消息
+ */
+export interface ChatMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}

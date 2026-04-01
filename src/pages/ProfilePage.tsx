@@ -22,6 +22,12 @@ import {
   Brain,
   PenTool,
   Lightbulb,
+  Bot,
+  Eye,
+  EyeOff,
+  ChevronDown,
+  Loader2,
+  CheckCircle2,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { SyncStatusIndicator } from '@/components/ui/SyncStatusIndicator';
@@ -39,6 +45,9 @@ import { getSlotMachineResults } from '@/utils/storage';
 import { getUserDataSync, getCurrentUserId } from '@/utils/userStorage';
 import { manualSync, checkUnsyncedData, getLocalDataStats } from '@/services/syncService';
 import { toast } from 'react-toastify';
+import { getProviderConfig, validateApiKey } from '@/services/llmService';
+import { useRoundtableStore } from '@/stores/roundtableStore';
+import type { LLMProvider } from '@/types';
 
 interface CheckInRecord {
   date: string;
@@ -123,6 +132,85 @@ export function ProfilePage() {
 
   // 云端同步状态
   const { syncStatus, lastSync, manualSync: oldManualSync } = useSync(true);
+
+  // AI 配置状态
+  const { llmConfig, setLLMConfig, clearLLMConfig } = useRoundtableStore();
+  const [aiProvider, setAiProvider] = useState<LLMProvider>('deepseek');
+  const [apiKey, setApiKey] = useState('');
+  const [aiModel, setAiModel] = useState('');
+  const [aiBaseUrl, setAiBaseUrl] = useState('');
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationStatus, setValidationStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [validationMessage, setValidationMessage] = useState('');
+
+  // 从 store 加载已有配置
+  useEffect(() => {
+    if (llmConfig) {
+      setAiProvider(llmConfig.provider);
+      setApiKey(llmConfig.apiKey);
+      setAiModel(llmConfig.model);
+      if (llmConfig.baseUrl) setAiBaseUrl(llmConfig.baseUrl);
+    }
+  }, [llmConfig]);
+
+  // provider 变化时重置 model 和 baseUrl
+  useEffect(() => {
+    const config = getProviderConfig(aiProvider);
+    setAiModel(config.defaultModel);
+    setAiBaseUrl('');
+    setShowAdvanced(false);
+  }, [aiProvider]);
+
+  // AI 配置保存
+  const handleSaveAIConfig = () => {
+    if (!apiKey.trim()) {
+      toast.error('请输入 API Key');
+      return;
+    }
+    const newConfig = {
+      provider: aiProvider,
+      apiKey: apiKey.trim(),
+      model: aiModel,
+      baseUrl: aiBaseUrl.trim() || undefined,
+    };
+    setLLMConfig(newConfig);
+    toast.success('AI 配置已保存');
+    setValidationStatus('idle');
+  };
+
+  // AI 连接测试
+  const handleTestConnection = async () => {
+    if (!apiKey.trim()) {
+      toast.error('请先输入 API Key');
+      return;
+    }
+    setIsValidating(true);
+    setValidationStatus('idle');
+    setValidationMessage('');
+    try {
+      const config = {
+        provider: aiProvider,
+        apiKey: apiKey.trim(),
+        model: aiModel,
+        baseUrl: aiBaseUrl.trim() || undefined,
+      };
+      const isValid = await validateApiKey(config);
+      if (isValid) {
+        setValidationStatus('success');
+        setValidationMessage('连接成功！API Key 有效');
+      } else {
+        setValidationStatus('error');
+        setValidationMessage('连接失败，请检查 API Key 和网络');
+      }
+    } catch (err) {
+      setValidationStatus('error');
+      setValidationMessage('连接失败: ' + (err instanceof Error ? err.message : '网络错误'));
+    } finally {
+      setIsValidating(false);
+    }
+  };
 
   // 加载统计数据：使用多种机制确保数据能被加载
   useEffect(() => {
@@ -402,9 +490,9 @@ export function ProfilePage() {
 
       if (result.success) {
         toast.success(`✅ 已同步 ${result.uploaded} 条数据到云端`);
+        // 同步成功后更新 UI 状态（不重新检查，因为 checkUnsyncedData 已通过 synced keys 标记处理）
         setHasUnsyncedData(false);
         setLocalDataCount(0);
-        checkLocalData();
       } else {
         toast.error(`❌ 同步失败: ${result.error}`);
       }
@@ -707,6 +795,181 @@ export function ProfilePage() {
                 </div>
                 <p className="text-sm text-gray-600">创作次数</p>
               </div>
+            </div>
+          </motion.div>
+
+          {/* AI 大模型配置 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="bg-white rounded-2xl shadow-lg p-6 border-2 border-indigo-200 mb-8"
+          >
+            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
+              <Bot size={20} className="text-indigo-500" />
+              AI 大模型配置
+              {llmConfig && (
+                <span className="ml-2 px-2 py-0.5 text-xs font-medium text-green-600 bg-green-50 rounded-full border border-green-200">
+                  已配置
+                </span>
+              )}
+            </h3>
+            <p className="text-sm text-gray-500 mb-4">配置 AI 模型用于圆桌讨论、海龟汤等需要 AI 的功能模块</p>
+
+            {/* Provider 选择 */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">AI 服务商</label>
+              <select
+                value={aiProvider}
+                onChange={(e) => setAiProvider(e.target.value as LLMProvider)}
+                className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors"
+              >
+                <option value="deepseek">DeepSeek</option>
+                <option value="qwen">通义千问</option>
+                <option value="glm">智谱 GLM</option>
+                <option value="kimi">Kimi (Moonshot)</option>
+                <option value="doubao">豆包 (字节)</option>
+              </select>
+            </div>
+
+            {/* API Key */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">API Key</label>
+              <div className="relative">
+                <input
+                  type={showApiKey ? 'text' : 'password'}
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder="输入你的 API Key..."
+                  className="w-full px-3 py-2.5 pr-10 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowApiKey(!showApiKey)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Model 选择 */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">模型</label>
+              <select
+                value={aiModel}
+                onChange={(e) => setAiModel(e.target.value)}
+                className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors"
+              >
+                {(() => {
+                  const config = getProviderConfig(aiProvider);
+                  return config.models.map((m) => (
+                    <option key={m} value={m}>{m}</option>
+                  ));
+                })()}
+              </select>
+            </div>
+
+            {/* 高级设置 */}
+            <div className="mb-4">
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <ChevronDown size={14} className={`transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+                高级设置
+              </button>
+              <AnimatePresence>
+                {showAdvanced && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="pt-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">自定义 Base URL</label>
+                      <input
+                        type="text"
+                        value={aiBaseUrl}
+                        onChange={(e) => setAiBaseUrl(e.target.value)}
+                        placeholder={getProviderConfig(aiProvider).baseUrl}
+                        className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors font-mono"
+                      />
+                      <p className="text-xs text-gray-400 mt-1">留空则使用默认地址</p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* 验证状态 */}
+            <AnimatePresence>
+              {validationStatus !== 'idle' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
+                    validationStatus === 'success'
+                      ? 'bg-green-50 text-green-700 border border-green-200'
+                      : 'bg-red-50 text-red-700 border border-red-200'
+                  }`}>
+                    {validationStatus === 'success' ? <CheckCircle2 size={16} /> : <X size={16} />}
+                    {validationMessage}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* 操作按钮 */}
+            <div className="flex gap-3 mt-2">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleTestConnection}
+                disabled={isValidating || !apiKey.trim()}
+                className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isValidating ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <CheckCircle2 size={16} />
+                )}
+                {isValidating ? '测试中...' : '测试连接'}
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleSaveAIConfig}
+                disabled={!apiKey.trim()}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-sm font-medium shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Check size={16} />
+                保存配置
+              </motion.button>
+
+              {llmConfig && (
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    clearLLMConfig();
+                    setApiKey('');
+                    setAiBaseUrl('');
+                    setValidationStatus('idle');
+                    toast.success('已清除 AI 配置');
+                  }}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-sm font-medium transition-all"
+                >
+                  <Trash2 size={16} />
+                  清除
+                </motion.button>
+              )}
             </div>
           </motion.div>
 
