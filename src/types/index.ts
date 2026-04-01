@@ -275,3 +275,6 @@ export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
 }
+
+// ===== 辩论堂相关类型 =====
+export * from './debate';

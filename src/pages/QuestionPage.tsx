@@ -54,7 +54,7 @@ export function QuestionPage() {
 
   useEffect(() => {
     if (!question) {
-      navigate('/questions');
+      navigate('/questions/explore');
       return;
     }
 
@@ -178,7 +178,7 @@ export function QuestionPage() {
       setTimeout(() => {
         setIsSaving(false);
         setSyncing(false);
-        navigate('/questions');
+        navigate('/questions/explore');
       }, 500);
     } catch (error) {
       console.error('保存失败:', error);
@@ -191,7 +191,7 @@ export function QuestionPage() {
     if (content.trim() && !lastSavedTime) {
       setShowExitConfirm(true);
     } else {
-      navigate('/questions');
+      navigate('/questions/explore');
     }
   };
 
@@ -464,7 +464,7 @@ export function QuestionPage() {
               </Button>
               <Button
                 variant="danger"
-                onClick={() => navigate('/questions')}
+                onClick={() => navigate('/questions/explore')}
                 fullWidth
               >
                 确定离开
@@ -482,7 +482,7 @@ export function QuestionPage() {
           isOpen={showExportDialog}
           onClose={() => {
             setShowExportDialog(false);
-            navigate('/questions');
+            navigate('/questions/explore');
           }}
         />
       )}

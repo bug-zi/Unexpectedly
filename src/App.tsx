@@ -32,6 +32,8 @@ import { ProfilePage } from '@/pages/ProfilePage';
 import { TaskPage } from '@/pages/TaskPage';
 import { RoundtableSetupPage } from '@/pages/RoundtableSetupPage';
 import { RoundtablePage } from '@/pages/RoundtablePage';
+import { QuestionThinkingHubPage } from '@/pages/QuestionThinkingHubPage';
+import { DebateHallPage } from '@/pages/DebateHallPage';
 import { useGlobalNotificationReminder } from '@/hooks/useGlobalNotificationReminder';
 import { useSync } from '@/hooks/useSync';
 import { useEffect, useRef } from 'react';
@@ -92,7 +94,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/questions" element={<QuestionExplorerPage />} />
+        <Route path="/questions" element={<QuestionThinkingHubPage />} />
+        <Route path="/questions/explore" element={<QuestionExplorerPage />} />
         <Route path="/questions/growth" element={<GrowthTrackerPage />} />
         <Route path="/growth" element={<GrowthTrackerPage />} />
         <Route path="/questions/question-generator" element={<QuestionGeneratorPage />} />
@@ -117,6 +120,7 @@ function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/roundtable/setup" element={<RoundtableSetupPage />} />
         <Route path="/roundtable/discuss" element={<RoundtablePage />} />
+        <Route path="/debate" element={<DebateHallPage />} />
         <Route path="/knowledge-popularize" element={<KnowledgePopularizePage />} />
         <Route path="/knowledge-popularize/world-records" element={<WorldRecordsPage />} />
         <Route path="/knowledge-popularize/systems-thinking" element={<SystemsThinkingPage />} />

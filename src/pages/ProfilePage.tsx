@@ -130,6 +130,9 @@ export function ProfilePage() {
   const [localDataCount, setLocalDataCount] = useState(0);
   const [isSyncing, setIsSyncing] = useState(false);
 
+  // 孤儿数据检测：游客模式下 localStorage 中有之前登录用户的数据
+  const [orphanDataInfo, setOrphanDataInfo] = useState<{ found: boolean; userId: string; dataCount: number } | null>(null);
+
   // 云端同步状态
   const { syncStatus, lastSync, manualSync: oldManualSync } = useSync(true);
 
@@ -216,8 +219,13 @@ export function ProfilePage() {
   useEffect(() => {
     // 如果还在加载认证状态，跳过
     if (authLoading) return;
-    // 如果没有用户，跳过
-    if (!user) return;
+
+    // 游客模式下也要检查本地数据（孤儿数据检测）
+    if (!user) {
+      checkLocalData();
+      const timer = setTimeout(() => checkLocalData(), 500);
+      return () => clearTimeout(timer);
+    }
 
     // 直接尝试加载
     loadStats();
@@ -239,6 +247,31 @@ export function ProfilePage() {
     const stats = getLocalDataStats();
     setHasUnsyncedData(hasUnsynced);
     setLocalDataCount(stats.count);
+
+    // 孤儿数据检测：游客模式下检查是否有之前登录用户的数据
+    if (!isAuthenticated && !user) {
+      const allKeys = Object.keys(localStorage);
+      const userKeyPattern = /^user-([a-f0-9-]+)-/;
+      const orphanUserIds = new Set<string>();
+      let orphanDataCount = 0;
+
+      allKeys.forEach(key => {
+        const match = key.match(userKeyPattern);
+        if (match) {
+          orphanUserIds.add(match[1]);
+          orphanDataCount++;
+        }
+      });
+
+      if (orphanUserIds.size > 0 && orphanDataCount > 0) {
+        const firstUserId = Array.from(orphanUserIds)[0];
+        setOrphanDataInfo({ found: true, userId: firstUserId, dataCount: orphanDataCount });
+      } else {
+        setOrphanDataInfo(null);
+      }
+    } else {
+      setOrphanDataInfo(null);
+    }
   };
 
   // 监听用户数据变化事件（登录/登出时刷新）
@@ -735,6 +768,39 @@ export function ProfilePage() {
               </div>
             </div>
           </motion.div>
+
+          {/* 孤儿数据提示：游客模式下检测到之前登录用户的数据 */}
+          <AnimatePresence>
+            {orphanDataInfo?.found && !isAuthenticated && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-5 mb-8 shadow-md"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-amber-100 rounded-lg flex-shrink-0">
+                    <Lightbulb size={20} className="text-amber-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-amber-800 mb-1">发现未同步的数据</h3>
+                    <p className="text-sm text-amber-700 mb-3">
+                      检测到本地有 {orphanDataInfo.dataCount} 项之前登录时产生的数据。
+                      登录后这些数据会自动同步到云端，方便你在不同设备间访问。
+                    </p>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => navigate('/login')}
+                      className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm font-medium shadow-md transition-all"
+                    >
+                      立即登录恢复数据
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* 思考记录统计 */}
           <motion.div

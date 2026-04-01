@@ -137,7 +137,7 @@ export function RoundtablePage() {
       <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-gray-900 dark:via-amber-900/20 dark:to-yellow-900/20 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-500 dark:text-gray-400 mb-4">未找到问题</p>
-          <Button onClick={() => navigate('/questions')}>返回问题探索</Button>
+          <Button onClick={() => navigate('/questions/explore')}>返回问题探索</Button>
         </div>
       </div>
     );

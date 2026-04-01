@@ -75,7 +75,8 @@ export function needsSync(): boolean {
 }
 
 /**
- * 同步所有数据（简化版，调用 manualSync）
+ * 同步所有数据（双向同步：先上传本地数据，再从云端下载合并）
+ * 用于定时同步、窗口切换同步等场景
  */
 export async function syncAllData(): Promise<DetailedSyncResult> {
   const result: DetailedSyncResult = {
@@ -89,19 +90,36 @@ export async function syncAllData(): Promise<DetailedSyncResult> {
   };
 
   try {
+    const userId = getCurrentUserId();
+    if (!userId) {
+      result.status = SyncStatus.IDLE;
+      return result;
+    }
+
+    // 1. 上传本地数据到云端
     const syncResult = await manualSync();
 
     if (syncResult.success) {
       result.status = SyncStatus.SUCCESS;
-      const uploaded = syncResult.uploaded || 0;
-
-      // 简化处理：将所有上传的数据分配给 answers
-      result.answers.uploaded = uploaded;
-      setLastSyncTime(new Date());
+      result.answers.uploaded = syncResult.uploaded || 0;
     } else {
       result.status = SyncStatus.ERROR;
       result.error = syncResult.error;
     }
+
+    // 2. 从云端下载最新数据（合并，不覆盖本地数据）
+    try {
+      const downloadResult = await loadCloudDataToLocal(userId);
+      if (downloadResult.loaded > 0) {
+        result.answers.downloaded = downloadResult.loaded;
+        // 云端有新数据下载，通知页面刷新
+        window.dispatchEvent(new CustomEvent('user-data-changed'));
+      }
+    } catch (downloadError) {
+      console.warn('⚠️ 定时同步-下载失败（不影响上传）:', downloadError);
+    }
+
+    setLastSyncTime(new Date());
   } catch (error) {
     result.status = SyncStatus.ERROR;
     result.error = error instanceof Error ? error.message : '同步失败';
@@ -111,7 +129,7 @@ export async function syncAllData(): Promise<DetailedSyncResult> {
 }
 
 /**
- * 登录时同步（从云端下载数据到本地）
+ * 登录时同步（双向同步：先上传本地数据，再从云端下载合并）
  */
 export async function syncOnLogin(): Promise<void> {
   try {
@@ -121,7 +139,20 @@ export async function syncOnLogin(): Promise<void> {
       return;
     }
 
-    console.log('🔄 登录同步：从云端下载数据...');
+    console.log('🔄 登录同步：双向同步（先上传，后下载）...');
+
+    // 1. 先上传本地数据到云端（确保本地数据不丢失）
+    try {
+      const uploadResult = await syncLocalDataToCloud(userId);
+      if (uploadResult.uploaded > 0) {
+        markKeysAsSynced(userId);
+        console.log(`✅ 登录同步-上传完成: ${uploadResult.uploaded} 条数据`);
+      }
+    } catch (uploadError) {
+      console.warn('⚠️ 登录同步-上传失败（继续下载）:', uploadError);
+    }
+
+    // 2. 再从云端下载数据到本地（合并，不覆盖）
     await loadFromCloud();
     console.log('✅ 登录同步完成');
   } catch (error) {
