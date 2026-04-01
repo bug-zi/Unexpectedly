@@ -96,17 +96,15 @@ export function useSync(autoSync: boolean = true) {
   useEffect(() => {
     if (!autoSync) return;
 
-    // 延迟初始化同步，等待认证初始化完成
+    // 延迟初始化同步：始终执行双向同步，确保从云端拉取最新数据
     const initTimer = setTimeout(() => {
-      const shouldSync = needsSync();
-
-      if (shouldSync) {
-        console.log('🔄 自动同步触发...');
+      if (!syncInProgress.current) {
+        console.log('🔄 初始化双向同步触发...');
         sync(false);
       }
-    }, 2000); // 延迟 2 秒，等待认证初始化完成
+    }, 2000);
 
-    // 每5分钟执行双向同步（不管本地是否有变更，都要从云端拉取最新数据）
+    // 每5分钟执行双向同步
     const interval = setInterval(() => {
       if (!syncInProgress.current) {
         console.log('🔄 定时双向同步触发...');
