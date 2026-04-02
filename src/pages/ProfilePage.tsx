@@ -548,9 +548,9 @@ export function ProfilePage() {
       <div className="fixed inset-0" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.5) 20%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0.55) 100%)' }} />
       <div className="hidden dark:block fixed inset-0" style={{ background: 'linear-gradient(to bottom, rgba(15,23,41,0.75) 0%, rgba(15,23,41,0.55) 20%, rgba(15,23,41,0.4) 50%, rgba(15,23,41,0.6) 100%)' }} />
       {/* 导航栏 */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-blue-200">
+      <nav className="fixed top-0 left-0 right-0 z-50 shadow-none">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center h-16">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -560,13 +560,6 @@ export function ProfilePage() {
               <ArrowLeft size={20} />
               <span className="font-medium">返回</span>
             </motion.button>
-
-            <div className="flex items-center gap-3">
-              <User size={24} className="text-blue-500" />
-              <h1 className="text-xl font-bold text-blue-700">个人中心</h1>
-            </div>
-
-            <div className="w-16" />
           </div>
         </div>
       </nav>
@@ -574,18 +567,23 @@ export function ProfilePage() {
       {/* 主要内容 */}
       <main className="relative z-10 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
+          {/* 页面标题 */}
+          <div className="flex items-center gap-3 mb-6">
+            <User size={28} className="text-gray-700" />
+            <h1 className="text-2xl font-bold text-gray-700">个人中心</h1>
+          </div>
           {/* 用户信息卡片 */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-blue-200 mb-8"
+            className="bg-gray-100 rounded-3xl shadow-2xl overflow-hidden border-2 border-blue-200 mb-8"
           >
             <div className="bg-gradient-to-br from-gray-50/90 to-gray-100/90 backdrop-blur-xl p-8 border-b border-gray-200/50 shadow-inner">
               <div className="flex items-start gap-4">
                 <div className="relative">
                   <motion.div
                     whileHover={{ scale: 1.05, rotate: 5 }}
-                    className="w-20 h-20 rounded-2xl bg-white/60 backdrop-blur-md flex items-center justify-center overflow-hidden shadow-lg border border-gray-200/50"
+                    className="w-20 h-20 rounded-2xl bg-gray-100/60 backdrop-blur-md flex items-center justify-center overflow-hidden shadow-lg border border-gray-200/50"
                   >
                     {profile?.avatar_url ? (
                       <img
@@ -598,7 +596,7 @@ export function ProfilePage() {
                     )}
                   </motion.div>
                   {isAuthenticated && (
-                    <label className="absolute -bottom-2 -right-2 bg-white rounded-full p-1.5 shadow-lg cursor-pointer hover:bg-gray-100 transition-colors border border-gray-200">
+                    <label className="absolute -bottom-2 -right-2 bg-gray-100 rounded-full p-1.5 shadow-lg cursor-pointer hover:bg-gray-100 transition-colors border border-gray-200">
                       <Camera size={14} className="text-blue-500" />
                       <input
                         type="file"
@@ -628,7 +626,7 @@ export function ProfilePage() {
                           onChange={(e) =>
                             setEditData({ ...editData, username: e.target.value })
                           }
-                          className="w-full px-3 py-2 bg-white/80 text-gray-800 placeholder-gray-400 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 backdrop-blur-sm"
+                          className="w-full px-3 py-2 bg-gray-100/80 text-gray-800 placeholder-gray-400 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 backdrop-blur-sm"
                         />
                         <div className="flex gap-2">
                           <select
@@ -636,7 +634,7 @@ export function ProfilePage() {
                             onChange={(e) =>
                               setEditData({ ...editData, gender: e.target.value })
                             }
-                            className="px-3 py-2 bg-white/80 text-gray-800 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 backdrop-blur-sm"
+                            className="px-3 py-2 bg-gray-100/80 text-gray-800 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 backdrop-blur-sm"
                           >
                             <option value="">选择性别</option>
                             <option value="男">男</option>
@@ -650,7 +648,7 @@ export function ProfilePage() {
                             onChange={(e) =>
                               setEditData({ ...editData, age: e.target.value })
                             }
-                            className="px-3 py-2 bg-white/80 text-gray-800 placeholder-gray-400 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 backdrop-blur-sm"
+                            className="px-3 py-2 bg-gray-100/80 text-gray-800 placeholder-gray-400 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 backdrop-blur-sm"
                           />
                         </div>
                         <textarea
@@ -660,7 +658,7 @@ export function ProfilePage() {
                             setEditData({ ...editData, bio: e.target.value })
                           }
                           rows={2}
-                          className="w-full px-3 py-2 bg-white/80 text-gray-800 placeholder-gray-400 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 backdrop-blur-sm resize-none"
+                          className="w-full px-3 py-2 bg-gray-100/80 text-gray-800 placeholder-gray-400 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 backdrop-blur-sm resize-none"
                         />
                         <div className="flex gap-2">
                           <motion.button
@@ -764,21 +762,19 @@ export function ProfilePage() {
                 )}
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="relative rounded-xl p-4 border border-blue-200 overflow-hidden">
-                  <div className="absolute inset-0 bg-cover bg-center opacity-20" style={{ backgroundImage: "url('/icon-picture/icon-index1.jpg')" }} />
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-50/90 to-rose-50/90" />
+                <div className="relative rounded-xl p-4 border border-blue-300/50 overflow-hidden">
+                  <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/UI-picture/UI-profile2.jpg')", filter: 'brightness(0.7)' }} />
                   <div className="relative">
-                    <div className="text-sm text-gray-600 mb-2">答题总数</div>
-                    <p className="text-2xl font-bold text-blue-600">{stats.totalAnswers}</p>
+                    <div className="text-sm text-white/80 mb-2">答题总数</div>
+                    <p className="text-2xl font-bold text-white">{stats.totalAnswers}</p>
                   </div>
                 </div>
 
-                <div className="relative rounded-xl p-4 border border-green-200 overflow-hidden">
-                  <div className="absolute inset-0 bg-cover bg-center opacity-20" style={{ backgroundImage: "url('/icon-picture/icon-knowledge1.jpg')" }} />
-                  <div className="absolute inset-0 bg-gradient-to-br from-green-50/90 to-teal-50/90" />
+                <div className="relative rounded-xl p-4 border border-green-300/50 overflow-hidden">
+                  <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/UI-picture/UI-profile1.jpg')", filter: 'brightness(0.7)' }} />
                   <div className="relative">
-                    <div className="text-sm text-gray-600 mb-2">累计签到</div>
-                    <p className="text-2xl font-bold text-green-600">{stats.totalCheckIns}</p>
+                    <div className="text-sm text-white/80 mb-2">累计签到</div>
+                    <p className="text-2xl font-bold text-white">{stats.totalCheckIns}</p>
                   </div>
                 </div>
               </div>
@@ -823,59 +819,71 @@ export function ProfilePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white rounded-2xl shadow-lg p-6 border-2 border-blue-200 mb-8"
+            className="bg-gray-100 rounded-2xl shadow-lg p-6 border-2 border-blue-200 mb-8"
           >
             <h3 className="text-lg font-bold text-gray-900 mb-4">思考记录</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* 逻辑推理 */}
-              <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-5 border-2 border-red-200">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2.5 bg-red-500 rounded-lg">
-                    <Brain size={22} className="text-white" />
+              <div className="relative rounded-xl p-5 border-2 border-red-300/50 overflow-hidden">
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/UI-picture/UI-logic1.jpg')", filter: 'brightness(0.7)' }} />
+                <div className="absolute inset-0 bg-gradient-to-br from-red-900/60 to-orange-900/50" />
+                <div className="relative">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2.5 bg-red-500/80 backdrop-blur-sm rounded-lg">
+                      <Brain size={22} className="text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white">逻辑推理</h4>
+                      <p className="text-xs text-white/70">锻炼逻辑思维</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900">逻辑推理</h4>
-                    <p className="text-xs text-gray-600">锻炼逻辑思维</p>
+                  <div className="text-3xl font-bold text-white mb-2">
+                    {thinkingStats.logicReasoning}
                   </div>
+                  <p className="text-sm text-white/70">游戏次数</p>
                 </div>
-                <div className="text-3xl font-bold text-red-600 mb-2">
-                  {thinkingStats.logicReasoning}
-                </div>
-                <p className="text-sm text-gray-600">游戏次数</p>
               </div>
 
               {/* 问题思考 */}
-              <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl p-5 border-2 border-amber-200">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2.5 bg-amber-500 rounded-lg">
-                    <Lightbulb size={22} className="text-white" />
+              <div className="relative rounded-xl p-5 border-2 border-amber-300/50 overflow-hidden">
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/UI-picture/UI-question1.jpg')", filter: 'brightness(0.7)' }} />
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-900/60 to-yellow-900/50" />
+                <div className="relative">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2.5 bg-amber-500/80 backdrop-blur-sm rounded-lg">
+                      <Lightbulb size={22} className="text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white">问题思考</h4>
+                      <p className="text-xs text-white/70">深度思考问题</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900">问题思考</h4>
-                    <p className="text-xs text-gray-600">深度思考问题</p>
+                  <div className="text-3xl font-bold text-white mb-2">
+                    {thinkingStats.questionThinking}
                   </div>
+                  <p className="text-sm text-white/70">答题数量</p>
                 </div>
-                <div className="text-3xl font-bold text-amber-600 mb-2">
-                  {thinkingStats.questionThinking}
-                </div>
-                <p className="text-sm text-gray-600">答题数量</p>
               </div>
 
               {/* 写作创造 */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border-2 border-blue-200">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2.5 bg-blue-500 rounded-lg">
-                    <PenTool size={22} className="text-white" />
+              <div className="relative rounded-xl p-5 border-2 border-blue-300/50 overflow-hidden">
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/icon-picture/icon-writing1.jpg')", filter: 'brightness(0.7)' }} />
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-900/60 to-indigo-900/50" />
+                <div className="relative">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2.5 bg-blue-500/80 backdrop-blur-sm rounded-lg">
+                      <PenTool size={22} className="text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white">写作创造</h4>
+                      <p className="text-xs text-white/70">激发创意思维</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900">写作创造</h4>
-                    <p className="text-xs text-gray-600">激发创意思维</p>
+                  <div className="text-3xl font-bold text-white mb-2">
+                    {thinkingStats.writingCreation}
                   </div>
+                  <p className="text-sm text-white/70">创作次数</p>
                 </div>
-                <div className="text-3xl font-bold text-blue-600 mb-2">
-                  {thinkingStats.writingCreation}
-                </div>
-                <p className="text-sm text-gray-600">创作次数</p>
               </div>
             </div>
           </motion.div>
@@ -885,7 +893,7 @@ export function ProfilePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="bg-white rounded-2xl shadow-lg p-6 border-2 border-indigo-200 mb-8"
+            className="bg-gray-100 rounded-2xl shadow-lg p-6 border-2 border-indigo-200 mb-8"
           >
             <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
               <Bot size={20} className="text-indigo-500" />
@@ -904,7 +912,7 @@ export function ProfilePage() {
               <select
                 value={aiProvider}
                 onChange={(e) => setAiProvider(e.target.value as LLMProvider)}
-                className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors"
+                className="w-full px-3 py-2.5 bg-gray-100 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors"
               >
                 <option value="deepseek">DeepSeek</option>
                 <option value="qwen">通义千问</option>
@@ -923,7 +931,7 @@ export function ProfilePage() {
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   placeholder="输入你的 API Key..."
-                  className="w-full px-3 py-2.5 pr-10 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors"
+                  className="w-full px-3 py-2.5 pr-10 bg-gray-100 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors"
                 />
                 <button
                   type="button"
@@ -941,7 +949,7 @@ export function ProfilePage() {
               <select
                 value={aiModel}
                 onChange={(e) => setAiModel(e.target.value)}
-                className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors"
+                className="w-full px-3 py-2.5 bg-gray-100 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors"
               >
                 {(() => {
                   const config = getProviderConfig(aiProvider);
@@ -977,7 +985,7 @@ export function ProfilePage() {
                         value={aiBaseUrl}
                         onChange={(e) => setAiBaseUrl(e.target.value)}
                         placeholder={getProviderConfig(aiProvider).baseUrl}
-                        className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors font-mono"
+                        className="w-full px-3 py-2.5 bg-gray-100 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors font-mono"
                       />
                       <p className="text-xs text-gray-400 mt-1">留空则使用默认地址</p>
                     </div>
@@ -1060,7 +1068,7 @@ export function ProfilePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white rounded-2xl shadow-lg p-6 border-2 border-blue-200 mb-8"
+            className="bg-gray-100 rounded-2xl shadow-lg p-6 border-2 border-blue-200 mb-8"
           >
             <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
               <Settings size={20} className="text-blue-500" />
@@ -1136,7 +1144,7 @@ export function ProfilePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white rounded-2xl shadow-lg p-6 border-2 border-red-200"
+            className="bg-gray-100 rounded-2xl shadow-lg p-6 border-2 border-red-200"
           >
             <h3 className="text-lg font-bold text-red-700 mb-4 flex items-center gap-2">
               <Trash2 size={20} className="text-red-500" />

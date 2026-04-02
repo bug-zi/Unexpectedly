@@ -194,7 +194,7 @@ export function LogicReasoningPage() {
       {/* 导航栏 */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg border-b border-red-200/50 dark:border-red-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="relative flex items-center justify-between h-16">
             {/* 左侧：返回按钮 */}
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -207,15 +207,15 @@ export function LogicReasoningPage() {
             </motion.button>
 
             {/* 中间：标题和图标 */}
-            <div className="flex items-center gap-3">
+            <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
               <motion.div
                 whileHover={{ rotate: 360 }}
                 transition={{ duration: 0.6 }}
                 className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center"
               >
-                <PuzzlePiece size={24} weight="duotone" className="text-white" />
+                <PuzzlePiece size={24} weight="duotone" className="text-red-500 dark:text-red-400" />
               </motion.div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent hidden sm:block">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
                 逻辑推理
               </h1>
             </div>
@@ -291,12 +291,18 @@ export function LogicReasoningPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden border-2 border-red-200 dark:border-red-800"
+              className="relative rounded-3xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden border-2 border-red-200 dark:border-red-800"
               onClick={(e) => e.stopPropagation()}
             >
+              {/* 背景图 */}
+              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/icon-picture/icon-logic1.jpg')" }} />
+              <div className="absolute inset-0 bg-white/30 dark:bg-gray-900/30 backdrop-blur-[2px]" />
+
               {/* 头部 */}
-              <div className="sticky top-0 z-10 bg-gradient-to-r from-red-500 to-rose-500 px-6 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="relative sticky top-0 z-10 overflow-hidden px-6 py-4 flex items-center justify-between">
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/icon-picture/icon-logic1.jpg')" }} />
+                <div className="absolute inset-0 bg-gradient-to-r from-red-900/80 to-rose-900/70" />
+                <div className="relative flex items-center gap-3">
                   <BookOpen size={24} weight="duotone" className="text-white" />
                   <h3 className="text-xl font-bold text-white">游戏说明</h3>
                 </div>
@@ -304,14 +310,14 @@ export function LogicReasoningPage() {
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setShowInstructions(false)}
-                  className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
+                  className="relative p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
                 >
                   <X size={24} weight="duotone" />
                 </motion.button>
               </div>
 
               {/* 内容 */}
-              <div className="p-6 overflow-y-auto max-h-[60vh]">
+              <div className="relative p-6 overflow-y-auto max-h-[60vh]">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
                     <h4 className="font-bold text-red-600 dark:text-red-400 mb-2 flex items-center gap-2">
@@ -327,8 +333,8 @@ export function LogicReasoningPage() {
                     </div>
                   </div>
 
-                  <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-800">
-                    <h4 className="font-bold text-orange-600 dark:text-orange-400 mb-2 flex items-center gap-2">
+                  <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
+                    <h4 className="font-bold text-red-600 dark:text-red-400 mb-2 flex items-center gap-2">
                       <Lightbulb size={20} weight="duotone" />
                       谜语人
                     </h4>
@@ -336,22 +342,23 @@ export function LogicReasoningPage() {
                       猜谜语，锻炼联想思维和文字理解能力。每个谜语都有提示帮助你找到答案。
                     </p>
                     <div className="mt-2 flex flex-wrap gap-1">
-                      <span className="text-xs px-2 py-1 bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400 rounded-full">文字</span>
-                      <span className="text-xs px-2 py-1 bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400 rounded-full">联想</span>
+                      <span className="text-xs px-2 py-1 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 rounded-full">文字</span>
+                      <span className="text-xs px-2 py-1 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 rounded-full">联想</span>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-rose-50 dark:bg-rose-900/20 rounded-xl border border-rose-200 dark:border-rose-800">
-                    <h4 className="font-bold text-rose-600 dark:text-rose-400 mb-2 flex items-center gap-2">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-200 dark:border-gray-600 opacity-60">
+                    <h4 className="font-bold text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-2">
                       <Question size={20} weight="duotone" />
                       Yes or No
+                      <span className="text-xs font-normal text-gray-400">（待推出）</span>
                     </h4>
-                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                       AI出题，你通过"是/否"问题猜出AI心中的词语。可以选择不同词库类别挑战。
                     </p>
                     <div className="mt-2 flex flex-wrap gap-1">
-                      <span className="text-xs px-2 py-1 bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400 rounded-full">AI</span>
-                      <span className="text-xs px-2 py-1 bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400 rounded-full">问答</span>
+                      <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700/40 text-gray-500 dark:text-gray-400 rounded-full">AI</span>
+                      <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700/40 text-gray-500 dark:text-gray-400 rounded-full">问答</span>
                     </div>
                   </div>
 
@@ -390,12 +397,18 @@ export function LogicReasoningPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-lg w-full border-2 border-red-200 dark:border-red-800"
+              className="relative rounded-3xl shadow-2xl max-w-lg w-full border-2 border-red-200 dark:border-red-800"
               onClick={(e) => e.stopPropagation()}
             >
+              {/* 背景图 */}
+              <div className="absolute inset-0 bg-cover bg-center rounded-3xl" style={{ backgroundImage: "url('/icon-picture/icon-logic1.jpg')" }} />
+              <div className="absolute inset-0 bg-white/30 dark:bg-gray-900/30 rounded-3xl backdrop-blur-[2px]" />
+
               {/* 头部 */}
-              <div className="bg-gradient-to-r from-red-500 to-rose-500 px-6 py-4 rounded-t-3xl flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="relative overflow-hidden px-6 py-4 rounded-t-3xl flex items-center justify-between">
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/icon-picture/icon-logic1.jpg')" }} />
+                <div className="absolute inset-0 bg-gradient-to-r from-red-900/80 to-rose-900/70" />
+                <div className="relative flex items-center gap-3">
                   <ChartBar size={24} weight="duotone" className="text-white" />
                   <h3 className="text-xl font-bold text-white">游戏统计</h3>
                 </div>
@@ -403,14 +416,14 @@ export function LogicReasoningPage() {
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setShowStats(false)}
-                  className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
+                  className="relative p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
                 >
                   <X size={24} weight="duotone" />
                 </motion.button>
               </div>
 
               {/* 内容 */}
-              <div className="p-6">
+              <div className="relative p-6">
                 <div className="text-center mb-6">
                   <div className="text-5xl font-bold bg-gradient-to-r from-red-500 to-rose-500 bg-clip-text text-transparent mb-2">
                     {gameStats.totalGames}
@@ -525,12 +538,18 @@ export function LogicReasoningPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden border-2 border-red-200 dark:border-red-800 flex flex-col"
+              className="relative rounded-3xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden border-2 border-red-200 dark:border-red-800 flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
+              {/* 背景图 */}
+              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/icon-picture/icon-logic1.jpg')" }} />
+              <div className="absolute inset-0 bg-white/30 dark:bg-gray-900/30 backdrop-blur-[2px]" />
+
               {/* 头部 */}
-              <div className="bg-gradient-to-r from-red-500 to-rose-500 px-6 py-4 flex items-center justify-between flex-shrink-0">
-                <div className="flex items-center gap-3">
+              <div className="relative overflow-hidden px-6 py-4 flex items-center justify-between flex-shrink-0">
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/icon-picture/icon-logic1.jpg')" }} />
+                <div className="absolute inset-0 bg-gradient-to-r from-red-900/80 to-rose-900/70" />
+                <div className="relative flex items-center gap-3">
                   <ClockCounterClockwise size={24} weight="duotone" className="text-white" />
                   <h3 className="text-xl font-bold text-white">推理游戏记录</h3>
                 </div>
@@ -538,14 +557,14 @@ export function LogicReasoningPage() {
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setShowRecords(false)}
-                  className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
+                  className="relative p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
                 >
                   <X size={24} weight="duotone" />
                 </motion.button>
               </div>
 
               {/* 内容 */}
-              <div className="p-6 overflow-y-auto flex-1">
+              <div className="relative p-6 overflow-y-auto flex-1">
                 {gameRecords.length === 0 ? (
                   <div className="text-center py-12">
                     <Trophy size={48} weight="duotone" className="mx-auto text-gray-400 mb-4" />
@@ -712,7 +731,7 @@ export function LogicReasoningPage() {
 
               {/* 底部统计 */}
               {gameRecords.length > 0 && (
-                <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+                <div className="relative px-6 py-4 bg-gray-50/80 dark:bg-gray-900/80 backdrop-blur-sm border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
                   <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
                     共 <span className="font-bold text-red-600 dark:text-red-400">{gameRecords.length}</span> 条游戏记录
                   </p>

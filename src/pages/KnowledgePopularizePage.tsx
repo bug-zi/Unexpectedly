@@ -250,6 +250,14 @@ export function KnowledgePopularizePage() {
             onClick={() => navigate('/knowledge-popularize/ai-ask')}
             className="relative bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 dark:from-green-600 dark:via-emerald-600 dark:to-teal-600 rounded-3xl shadow-2xl p-8 cursor-pointer overflow-hidden group mb-8"
           >
+            {/* 背景图片 */}
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: 'url(/icon-picture/icon-knowledge1.jpg)' }}
+            />
+            {/* 渐变遮罩层 */}
+            <div className="absolute inset-0 bg-gradient-to-br from-green-200/85 via-emerald-200/80 to-teal-200/85 dark:from-green-600/90 dark:via-emerald-600/85 dark:to-teal-600/90" />
+
             {/* 背景动画 */}
             <div className="absolute inset-0">
               <motion.div

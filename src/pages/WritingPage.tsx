@@ -206,8 +206,9 @@ export function WritingPage() {
       {/* 导航栏 */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/50 dark:border-gray-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="relative flex items-center justify-between h-16">
             {/* 左侧：返回按钮 */}
+            <div className="flex-shrink-0">
             <motion.button
               whileHover={{ scale: 1.05, x: -3 }}
               whileTap={{ scale: 0.95 }}
@@ -217,13 +218,14 @@ export function WritingPage() {
               <ArrowLeft size={20} />
               <span className="font-medium hidden sm:inline">返回</span>
             </motion.button>
+            </div>
 
-            {/* 中间：标题 */}
+            {/* 中间：标题 - 绝对定位视口居中 */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ease: customEasing.unexpected }}
-              className="flex items-center gap-3"
+              className="absolute left-0 right-0 flex items-center justify-center gap-3 pointer-events-none"
             >
               <motion.div
                 whileHover={{ rotate: 360 }}
@@ -238,7 +240,7 @@ export function WritingPage() {
             </motion.div>
 
             {/* 右侧：功能按钮组 */}
-            <div className="flex items-center gap-2">
+            <div className="flex-shrink-0 flex items-center gap-2">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

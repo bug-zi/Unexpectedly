@@ -179,20 +179,22 @@ export function RiddlePage() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowInstructions(!showInstructions)}
-                className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-lg hover:shadow-lg transition-all font-medium text-sm"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                title="游戏说明"
               >
-                <HelpCircle size={16} />
-                <span className="hidden sm:inline">游戏说明</span>
+                <HelpCircle size={18} />
+                <span className="hidden md:inline">游戏说明</span>
               </motion.button>
 
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleNewGame}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-500 to-red-500 text-white rounded-lg hover:shadow-lg transition-all font-medium text-sm"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                title="换个谜题"
               >
-                <Shuffle size={16} />
-                <span className="hidden sm:inline">换个谜题</span>
+                <Shuffle size={18} />
+                <span className="hidden md:inline">换个谜题</span>
               </motion.button>
             </div>
           </div>
@@ -275,16 +277,21 @@ export function RiddlePage() {
             className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden border-2 border-red-200 dark:border-red-800"
           >
             {/* 标题区域 */}
-            <div className="bg-gradient-to-r from-red-500 to-orange-500 p-8">
+            <div className="relative p-8 overflow-hidden">
+              <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: 'url(/UI-picture/UI-logic1.jpg)' }}
+              />
+              <div className="absolute inset-0 bg-transparent" />
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-3xl md:text-4xl font-bold text-white mb-2"
+                className="relative z-10 text-3xl md:text-4xl font-bold text-white mb-2"
               >
                 谜语挑战
               </motion.h2>
-              <p className="text-red-100 text-sm">开动脑筋，猜出谜底</p>
+              <p className="relative z-10 text-red-100 text-sm">开动脑筋，猜出谜底</p>
             </div>
 
             {/* 谜面 */}
@@ -336,7 +343,12 @@ export function RiddlePage() {
                       whileTap={{ scale: 0.98 }}
                       onClick={handleSubmitAnswer}
                       disabled={!userAnswer.trim() || showAnswer}
-                      className="px-6 py-3 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      className="px-6 py-3 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 relative overflow-hidden"
+                      style={{
+                        backgroundImage: 'url(/UI-picture/UI-logic1.jpg)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }}
                     >
                       <Send size={20} />
                       <span>提交</span>
@@ -396,7 +408,8 @@ export function RiddlePage() {
                       {currentHintIndex < currentRiddle.hints.length - 1 && (
                         <button
                           onClick={handleNextHint}
-                          className="mt-4 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors"
+                          className="mt-4 px-4 py-2 bg-cover bg-center hover:opacity-90 text-white rounded-lg text-sm font-medium transition-all"
+                          style={{ backgroundImage: "url(/icon-picture/icon-logic1.jpg)" }}
                         >
                           下一个提示
                         </button>
@@ -438,7 +451,12 @@ export function RiddlePage() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setShowHint(!showHint)}
-                      className="flex items-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium"
+                      className="flex items-center gap-2 px-6 py-3 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium relative overflow-hidden"
+                      style={{
+                        backgroundImage: 'url(/UI-picture/UI-logic1.jpg)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }}
                     >
                       {showHint ? <EyeOff size={20} /> : <Lightbulb size={20} />}
                       <span>{showHint ? '隐藏提示' : '显示提示'}</span>
@@ -455,7 +473,12 @@ export function RiddlePage() {
                           message: '查看答案'
                         });
                       }}
-                      className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-rose-500 to-red-500 hover:from-rose-600 hover:to-red-600 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium"
+                      className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium relative overflow-hidden"
+                      style={{
+                        backgroundImage: 'url(/UI-picture/UI-logic1.jpg)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }}
                     >
                       <Eye size={20} />
                       <span>查看答案</span>

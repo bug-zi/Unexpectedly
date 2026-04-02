@@ -34,6 +34,13 @@ export interface TaskProgress {
 // 每日任务配置
 export const DAILY_TASKS_CONFIG: Omit<DailyTask, 'current' | 'completed'>[] = [
   {
+    id: 'daily-reasoning',
+    title: '逻辑推理',
+    description: '进行两次逻辑推理',
+    type: 'reasoning',
+    target: 2,
+  },
+  {
     id: 'daily-question',
     title: '问题思考',
     description: '完成一个问题的思考',
@@ -46,13 +53,6 @@ export const DAILY_TASKS_CONFIG: Omit<DailyTask, 'current' | 'completed'>[] = [
     description: '完成一道写作创作',
     type: 'writing',
     target: 1,
-  },
-  {
-    id: 'daily-reasoning',
-    title: '逻辑推理',
-    description: '进行两次逻辑推理',
-    type: 'reasoning',
-    target: 2,
   },
 ];
 

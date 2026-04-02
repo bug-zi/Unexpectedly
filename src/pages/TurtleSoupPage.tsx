@@ -172,20 +172,22 @@ export function TurtleSoupPage() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowInstructions(!showInstructions)}
-                className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-lg hover:shadow-lg transition-all font-medium text-sm"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                title="游戏说明"
               >
-                <HelpCircle size={16} />
-                <span className="hidden sm:inline">游戏说明</span>
+                <HelpCircle size={18} />
+                <span className="hidden md:inline">游戏说明</span>
               </motion.button>
 
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleNewGame}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-500 to-red-500 text-white rounded-lg hover:shadow-lg transition-all font-medium text-sm"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                title="换个题目"
               >
-                <Shuffle size={16} />
-                <span className="hidden sm:inline">换个题目</span>
+                <Shuffle size={18} />
+                <span className="hidden md:inline">换个题目</span>
               </motion.button>
             </div>
           </div>

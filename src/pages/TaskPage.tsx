@@ -190,6 +190,48 @@ export function TaskPage() {
 
   const calendarData = getCalendarData();
 
+  // 每日任务配色方案 - 根据背景图片主色调适配
+  const getTaskStyle = (taskId: string) => {
+    switch (taskId) {
+      case 'daily-question':
+        return {
+          iconBg: 'bg-gradient-to-br from-blue-100 to-indigo-100',
+          iconColor: 'text-blue-600',
+          numberBg: 'bg-gradient-to-br from-blue-100 to-indigo-100',
+          numberColor: 'bg-gradient-to-br from-blue-600 to-indigo-600 bg-clip-text text-transparent',
+          progressBg: 'bg-gradient-to-r from-blue-400 via-indigo-400 to-blue-500',
+          percentBg: 'bg-blue-100 text-blue-700',
+        };
+      case 'daily-writing':
+        return {
+          iconBg: 'bg-gradient-to-br from-yellow-100 to-amber-100',
+          iconColor: 'text-yellow-600',
+          numberBg: 'bg-gradient-to-br from-yellow-100 to-amber-100',
+          numberColor: 'bg-gradient-to-br from-yellow-600 to-amber-600 bg-clip-text text-transparent',
+          progressBg: 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500',
+          percentBg: 'bg-yellow-100 text-yellow-700',
+        };
+      case 'daily-reasoning':
+        return {
+          iconBg: 'bg-gradient-to-br from-red-100 to-rose-100',
+          iconColor: 'text-red-600',
+          numberBg: 'bg-gradient-to-br from-red-100 to-rose-100',
+          numberColor: 'bg-gradient-to-br from-red-600 to-rose-600 bg-clip-text text-transparent',
+          progressBg: 'bg-gradient-to-r from-red-400 via-rose-400 to-red-500',
+          percentBg: 'bg-red-100 text-red-700',
+        };
+      default:
+        return {
+          iconBg: 'bg-gradient-to-br from-pink-100 to-sky-100',
+          iconColor: 'text-pink-600',
+          numberBg: 'bg-gradient-to-br from-pink-100 to-sky-100',
+          numberColor: 'bg-gradient-to-br from-pink-600 to-sky-600 bg-clip-text text-transparent',
+          progressBg: 'bg-gradient-to-r from-pink-400 via-rose-400 to-sky-400',
+          percentBg: 'bg-pink-100 text-pink-700',
+        };
+    }
+  };
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* 背景图片 */}
@@ -197,12 +239,12 @@ export function TaskPage() {
         className="fixed inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: 'url(/bg-picture/bg-index.jpg)' }}
       />
-      {/* 半透明渐变遮罩 - 顶部更实，底部自然过渡 */}
-      <div className="fixed inset-0" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.5) 20%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0.55) 100%)' }} />
+      {/* 半透明渐变遮罩 */}
+      <div className="fixed inset-0" style={{ background: 'linear-gradient(to bottom, rgba(240,242,245,0.88) 0%, rgba(240,242,245,0.75) 30%, rgba(240,242,245,0.65) 60%, rgba(240,242,245,0.8) 100%)' }} />
       <div className="hidden dark:block fixed inset-0" style={{ background: 'linear-gradient(to bottom, rgba(15,23,41,0.75) 0%, rgba(15,23,41,0.55) 20%, rgba(15,23,41,0.4) 50%, rgba(15,23,41,0.6) 100%)' }} />
 
       {/* 导航栏 */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-xl border-b border-pink-200/60">
+      <nav className="fixed top-0 left-0 right-0 z-50 shadow-none">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <motion.button
@@ -473,10 +515,17 @@ export function TaskPage() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-6"
+                  className="relative overflow-hidden rounded-2xl shadow-lg p-6"
                 >
+                  {/* 背景图片 */}
+                  <div
+                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                    style={{ backgroundImage: 'url(/UI-picture/UI-tasks2.jpg)' }}
+                  />
+                  {/* 浅灰色透明遮罩 */}
+                  <div className="absolute inset-0 bg-gray-100/80 backdrop-blur-lg" />
                   {/* 月份导航 */}
-                  <div className="flex items-center justify-between mb-6">
+                  <div className="relative flex items-center justify-between mb-6">
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
@@ -509,7 +558,7 @@ export function TaskPage() {
                   </div>
 
                   {/* 星期标题 */}
-                  <div className="grid grid-cols-7 gap-2 mb-3">
+                  <div className="relative grid grid-cols-7 gap-2 mb-3">
                     {['日', '一', '二', '三', '四', '五', '六'].map((day, index) => (
                       <div
                         key={index}
@@ -521,7 +570,7 @@ export function TaskPage() {
                   </div>
 
                   {/* 日历格子 */}
-                  <div className="grid grid-cols-7 gap-2">
+                  <div className="relative grid grid-cols-7 gap-2">
                     {calendarData.map((dayInfo, index) => (
                       <motion.div
                         key={index}
@@ -536,7 +585,7 @@ export function TaskPage() {
                             ? 'bg-gradient-to-br from-pink-400 to-sky-400 text-white shadow-lg'
                             : dayInfo.isCompleted
                             ? 'bg-gradient-to-br from-green-100 to-emerald-100 text-green-700 border-2 border-green-300'
-                            : 'bg-gray-100 text-gray-400'
+                            : 'bg-white/60 text-gray-400'
                         }`}
                       >
                         {dayInfo.day && (
@@ -559,13 +608,13 @@ export function TaskPage() {
                   </div>
 
                   {/* 图例 */}
-                  <div className="flex items-center justify-center gap-6 mt-6 pt-4 border-t border-gray-200">
+                  <div className="relative flex items-center justify-center gap-6 mt-6 pt-4 border-t border-gray-200">
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 rounded bg-gradient-to-br from-green-100 to-emerald-100 border-2 border-green-300"></div>
                       <span className="text-sm text-gray-600">已完成</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded bg-gray-100"></div>
+                      <div className="w-4 h-4 rounded bg-white/60"></div>
                       <span className="text-sm text-gray-600">未完成</span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -587,9 +636,16 @@ export function TaskPage() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-5 mb-6"
+                  className="relative overflow-hidden rounded-2xl shadow-lg p-5 mb-6"
                 >
-                  <div className="flex items-center justify-between mb-3">
+                  {/* 背景图片 */}
+                  <div
+                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                    style={{ backgroundImage: "url(/UI-picture/UI-tasks2.jpg)" }}
+                  />
+                  {/* 浅灰色透明遮罩 */}
+                  <div className="absolute inset-0 bg-gray-100/80 backdrop-blur-lg" />
+                  <div className="relative flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <div className="p-2 rounded-lg bg-gradient-to-br from-pink-100 to-sky-100">
                         <TrendingUp size={18} className="text-pink-600" />
@@ -643,15 +699,26 @@ export function TaskPage() {
                       transition={{ delay: index * 0.1 }}
                       whileHover={{ scale: 1.02, y: -2 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`group relative bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg overflow-hidden transition-all duration-300 cursor-pointer ${
+                      className={`group relative rounded-2xl shadow-lg overflow-hidden transition-all duration-300 cursor-pointer ${
                         task.completed
-                          ? 'border-2 border-green-200 shadow-green-100/50'
-                          : 'border-2 border-pink-200 hover:border-sky-400 hover:shadow-sky-200/50'
+                          ? 'shadow-green-100/50'
+                          : ''
                       }`}
                     >
+                      {/* 背景图片 */}
+                      <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none">
+                        <img
+                          src={task.id === "daily-question" ? "/icon-picture/icon-question1.jpg" : task.id === "daily-writing" ? "/icon-picture/icon-writing1.jpg" : "/icon-picture/icon-logic1.jpg"}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          style={{ transform: 'rotate(180deg)' }}
+                        />
+                      </div>
+                      {/* 浅灰色透明遮罩 */}
+                      <div className="absolute inset-0 bg-gray-100/80" />
                       {/* 背景装饰 */}
                       {!task.completed && (
-                        <div className="absolute inset-0 bg-gradient-to-br from-pink-50 to-sky-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-pink-50/50 to-sky-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       )}
 
                       <div className="relative p-6">
@@ -663,13 +730,13 @@ export function TaskPage() {
                               className={`p-3 rounded-2xl ${
                                 task.completed
                                   ? 'bg-gradient-to-br from-green-100 to-emerald-100'
-                                  : 'bg-gradient-to-br from-pink-100 to-sky-100'
+                                  : getTaskStyle(task.id).iconBg
                               }`}
                             >
                               {task.completed ? (
                                 <CheckCircle2 size={26} className="text-green-600" />
                               ) : (
-                                <Circle size={26} className="text-pink-600" />
+                                <Circle size={26} className={getTaskStyle(task.id).iconColor} />
                               )}
                             </motion.div>
 
@@ -688,10 +755,10 @@ export function TaskPage() {
                             className={`text-center px-4 py-2 rounded-xl ${
                               task.completed
                                 ? 'bg-green-100'
-                                : 'bg-gradient-to-br from-pink-100 to-sky-100'
+                                : getTaskStyle(task.id).numberBg
                             }`}
                           >
-                            <div className="text-3xl font-black bg-gradient-to-br from-pink-600 to-sky-600 bg-clip-text text-transparent">
+                            <div className={`text-3xl font-black ${task.completed ? 'bg-gradient-to-br from-green-600 to-emerald-600' : getTaskStyle(task.id).numberColor}`}>
                               {task.current}
                             </div>
                             <div className="text-xs text-gray-600 font-medium mt-0.5">
@@ -701,8 +768,8 @@ export function TaskPage() {
                         </div>
 
                         {/* 进度条 */}
-                        <div className="relative">
-                          <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden shadow-inner">
+                        <div className="flex items-center gap-3">
+                          <div className="flex-1 bg-gray-200 rounded-full h-2.5 overflow-hidden shadow-inner">
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${task.progress}%` }}
@@ -710,7 +777,7 @@ export function TaskPage() {
                               className={`h-full rounded-full relative overflow-hidden ${
                                 task.completed
                                   ? 'bg-gradient-to-r from-green-400 via-emerald-500 to-green-600'
-                                  : 'bg-gradient-to-r from-pink-400 via-rose-400 to-sky-400'
+                                  : getTaskStyle(task.id).progressBg
                               }`}
                             >
                               <motion.div
@@ -731,13 +798,13 @@ export function TaskPage() {
                           <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="absolute -top-1 right-0 transform translate-y-full"
+                            className="flex-shrink-0"
                           >
                             <span
                               className={`text-xs font-bold px-2 py-1 rounded-lg ${
                                 task.completed
                                   ? 'bg-green-100 text-green-700'
-                                  : 'bg-pink-100 text-pink-700'
+                                  : getTaskStyle(task.id).percentBg
                               }`}
                             >
                               {Math.round(task.progress)}%
@@ -779,9 +846,16 @@ export function TaskPage() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-5 mb-6"
+                  className="relative overflow-hidden rounded-2xl shadow-lg p-5 mb-6"
                 >
-                  <div className="flex items-center justify-between mb-3">
+                  {/* 背景图片 */}
+                  <div
+                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                    style={{ backgroundImage: "url(/UI-picture/UI-tasks2.jpg)" }}
+                  />
+                  {/* 浅灰色透明遮罩 */}
+                  <div className="absolute inset-0 bg-gray-100/80 backdrop-blur-lg" />
+                  <div className="relative flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <div className="p-2 rounded-lg bg-gradient-to-br from-sky-100 to-blue-100">
                         <Calendar size={18} className="text-sky-600" />
@@ -836,15 +910,22 @@ export function TaskPage() {
                       whileHover={task.completed ? {} : { scale: 1.02, y: -2 }}
                       whileTap={task.completed ? {} : { scale: 0.98 }}
                       onClick={() => handleWeeklyTaskClick(task)}
-                      className={`group relative bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg overflow-hidden transition-all duration-300 ${
+                      className={`group relative rounded-2xl shadow-lg overflow-hidden transition-all duration-300 ${
                         task.completed
                           ? 'border-2 border-green-200 opacity-70'
                           : 'border-2 border-sky-200 hover:border-blue-400 hover:shadow-sky-200/50 cursor-pointer'
                       }`}
                     >
+                      {/* 背景图片 */}
+                      <div
+                        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                        style={{ backgroundImage: "url(/UI-picture/UI-tasks2.jpg)" }}
+                      />
+                      {/* 浅灰色透明遮罩 */}
+                      <div className="absolute inset-0 bg-gray-100/80 backdrop-blur-lg" />
                       {/* 背景装饰 */}
                       {!task.completed && (
-                        <div className="absolute inset-0 bg-gradient-to-br from-sky-50 to-blue-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-sky-50/50 to-blue-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       )}
 
                       <div className="relative p-6">
@@ -911,19 +992,29 @@ export function TaskPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-8 bg-gradient-to-br from-pink-50 to-rose-50 backdrop-blur-lg border-2 border-pink-200 rounded-2xl p-6 shadow-lg"
+              className="mt-8 relative overflow-hidden rounded-2xl p-6 shadow-lg"
             >
-              <div className="flex items-start gap-3">
+              {/* 背景图片 */}
+              <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none">
+                <img
+                  src="/icon-picture/icon-knowledge1.jpg"
+                  alt=""
+                  className="w-full h-full object-cover"
+                  style={{ transform: 'rotate(180deg)' }}
+                />
+              </div>
+              <div className="absolute inset-0 bg-gray-100/80" />
+              <div className="relative flex items-start gap-3">
                 <motion.div
                   animate={{ rotate: [0, 10, -10, 0] }}
                   transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
-                  className="p-2 rounded-xl bg-pink-100 flex-shrink-0"
+                  className="p-2 rounded-xl bg-green-100 flex-shrink-0"
                 >
-                  <Sparkles size={20} className="text-pink-600" />
+                  <Sparkles size={20} className="text-green-600" />
                 </motion.div>
                 <div className="flex-1">
-                  <h5 className="font-bold text-pink-900 mb-1">小贴士</h5>
-                  <p className="text-sm text-pink-800 leading-relaxed">
+                  <h5 className="font-bold text-green-900 mb-1">小贴士</h5>
+                  <p className="text-sm text-green-800 leading-relaxed">
                     完成任务后，进度会自动更新。每天坚持一点点，培养深度思考习惯！
                   </p>
                 </div>
@@ -935,9 +1026,15 @@ export function TaskPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-8 bg-gradient-to-br from-sky-50 to-blue-50 backdrop-blur-lg border-2 border-sky-200 rounded-2xl p-6 shadow-lg"
+              className="mt-8 relative overflow-hidden rounded-2xl p-6 shadow-lg border-2 border-sky-200"
             >
-              <div className="flex items-start gap-3">
+              {/* 背景图片 */}
+              <div
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                style={{ backgroundImage: "url(/UI-picture/UI-tasks2.jpg)" }}
+              />
+              <div className="absolute inset-0 bg-gray-100/80 backdrop-blur-lg" />
+              <div className="relative flex items-start gap-3">
                 <motion.div
                   animate={{ scale: [1, 1.1, 1] }}
                   transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}

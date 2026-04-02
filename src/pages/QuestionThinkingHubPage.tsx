@@ -69,7 +69,7 @@ export function QuestionThinkingHubPage() {
       {/* 导航栏 */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/60 dark:bg-gray-900/60 backdrop-blur-lg border-b border-gray-200/30 dark:border-gray-800/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="relative grid grid-cols-3 items-center h-16">
             {/* 左侧：返回按钮 */}
             <motion.button
               whileHover={{ scale: 1.05, x: -3 }}
@@ -82,67 +82,69 @@ export function QuestionThinkingHubPage() {
             </motion.button>
 
             {/* 中间：标题 */}
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ ease: customEasing.unexpected }}
-              className="flex items-center gap-3"
-            >
+            <div className="flex items-center justify-center">
               <motion.div
-                whileHover={{ rotate: 360 }}
-                transition={{ duration: 0.6 }}
-                className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-500 to-amber-500 flex items-center justify-center shadow-lg"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ease: customEasing.unexpected }}
+                className="relative inline-flex items-center"
               >
-                <Brain size={20} className="text-white" />
+                <motion.div
+                  whileHover={{ rotate: 360 }}
+                  transition={{ duration: 0.6 }}
+                  className="absolute right-[calc(100%+6px)] w-8 h-8 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center"
+                >
+                  <Brain size={20} className="text-yellow-500 dark:text-yellow-400" />
+                </motion.div>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent">
+                  问题思考
+                </h1>
               </motion.div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent hidden sm:block">
-                问题思考
-              </h1>
-            </motion.div>
+            </div>
 
             {/* 右侧：功能按钮组 */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-end gap-2">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowInstructions(true)}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg transition-all"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg transition-all whitespace-nowrap"
                 title="模式说明"
               >
                 <BookOpen size={18} />
-                <span className="hidden md:inline">模式说明</span>
+                <span>模式说明</span>
               </motion.button>
 
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={startRandomModule}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg transition-all"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg transition-all whitespace-nowrap"
                 title="随机开始思考"
               >
                 <Shuffle size={18} />
-                <span className="hidden md:inline">随机开始</span>
+                <span>随机开始</span>
               </motion.button>
 
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowStats(true)}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg transition-all"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg transition-all whitespace-nowrap"
                 title="查看思考统计"
               >
                 <BarChart3 size={18} />
-                <span className="hidden md:inline">思考统计</span>
+                <span>思考统计</span>
               </motion.button>
 
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg transition-all"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg transition-all whitespace-nowrap"
                 title="查看历史记录"
               >
                 <History size={18} />
-                <span className="hidden md:inline">历史记录</span>
+                <span>历史记录</span>
               </motion.button>
             </div>
           </div>

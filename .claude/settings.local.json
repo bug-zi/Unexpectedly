@@ -129,7 +129,24 @@
       "Bash(powershell -Command \"Get-Process chrome -ErrorAction SilentlyContinue | Stop-Process -Force\")",
       "Bash(powershell -Command \"Stop-Process -Name chrome -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 3; 'done'\")",
       "Bash(xargs grep:*)",
-      "Bash(xxd:*)"
+      "Bash(xxd:*)",
+      "Bash(vercel ls:*)",
+      "Bash(cmd.exe /c 'taskkill /F /IM chrome.exe')",
+      "Bash(for pid:*)",
+      "Bash(do taskkill:*)",
+      "Bash(done)",
+      "Bash(node -e \":*)",
+      "Bash(powershell -Command \"Stop-Process -Name chrome -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 3; Get-Process chrome -ErrorAction SilentlyContinue | Select-Object -Property Id,ProcessName\")",
+      "Bash(cmd.exe /c \"wmic process where \\\\\"name='chrome.exe'\\\\\" get ProcessId,CommandLine\" 2>/dev/null)",
+      "Bash(powershell -Command \"Get-Process chrome -ErrorAction SilentlyContinue | Select-Object Id, Path, CommandLine | Format-List\" 2>/dev/null)",
+      "Bash(grep -iE \"puzzle|book|light|question|hash|chart|shuffle|trophy|calendar|arrow|clock|x$|x;\")",
+      "Bash(grep -iE \"^Puzzle|^BookOpen|^Lightbulb|^Question$|^Hash$|^ChartBar|^Shuffle$|^Trophy$|^Calendar|^ArrowLeft$|^ClockCounter|^X$\")",
+      "Bash(grep -E \"^ArrowLeft$\")",
+      "Bash(grep -rn /profile D:/Code/自创项目/万万没想到/src/ --include=*.tsx -l)",
+      "Bash(cp \"C:/Users/Administrator/.claude/image-cache/ed7839c9-f028-4548-afd8-b1989effb5be/5.jpeg\" \"D:/Code/自创项目/万万没想到/public/UI-picture/UI-riddle.jpg\")",
+      "Bash(cp \"C:/Users/Administrator/.claude/image-cache/ed7839c9-f028-4548-afd8-b1989effb5be/5.jpeg\" \"D:/Code/自创项目/万万没想到/public/UI-picture/UI-guess-number.jpg\")",
+      "Bash(grep -A \"error|Error\")",
+      "Bash(powershell -Command \"Get-Process chrome -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 3; \\(Get-Process chrome -ErrorAction SilentlyContinue\\).Count\")"
     ]
   }
 }

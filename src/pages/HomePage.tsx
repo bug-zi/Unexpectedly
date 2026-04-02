@@ -204,10 +204,8 @@ export function HomePage() {
         </div>
       </div>
 
-      {/* 导航栏 - 带底部渐隐过渡 */}
-      <nav className="fixed top-0 left-0 right-0 z-50 shadow-none" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.5) 70%, rgba(255,255,255,0) 100%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)', backdropFilter: 'blur(24px) saturate(180%)' }}>
-        <div className="dark:hidden absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.5) 70%, rgba(255,255,255,0) 100%)' }} />
-        <div className="hidden dark:block absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(15,23,41,0.8) 0%, rgba(15,23,41,0.5) 70%, rgba(15,23,41,0) 100%)' }} />
+      {/* 导航栏 - 完全透明，背景图直接穿透 */}
+      <nav className="fixed top-0 left-0 right-0 z-50 shadow-none">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <motion.div

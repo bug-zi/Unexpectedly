@@ -20,6 +20,66 @@ interface CheckInRecord {
 
 type MoodType = 'coral' | 'orange' | 'blue' | 'green';
 
+const MOOD_BG_IMAGE: Record<MoodType, string> = {
+  coral: '/UI-picture/UI-logic2.jpg',
+  orange: '/UI-picture/UI-question1.jpg',
+  blue: '/UI-picture/UI-writing1.jpg',
+  green: '/UI-picture/UI-knowledge2.jpg',
+};
+
+const thinkingQuotes = [
+  "逻辑不是知识的全部，却是所有知识的出发点。",
+  "每一个坚实的结论背后，都站着一排无声的证据。",
+  "推理的本质，是从已知的碎片中重构未知的全貌。",
+  "如果前提是错的，再严密的逻辑也只会带你走向更远的谬误。",
+  "因果律是世界的脊梁，而推理则是顺着脊梁攀爬的过程。",
+  "排除所有不可能，剩下的无论多么不可思议，都是真相。",
+  "定义不清的讨论，只是在不同频率上的无效呼喊。",
+  "逻辑是思维的语法，确保我们不仅在说话，而且在表达意义。",
+  "归纳法让我们认识世界，演绎法让我们理解世界。",
+  "逻辑的力量在于：它能强迫你的头脑承认它并不想接受的结论。",
+  "思考不是为了寻找标准答案，而是为了拆解问题的本质。",
+  "伟大的发现往往源于对「理所当然」的第一次怀疑。",
+  "洞察力是看穿表象的X射线，能发现事物间隐秘的关联。",
+  "所谓直觉，往往是高度熟练后的瞬间推理。",
+  "深度思考是孤独的，因为你需要穿过常识的丛林。",
+  "最简单的问题，往往需要最深刻的推理才能回答。",
+  "观察是收集拼图，而思考是拼合过程。",
+  "能够站在对手的角度进行推理，是心智成熟的标志。",
+  "偏见是思维的围墙，思考则是拆除围墙的锤子。",
+  "真正的深刻，是能将复杂的事物归纳为简单的真理。",
+  "怀疑不是终点，而是通往确信的必经之路。",
+  "永远不要爱上你的第一个假设。",
+  "批判性思维最重要的目标，是审视自己的思维模型。",
+  "当所有人的想法都一样时，说明没有人真的在思考。",
+  "警惕那些完美的逻辑，因为现实往往充满了随机的杂音。",
+  "证伪比证实更有力量，因为它能剔除错误的幻想。",
+  "知识的边界由逻辑划定，而认知的疆域由怀疑拓展。",
+  "保持开放的心态，但别让你的大脑因为太开放而掉出来。",
+  "推理的陷阱通常不在于计算错误，而在于情感倾向。",
+  "所有的共识都值得被再次审视。",
+  "思考的深度决定了选择的高度。",
+  "决策是推理在现实世界中的落脚点。",
+  "概率是理性的语言，世界并非非黑即白。",
+  "平庸的思维寻找借口，优秀的思维寻找变量。",
+  "长期主义的本质，是对未来因果链条的坚定推演。",
+  "在信息不足的情况下保持冷静，也是一种高级的逻辑。",
+  "推理不仅是向前预测，更是向后追溯失败的根源。",
+  "最好的决策不是没有风险，而是算清了风险。",
+  "思维模型就像工具箱，你拥有的工具越多，看世界的维度越广。",
+  "战略是思考的艺术，而执行是逻辑的验证。",
+  "我思故我在。",
+  "思想的力量远比枪炮更有穿透力。",
+  "思考是灵魂与自己的对话。",
+  "逻辑是严寒中的火种，照亮混乱中的秩序。",
+  "博学而不思，如同吃下食物却不消化。",
+  "推理是连接已知岸边与未知彼岸的桥梁。",
+  "智慧的增长不在于信息的积累，而在于对信息处理方式的进化。",
+  "逻辑可以带你从A走到B，而想象力和推理能带你去任何地方。",
+  "一个人的思维疆域，就是他世界的边界。",
+  "终身思考者，永远不会在平庸中老去。",
+];
+
 interface MoodConfig {
   type: MoodType;
   label: string;
@@ -196,17 +256,6 @@ export function CheckInPage() {
     return checkInHistory.filter((r) => r.date.startsWith(prefix));
   }, [checkInHistory]);
 
-  const dominantMood = useMemo((): MoodConfig | null => {
-    const moodCounts: Record<string, number> = {};
-    thisMonthRecords.forEach((r) => {
-      if (r.mood) moodCounts[r.mood] = (moodCounts[r.mood] || 0) + 1;
-    });
-    const entries = Object.entries(moodCounts);
-    if (entries.length === 0) return null;
-    entries.sort((a, b) => b[1] - a[1]);
-    return MOODS.find((m) => m.type === entries[0][0]) || null;
-  }, [thisMonthRecords]);
-
   // 签到庆祝粒子
   const celebrationParticles = useMemo(() =>
     Array.from({ length: 16 }, (_, i) => ({
@@ -218,6 +267,13 @@ export function CheckInPage() {
     })), []);
 
   const todayMoodConfig = todayMood ? MOODS.find((m) => m.type === todayMood) : null;
+
+  // 今日语录 - 基于日期固定，用户不可更改
+  const todayQuote = useMemo(() => {
+    const dateStr = `${today.getFullYear()}${today.getMonth() + 1}${today.getDate()}`;
+    const index = parseInt(dateStr, 10) % thinkingQuotes.length;
+    return thinkingQuotes[index];
+  }, []);
 
   // 日期格式化
   const formatDate = () => {
@@ -242,98 +298,67 @@ export function CheckInPage() {
       <div className="hidden dark:block fixed inset-0" style={{ background: 'linear-gradient(to bottom, rgba(15,23,41,0.75) 0%, rgba(15,23,41,0.55) 20%, rgba(15,23,41,0.4) 50%, rgba(15,23,41,0.6) 100%)' }} />
 
       {/* 主容器 */}
-      <div className="relative w-full max-w-[1200px] min-h-screen md:min-h-0 flex flex-col md:flex-row gap-4 md:gap-6 p-4 md:p-6">
+      <div className="relative w-full max-w-[900px] min-h-screen md:min-h-0 flex flex-col p-3 md:p-5">
 
-        {/* ---- 左侧栏 (Sidebar) ---- */}
-        <aside
-          className="glass-panel w-full md:w-[240px] rounded-[24px] md:rounded-[32px] p-5 md:p-6 flex flex-row md:flex-col justify-between md:justify-between shrink-0 relative z-10"
-        >
-          <div className="flex-1 md:flex-none">
-            <h2 className="text-lg md:text-xl font-bold mb-4 md:mb-8 text-[#2D3436]/80">
-              本月 <span className="text-sm font-normal text-[#636E72]">(This Month)</span>
-            </h2>
-            <div className="mb-4 md:mb-10">
-              <p className="text-xs md:text-sm text-[#636E72] mb-1 md:mb-2 font-medium">累计打卡 (Total Days)</p>
-              <div className="flex items-baseline gap-1 md:gap-2">
-                <span className="text-4xl md:text-6xl font-bold text-[#f53d3d] tracking-tighter">{thisMonthRecords.length}</span>
-                <span className="text-[#636E72] font-medium text-sm">天</span>
-              </div>
-            </div>
-            <div className="hidden md:block">
-              <p className="text-sm text-[#636E72] mb-4 font-medium">主导心情 (Dominant Mood)</p>
-              {dominantMood ? (
-                <div className="flex items-center gap-3 bg-white/30 rounded-full p-3 border border-white/50">
-                  <div className={`w-10 h-10 rounded-full ${dominantMood.bgClass} ${dominantMood.shadowClass} flex items-center justify-center`}>
-                    {dominantMood.icon}
-                  </div>
-                  <span className="font-bold text-[#2D3436]">{dominantMood.labelCn} ({dominantMood.label})</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3 bg-white/30 rounded-full p-3 border border-white/50">
-                  <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
-                    <span className="text-white text-lg">?</span>
-                  </div>
-                  <span className="font-bold text-[#636E72]">暂无数据</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* 底部装饰 */}
-          <div className="hidden md:flex w-full h-32 rounded-2xl bg-gradient-to-t from-white/40 to-transparent border border-white/20 items-center justify-center overflow-hidden relative">
-            <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
-            <span className="text-[#636E72]/50 text-sm font-medium z-10 relative">
-              {isCheckedIn ? 'Great job! ✨' : 'Keep it up! ✨'}
-            </span>
-          </div>
-
-          {/* 移动端返回按钮 */}
-          <div className="md:hidden flex items-center">
+        {/* ---- 固定顶部导航 ---- */}
+        <header className="flex items-center justify-between mb-3 md:mb-4">
+          <div className="flex items-center gap-3">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate(-1)}
-              className="w-10 h-10 glass-panel rounded-full flex items-center justify-center hover:bg-white/60 transition-colors"
+              className="w-10 h-10 glass-panel rounded-full flex items-center justify-center hover:bg-white/60 transition-colors cursor-pointer"
             >
               <ArrowLeft size={18} />
             </motion.button>
+            <h1 className="text-lg md:text-2xl font-bold text-[#2D3436] tracking-tight">
+              {monthNames[today.getMonth()]}日历
+            </h1>
           </div>
-        </aside>
-
-        {/* ---- 右侧主区域 ---- */}
-        <main className="flex-1 flex flex-col relative z-0">
-          {/* 顶部栏 */}
-          <header className="flex justify-between items-center mb-3 md:mb-5 h-10 md:h-12">
-            <div className="flex items-center gap-3">
-              {/* 返回按钮 - 桌面端 */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate(-1)}
-                className="hidden md:flex w-12 h-12 glass-panel rounded-full items-center justify-center hover:bg-white/60 transition-colors cursor-pointer"
-              >
-                <ArrowLeft size={20} />
-              </motion.button>
-              <h1 className="text-xl md:text-3xl font-bold text-[#2D3436] tracking-tight">
-                {monthNames[today.getMonth()]}日历{' '}
-                <span className="text-base md:text-xl font-normal text-[#636E72] ml-1 md:ml-2">
-                  {today.toLocaleDateString('en-US', { month: 'long' })} Vault
-                </span>
-              </h1>
+          <div className="flex items-center gap-2">
+            <div className="glass-panel rounded-full px-2 md:px-3 py-1 text-[10px] md:text-xs text-[#636E72] font-medium hidden md:block">
+              {formatDate()}
             </div>
-            {/* 日期药丸 + 连续天数 */}
-            <div className="flex items-center gap-2">
-              <div className="glass-panel rounded-full px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-[#636E72] font-medium hidden md:block">
-                {formatDate()}
+            {totalDays > 0 && (
+              <div className="glass-panel rounded-full px-2 md:px-3 py-1 flex items-center gap-1">
+                <span className="text-xs md:text-sm">🔥</span>
+                <span className="text-[10px] md:text-xs font-bold text-[#2D3436] tracking-wide">累计 {totalDays} 天</span>
               </div>
-              {totalDays > 0 && (
-                <div className="glass-panel rounded-full px-3 md:px-4 py-1.5 md:py-2 flex items-center gap-1 md:gap-2">
-                  <span className="text-sm md:text-lg">🔥</span>
-                  <span className="text-xs md:text-sm font-bold text-[#2D3436] tracking-wide">累计 {totalDays} 天</span>
-                </div>
-              )}
+            )}
+          </div>
+        </header>
+
+        {/* ---- 统计 + 语录 横排 ---- */}
+        <div className="flex gap-3 mb-3 md:mb-4">
+          {/* 累计打卡 */}
+          <div className="glass-panel rounded-[16px] px-4 py-3 flex items-center gap-3 shrink-0">
+            <div>
+              <p className="text-[10px] md:text-xs text-[#636E72] font-medium">本月打卡</p>
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl md:text-4xl font-bold text-[#f53d3d] tracking-tighter">{thisMonthRecords.length}</span>
+                <span className="text-[#636E72] font-medium text-xs">天</span>
+              </div>
             </div>
-          </header>
+          </div>
+          {/* 今日语录 */}
+          <div className="glass-panel rounded-[16px] px-4 py-3 flex-1 min-w-0 relative overflow-hidden">
+            {todayMood && MOOD_BG_IMAGE[todayMood] && (
+              <>
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{ backgroundImage: `url('${MOOD_BG_IMAGE[todayMood]}')` }}
+                />
+                <div className="absolute inset-0 bg-white/60" />
+              </>
+            )}
+            <div className="relative z-10">
+              <p className="text-[10px] md:text-xs text-[#636E72] font-medium mb-1">今日语录</p>
+              <p className="text-xs md:text-sm text-[#2D3436]/80 leading-relaxed italic line-clamp-2">
+                "{todayQuote}"
+              </p>
+            </div>
+          </div>
+        </div>
 
           {/* 未签到时显示 Hero CTA 区域 */}
           <AnimatePresence mode="wait">
@@ -344,7 +369,7 @@ export function CheckInPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -30 }}
                 transition={{ duration: 0.4 }}
-                className="glass-panel rounded-[24px] md:rounded-[32px] p-6 md:p-10 mb-3 md:mb-5 flex flex-col items-center justify-center relative overflow-hidden"
+                className="glass-panel rounded-[20px] md:rounded-[24px] p-4 md:p-6 mb-2 md:mb-3 flex flex-col items-center justify-center relative overflow-hidden"
               >
                 {/* 装饰光效 */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent opacity-50 pointer-events-none" />
@@ -353,7 +378,7 @@ export function CheckInPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="text-2xl md:text-4xl lg:text-5xl font-bold text-[#2D3436] mb-8 md:mb-16 text-center tracking-tight relative z-10"
+                  className="text-xl md:text-2xl font-bold text-[#2D3436] mb-4 md:mb-6 text-center tracking-tight relative z-10"
                 >
                   今日份的<span className="text-[#f53d3d] opacity-90">万万没想到...</span>
                 </motion.h2>
@@ -383,20 +408,20 @@ export function CheckInPage() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleOpenMoodPicker}
-                    className="glass-panel glass-button shadow-glass relative w-[180px] md:w-[240px] h-[72px] md:h-[88px] rounded-full flex items-center justify-center cursor-pointer animate-breathe focus:outline-none focus:ring-4 focus:ring-[#f53d3d]/30 overflow-hidden group"
+                    className="glass-panel glass-button shadow-glass relative w-[140px] md:w-[180px] h-[56px] md:h-[68px] rounded-full flex items-center justify-center cursor-pointer animate-breathe focus:outline-none focus:ring-4 focus:ring-[#f53d3d]/30 overflow-hidden group"
                   >
                     {/* Shine effect */}
                     <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent group-hover:animate-[shimmer_1.5s_infinite] skew-x-12" />
-                    <span className="text-[#f53d3d] font-bold text-lg md:text-2xl tracking-widest relative z-10 flex items-center gap-2">
+                    <span className="text-[#f53d3d] font-bold text-base md:text-xl tracking-widest relative z-10 flex items-center gap-2">
                       立即揭晓
-                      <svg className="w-6 h-6 md:w-7 md:h-7 group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 24 24" fill="currentColor">
+                      <svg className="w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                       </svg>
                     </span>
                   </motion.button>
                 </div>
 
-                <p className="mt-4 md:mt-8 text-[#636E72]/50 text-xs md:text-sm font-medium tracking-widest uppercase relative z-10">
+                <p className="mt-2 md:mt-4 text-[#636E72]/50 text-[10px] md:text-xs font-medium tracking-widest uppercase relative z-10">
                   Click to check in
                 </p>
               </motion.div>
@@ -411,16 +436,17 @@ export function CheckInPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                className="glass-panel rounded-[24px] md:rounded-[32px] p-5 md:p-6 mb-3 md:mb-5 flex flex-col items-center justify-center"
+                className="glass-panel rounded-[20px] md:rounded-[24px] p-3 md:p-4 mb-2 md:mb-3 flex items-center justify-center gap-4"
               >
-                <div className={`w-16 h-16 md:w-20 md:h-20 rounded-full ${todayMoodConfig.bgClass} ${todayMoodConfig.shadowClass} flex items-center justify-center mb-4`}>
+                <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full ${todayMoodConfig.bgClass} ${todayMoodConfig.shadowClass} flex items-center justify-center`}>
                   {todayMoodConfig.icon}
                 </div>
-                <h3 className="text-xl md:text-2xl font-bold text-[#2D3436] mb-2">今日已签到</h3>
-                <p className="text-[#636E72] text-sm">
-                  心情: {todayMoodConfig.labelCn} ({todayMoodConfig.label})
-                </p>
-                <p className="text-[#636E72]/50 text-xs mt-2">累计签到 {totalDays} 天</p>
+                <div>
+                  <h3 className="text-base md:text-lg font-bold text-[#2D3436]">今日已签到</h3>
+                  <p className="text-[#636E72] text-xs">
+                    心情: {todayMoodConfig.labelCn} ({todayMoodConfig.label}) · 累计 {totalDays} 天
+                  </p>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -430,14 +456,14 @@ export function CheckInPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="glass-panel rounded-[24px] md:rounded-[32px] p-4 md:p-6 flex-1 flex flex-col min-h-0"
+            className="glass-panel rounded-[20px] md:rounded-[24px] p-3 md:p-4 flex-1 flex flex-col min-h-0"
           >
             {/* 星期标题 (Monday first) */}
-            <div className="grid grid-cols-7 gap-1 md:gap-2 mb-2 md:mb-3 text-center">
+            <div className="grid grid-cols-7 gap-1 mb-1 md:mb-2 text-center">
               {weekDays.map((day, i) => (
                 <div
                   key={day}
-                  className={`text-[#636E72] font-semibold text-xs md:text-sm py-1 ${i >= 5 ? 'opacity-50' : ''}`}
+                  className={`text-[#636E72] font-semibold text-[10px] md:text-xs py-0.5 ${i >= 5 ? 'opacity-50' : ''}`}
                 >
                   {day}
                 </div>
@@ -445,10 +471,10 @@ export function CheckInPage() {
             </div>
 
             {/* 日期网格 */}
-            <div className="grid grid-cols-7 gap-1 md:gap-2">
+            <div className="grid grid-cols-7 gap-1">
               {monthData.map((dayInfo, idx) => {
                 if (dayInfo.isEmpty) {
-                  return <div key={`empty-${idx}`} className="aspect-square" />;
+                  return <div key={`empty-${idx}`} className="py-2 md:py-3" />;
                 }
 
                 const isCheckDay = dayInfo.hasChecked;
@@ -456,29 +482,42 @@ export function CheckInPage() {
                 const isFuture = dayInfo.isFuture;
                 const moodCfg = dayInfo.mood ? MOODS.find((m) => m.type === dayInfo.mood) : null;
 
+                const moodBg = isCheckDay && dayInfo.mood ? MOOD_BG_IMAGE[dayInfo.mood] : null;
+
                 return (
                   <motion.div
                     key={dayInfo.date}
                     whileHover={!isFuture ? { scale: 1.05, y: -2 } : {}}
                     className={`
-                      aspect-square rounded-[10px] md:rounded-[14px]
-                      glass-cell flex flex-col items-center justify-center relative group cursor-pointer
+                      rounded-[8px] md:rounded-[12px] py-2 md:py-3
+                      glass-cell flex flex-col items-center justify-center relative group cursor-pointer overflow-hidden
                       ${isFuture ? 'opacity-40 cursor-default' : ''}
                     `}
                   >
-                    <span className={`text-[10px] md:text-sm font-bold mb-0.5 ${
-                      isToday ? 'text-[#f53d3d]' : 'text-[#636E72]/60'
+                    {/* 日期背景图 */}
+                    {moodBg ? (
+                      <>
+                        <div
+                          className="absolute inset-0 bg-cover bg-center"
+                          style={{ backgroundImage: `url('${moodBg}')` }}
+                        />
+                        <div className="absolute inset-0 bg-white/40" />
+                      </>
+                    ) : !isFuture ? (
+                      <>
+                        <div
+                          className="absolute inset-0 bg-cover bg-center"
+                          style={{ backgroundImage: "url('/UI-picture/UI-checkin.jpg')" }}
+                        />
+                        <div className="absolute inset-0 bg-white/40" />
+                      </>
+                    ) : null}
+                    <span className={`text-[9px] md:text-xs font-bold relative z-10 ${
+                      moodBg ? 'text-white drop-shadow-md' : isToday ? 'text-[#f53d3d]' : 'text-[#636E72]/60'
                     }`}>
                       {dayInfo.day}
                     </span>
 
-                    {/* 心情点 */}
-                    {isCheckDay && moodCfg && (
-                      <div className={`w-2 h-2 md:w-3 md:h-3 rounded-full ${moodCfg.dotClass} ${isToday ? 'animate-pulse' : ''}`} />
-                    )}
-                    {isCheckDay && !moodCfg && (
-                      <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-[#636E72]/30" />
-                    )}
 
                     {/* 今天标记 - 脉冲边框 */}
                     {isToday && (
@@ -490,7 +529,7 @@ export function CheckInPage() {
                           }
                         `}</style>
                         <div
-                          className="absolute inset-0 rounded-[10px] md:rounded-[16px] border-2 border-white pointer-events-none"
+                          className="absolute inset-0 rounded-[8px] md:rounded-[12px] border-2 border-white pointer-events-none"
                           style={{ animation: 'pulseBorder 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}
                         />
                       </>
@@ -514,16 +553,15 @@ export function CheckInPage() {
             </div>
 
             {/* 图例 */}
-            <div className="flex items-center justify-center gap-4 md:gap-6 mt-2 md:mt-4 text-xs text-[#636E72]/60">
+            <div className="flex items-center justify-center gap-3 md:gap-5 mt-1 md:mt-2 text-[10px] md:text-xs text-[#636E72]/60">
               {MOODS.map((mood) => (
-                <span key={mood.type} className="flex items-center gap-1 md:gap-1.5">
-                  <span className={`w-2 md:w-2.5 h-2 md:h-2.5 rounded-full ${mood.dotClass}`} />
+                <span key={mood.type} className="flex items-center gap-1">
+                  <span className={`w-1.5 md:w-2 h-1.5 md:h-2 rounded-full ${mood.dotClass}`} />
                   <span className="hidden md:inline">{mood.labelCn}</span>
                 </span>
               ))}
             </div>
           </motion.div>
-        </main>
       </div>
 
       {/* ---- 心情选择弹窗 ---- */}

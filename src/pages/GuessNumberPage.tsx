@@ -183,20 +183,22 @@ export function GuessNumberPage() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowInstructions(!showInstructions)}
-                className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg hover:shadow-lg transition-all font-medium text-sm"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                title="游戏说明"
               >
-                <HelpCircle size={16} />
-                <span className="hidden sm:inline">游戏说明</span>
+                <HelpCircle size={18} />
+                <span className="hidden md:inline">游戏说明</span>
               </motion.button>
 
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={startNewGame}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:shadow-lg transition-all font-medium text-sm"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                title="新游戏"
               >
-                <Shuffle size={16} />
-                <span className="hidden sm:inline">新游戏</span>
+                <Shuffle size={18} />
+                <span className="hidden md:inline">新游戏</span>
               </motion.button>
             </div>
           </div>
@@ -286,16 +288,21 @@ export function GuessNumberPage() {
             className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden border-2 border-red-200 dark:border-red-800"
           >
             {/* 标题区域 */}
-            <div className="bg-gradient-to-r from-orange-500 to-red-500 p-8">
+            <div className="relative p-8 overflow-hidden">
+              <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: 'url(/UI-picture/UI-logic2.jpg)' }}
+              />
+              <div className="absolute inset-0 bg-transparent" />
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-3xl md:text-4xl font-bold text-white mb-2"
+                className="relative z-10 text-3xl md:text-4xl font-bold text-white mb-2"
               >
                 猜数字挑战
               </motion.h2>
-              <p className="text-orange-100 text-sm">根据xAxB提示，猜出四位不重复数字</p>
+              <p className="relative z-10 text-orange-100 text-sm">根据xAxB提示，猜出四位不重复数字</p>
             </div>
 
             {/* 游戏区域 */}
@@ -335,7 +342,12 @@ export function GuessNumberPage() {
                       whileTap={{ scale: 0.98 }}
                       onClick={handleSubmitGuess}
                       disabled={currentGuess.length !== 4 || isGameOver}
-                      className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      className="px-6 py-3 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 relative overflow-hidden"
+                      style={{
+                        backgroundImage: 'url(/UI-picture/UI-logic2.jpg)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }}
                     >
                       <Send size={20} />
                       <span>猜测</span>
