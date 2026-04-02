@@ -51,15 +51,14 @@ export function GrowthTrackerPage() {
   // 从云端加载数据（如果已登录）
   useEffect(() => {
     const loadData = async () => {
+      // 始终先加载本地数据，确保立即显示
+      const local = getAnswers();
+      setAnswers(local);
+      loadAllActivities(local);
+
+      // 如果已登录，再从云端同步
       if (isAuthenticated && user) {
-        // 从云端加载
         await loadFromCloud();
-      } else {
-        // 从本地加载
-        const local = getAnswers();
-        setAnswers(local);
-        // 加载所有活动
-        loadAllActivities();
       }
     };
 
@@ -76,7 +75,7 @@ export function GrowthTrackerPage() {
         } else {
           const local = getAnswers();
           setAnswers(local);
-          loadAllActivities();
+          loadAllActivities(local);
         }
       }, 100);
     };
@@ -93,8 +92,8 @@ export function GrowthTrackerPage() {
   }, [isAuthenticated, user]);
 
   // 加载所有类型的活动记录
-  const loadAllActivities = () => {
-    const answersData = getAnswers();
+  const loadAllActivities = (data?: Answer[]) => {
+    const answersData = data || getAnswers();
 
     // 转换为统一的活动格式 - 只保留问答记录
     const allActivities: Activity[] = answersData.map(a => ({
@@ -139,8 +138,8 @@ export function GrowthTrackerPage() {
           userId: answer.user_id,
           content: answer.content,
           metadata: {
-            wordCount: (answer.metadata as any).wordCount || 0,
-            readingTime: (answer.metadata as any).readingTime || 0,
+            wordCount: (answer.metadata as any)?.wordCount || 0,
+            readingTime: (answer.metadata as any)?.readingTime || 0,
             writingTime: (answer.metadata as any).writingTime || 0,
             mood: (answer.metadata as any).mood,
             tags: (answer.metadata as any).tags,
@@ -162,14 +161,18 @@ export function GrowthTrackerPage() {
 
         setAnswers(mergedAnswers);
         setSyncStatus('success');
-        // 加载所有活动
-        loadAllActivities();
+        // 用合并后的数据加载活动
+        loadAllActivities(mergedAnswers);
+      } else {
+        // 云端无数据，仍使用本地数据
+        loadAllActivities(localAnswers);
       }
     } catch (error) {
       console.error('从云端加载数据失败:', error);
       // 降级到本地数据
       const local = getAnswers();
       setAnswers(local);
+      loadAllActivities(local);
       setSyncStatus('error');
     } finally {
       setLoading(false);
@@ -340,7 +343,7 @@ export function GrowthTrackerPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <button
-              onClick={() => navigate('/questions')}
+              onClick={() => navigate('/questions/explore')}
               className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
             >
               <Icon icon="ph:arrow-left" width={22} height={22} />

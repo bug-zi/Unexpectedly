@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Star, Clock, Users } from 'lucide-react';
 import { Question } from '@/types';
 import { getCategoryConfig } from '@/constants/categories';
-import { Button } from '@/components/ui/Button';
 import { CategoryIcon } from '@/components/ui/Icon';
 import { clsx } from 'clsx';
 import { useFavorites } from '@/hooks/useFavorites';
@@ -256,33 +255,50 @@ export function QuestionCard({
 
       {/* 操作按钮 */}
       <div className="flex flex-col sm:flex-row gap-4">
-        <Button
-          variant="ghost"
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={onStart}
-          fullWidth
-          className="!bg-amber-500 hover:!bg-amber-600 !text-white !border-0 shadow-md hover:shadow-lg"
+          className="relative overflow-hidden w-full py-2.5 px-4 rounded-lg text-white font-medium shadow-md hover:shadow-lg transition-all"
         >
-          开始思考
-        </Button>
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: 'url(/icon-picture/icon-question1.jpg)' }}
+          />
+          <div className="absolute inset-0 bg-black/30" />
+          <span className="relative z-10">开始思考</span>
+        </motion.button>
         {onRoundtable && (
-          <Button
-            variant="ghost"
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={onRoundtable}
-            fullWidth
-            className="border-2 border-amber-400 dark:border-amber-600 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+            className="relative overflow-hidden w-full py-2.5 px-4 rounded-lg font-medium transition-all"
           >
-            <Users size={16} className="mr-1" />
-            大咖圆桌
-          </Button>
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: 'url(/icon-picture/icon-question1.jpg)' }}
+            />
+            <div className="absolute inset-0 bg-white/60 dark:bg-gray-800/70" />
+            <span className="relative z-10 flex items-center justify-center text-amber-700 dark:text-amber-300">
+              <Users size={16} className="mr-1" />
+              大咖圆桌
+            </span>
+          </motion.button>
         )}
-        <Button
-          variant="ghost"
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={onSkip}
-          className="border border-amber-200 dark:border-amber-800 text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-amber-900/20"
-          fullWidth
+          className="relative overflow-hidden w-full py-2.5 px-4 rounded-lg font-medium transition-all border border-amber-200 dark:border-amber-800"
         >
-          换一个
-        </Button>
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: 'url(/icon-picture/icon-question1.jpg)' }}
+          />
+          <div className="absolute inset-0 bg-white/70 dark:bg-gray-900/70" />
+          <span className="relative z-10 text-gray-700 dark:text-gray-300">换一个</span>
+        </motion.button>
       </div>
 
       {/* 标签 */}

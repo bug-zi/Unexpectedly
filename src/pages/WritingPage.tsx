@@ -204,7 +204,7 @@ export function WritingPage() {
 
       {/* 导航栏 */}
       {/* 导航栏 */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/50 dark:border-gray-800/50">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-transparent border-b border-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative flex items-center justify-between h-16">
             {/* 左侧：返回按钮 */}
@@ -310,12 +310,18 @@ export function WritingPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden border-2 border-blue-200 dark:border-blue-800"
+              className="relative rounded-3xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden border-2 border-blue-200 dark:border-blue-800"
               onClick={(e) => e.stopPropagation()}
             >
+              {/* 背景图 */}
+              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/icon-picture/icon-writing1.jpg')" }} />
+              <div className="absolute inset-0 bg-white/30 dark:bg-gray-900/30 backdrop-blur-[2px]" />
+
               {/* 头部 */}
-              <div className="sticky top-0 z-10 bg-gradient-to-r from-blue-500 to-cyan-500 px-6 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="relative sticky top-0 z-10 overflow-hidden px-6 py-4 flex items-center justify-between">
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/icon-picture/icon-writing1.jpg')" }} />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-cyan-900/70" />
+                <div className="relative flex items-center gap-3">
                   <BookOpen size={24} className="text-white" />
                   <h3 className="text-xl font-bold text-white">模式说明</h3>
                 </div>
@@ -323,16 +329,16 @@ export function WritingPage() {
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setShowInstructions(false)}
-                  className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
+                  className="relative p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
                 >
                   <X size={24} />
                 </motion.button>
               </div>
 
               {/* 内容 */}
-              <div className="p-6 overflow-y-auto max-h-[60vh]">
+              <div className="relative p-6 overflow-y-auto max-h-[60vh]">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                  <div className="p-4 bg-blue-50/80 dark:bg-blue-900/20 backdrop-blur-sm rounded-xl border border-blue-200 dark:border-blue-800">
                     <h4 className="font-bold text-blue-600 dark:text-blue-400 mb-2 flex items-center gap-2">
                       <Sparkles size={20} />
                       灵感老虎机
@@ -347,7 +353,7 @@ export function WritingPage() {
                     </div>
                   </div>
 
-                  <div className="p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl border border-cyan-200 dark:border-cyan-800">
+                  <div className="p-4 bg-cyan-50/80 dark:bg-cyan-900/20 backdrop-blur-sm rounded-xl border border-cyan-200 dark:border-cyan-800">
                     <h4 className="font-bold text-cyan-600 dark:text-cyan-400 mb-2 flex items-center gap-2">
                       <PenTool size={20} />
                       文笔挑战
@@ -363,7 +369,7 @@ export function WritingPage() {
                   </div>
                 </div>
 
-                <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                <div className="mt-6 p-4 bg-gradient-to-r from-blue-50/80 to-cyan-50/80 dark:from-blue-900/20 dark:to-cyan-900/20 backdrop-blur-sm rounded-xl border border-blue-200 dark:border-blue-800">
                   <h4 className="font-bold text-gray-900 dark:text-white mb-2">💡 使用建议</h4>
                   <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
                     <li className="flex items-start gap-2">
@@ -401,12 +407,18 @@ export function WritingPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-lg w-full border-2 border-blue-200 dark:border-blue-800"
+              className="relative rounded-3xl shadow-2xl max-w-lg w-full border-2 border-blue-200 dark:border-blue-800"
               onClick={(e) => e.stopPropagation()}
             >
+              {/* 背景图 */}
+              <div className="absolute inset-0 bg-cover bg-center rounded-3xl" style={{ backgroundImage: "url('/icon-picture/icon-writing1.jpg')" }} />
+              <div className="absolute inset-0 bg-white/30 dark:bg-gray-900/30 rounded-3xl backdrop-blur-[2px]" />
+
               {/* 头部 */}
-              <div className="bg-gradient-to-r from-blue-500 to-cyan-500 px-6 py-4 rounded-t-3xl flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="relative overflow-hidden px-6 py-4 rounded-t-3xl flex items-center justify-between">
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/icon-picture/icon-writing1.jpg')" }} />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-cyan-900/70" />
+                <div className="relative flex items-center gap-3">
                   <BarChart3 size={24} className="text-white" />
                   <h3 className="text-xl font-bold text-white">创作统计</h3>
                 </div>
@@ -414,14 +426,14 @@ export function WritingPage() {
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setShowStats(false)}
-                  className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
+                  className="relative p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
                 >
                   <X size={24} />
                 </motion.button>
               </div>
 
               {/* 内容 */}
-              <div className="p-6">
+              <div className="relative p-6">
                 <div className="text-center mb-6">
                   <div className="text-5xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
                     {writingStats.totalWords}
@@ -430,17 +442,17 @@ export function WritingPage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                  <div className="text-center p-4 bg-blue-50/80 dark:bg-blue-900/20 backdrop-blur-sm rounded-xl">
                     <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{writingStats.totalSlotMachines}</div>
                     <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">老虎机次数</div>
                   </div>
-                  <div className="text-center p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl">
+                  <div className="text-center p-4 bg-cyan-50/80 dark:bg-cyan-900/20 backdrop-blur-sm rounded-xl">
                     <div className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">{writingStats.totalChallenges}</div>
                     <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">文笔挑战次数</div>
                   </div>
                 </div>
 
-                <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl text-center">
+                <div className="mt-4 p-4 bg-gradient-to-r from-blue-50/80 to-cyan-50/80 dark:from-blue-900/20 dark:to-cyan-900/20 backdrop-blur-sm rounded-xl text-center">
                   <p className="text-sm text-gray-700 dark:text-gray-300">
                     {writingStats.totalWords > 0 ? (
                       <span>太棒了！你已经创作了 <strong className="text-blue-600 dark:text-blue-400">{writingStats.totalWords}</strong> 字</span>
@@ -470,12 +482,18 @@ export function WritingPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden border-2 border-blue-200 dark:border-blue-800 flex flex-col"
+              className="relative rounded-3xl shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden border-2 border-blue-200 dark:border-blue-800 flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
+              {/* 背景图 */}
+              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/icon-picture/icon-writing1.jpg')" }} />
+              <div className="absolute inset-0 bg-white/30 dark:bg-gray-900/30 backdrop-blur-[2px]" />
+
               {/* 头部 */}
-              <div className="bg-gradient-to-r from-blue-500 to-cyan-500 px-6 py-4 flex items-center justify-between flex-shrink-0">
-                <div className="flex items-center gap-3">
+              <div className="relative overflow-hidden px-6 py-4 flex items-center justify-between flex-shrink-0">
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/icon-picture/icon-writing1.jpg')" }} />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-cyan-900/70" />
+                <div className="relative flex items-center gap-3">
                   <History size={24} className="text-white" />
                   <h3 className="text-xl font-bold text-white">历史创作记录</h3>
                 </div>
@@ -483,14 +501,14 @@ export function WritingPage() {
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setShowHistory(false)}
-                  className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
+                  className="relative p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
                 >
                   <X size={24} />
                 </motion.button>
               </div>
 
               {/* 内容 */}
-              <div className="p-6 overflow-y-auto flex-1">
+              <div className="relative p-6 overflow-y-auto flex-1">
                 {historyRecords.length === 0 ? (
                   <div className="text-center py-12">
                     <Clock size={48} className="mx-auto text-gray-400 mb-4" />
@@ -506,7 +524,7 @@ export function WritingPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800"
+                        className="bg-gradient-to-r from-blue-50/60 to-cyan-50/60 dark:from-blue-900/20 dark:to-cyan-900/20 backdrop-blur-sm rounded-xl p-4 border border-blue-200 dark:border-blue-800"
                       >
                         {/* 类型标签和操作按钮 */}
                         <div className="flex items-center justify-between mb-3">
@@ -560,14 +578,14 @@ export function WritingPage() {
 
                         {/* 文笔挑战：题目 */}
                         {record.type === 'writing-challenge' && record.prompt && (
-                          <div className="bg-blue-100 dark:bg-blue-900/30 rounded-lg p-3 mb-2 border-l-4 border-blue-500">
+                          <div className="bg-blue-100/70 dark:bg-blue-900/30 backdrop-blur-sm rounded-lg p-3 mb-2 border-l-4 border-blue-500">
                             <p className="text-sm text-blue-700 dark:text-blue-300 font-medium mb-1">题目：</p>
                             <p className="text-gray-700 dark:text-gray-300">{record.prompt}</p>
                           </div>
                         )}
 
                         {/* 创作内容 */}
-                        <div className="bg-white dark:bg-gray-800 rounded-lg p-3 mb-2">
+                        <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-lg p-3 mb-2">
                           {editingId === (record.id || record.promptId) ? (
                             // 编辑模式
                             <div className="space-y-2">
@@ -635,7 +653,7 @@ export function WritingPage() {
 
               {/* 底部统计 */}
               {historyRecords.length > 0 && (
-                <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+                <div className="relative px-6 py-4 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border-t border-gray-200/50 dark:border-gray-700/50 flex-shrink-0">
                   <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
                     共 <span className="font-bold text-blue-600 dark:text-blue-400">{historyRecords.length}</span> 条创作记录
                   </p>

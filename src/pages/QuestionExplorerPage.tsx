@@ -71,7 +71,7 @@ export function QuestionExplorerPage() {
       {/* 导航栏 */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-amber-200 dark:border-amber-800">
         <div className="max-w-7xl mx-auto px-2 sm:px-4">
-          <div className="flex items-center justify-between h-16 gap-2">
+          <div className="relative flex items-center justify-between h-16 gap-2">
             {/* 左侧：返回按钮 */}
             <motion.button
               whileHover={{ scale: 1.05, x: -3 }}
@@ -83,18 +83,20 @@ export function QuestionExplorerPage() {
               <span className="text-sm hidden sm:inline">返回</span>
             </motion.button>
 
-            {/* 中间：标题 */}
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ ease: customEasing.unexpected }}
-              className="flex items-center gap-2 px-2 min-w-0"
-            >
-              <Icon name="Brain" size={20} className="text-amber-500 shrink-0" />
-              <h1 className="text-base sm:text-xl font-bold text-amber-700 dark:text-amber-300 truncate">
-                问题探索
-              </h1>
-            </motion.div>
+            {/* 中间：标题 - 绝对居中 */}
+            <div className="absolute inset-x-0 flex justify-center pointer-events-none">
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ease: customEasing.unexpected }}
+                className="flex items-center gap-2 px-2 pointer-events-auto"
+              >
+                <Icon name="Brain" size={20} className="text-amber-500 shrink-0" />
+                <h1 className="text-base sm:text-xl font-bold text-amber-700 dark:text-amber-300 whitespace-nowrap">
+                  问题探索
+                </h1>
+              </motion.div>
+            </div>
 
             {/* 右侧：四个功能按钮 */}
             <div className="flex items-center gap-1 shrink-0">
@@ -199,10 +201,15 @@ export function QuestionExplorerPage() {
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => navigate('/categories/thinking')}
-                  className="group p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl shadow-md hover:shadow-lg transition-all border-2 border-amber-200 dark:border-amber-800 hover:border-amber-400 dark:hover:border-amber-600"
+                  className="group relative p-4 rounded-xl shadow-md hover:shadow-lg transition-all border-2 border-amber-200 dark:border-amber-800 hover:border-amber-400 dark:hover:border-amber-600 overflow-hidden"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-white dark:bg-gray-800 rounded-lg group-hover:scale-110 transition-transform">
+                  <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: 'url(/icon-picture/icon-question1.jpg)' }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-50/90 to-orange-50/90 dark:from-amber-900/80 dark:to-orange-900/80" />
+                  <div className="relative flex items-center gap-3">
+                    <div className="p-2.5 bg-white/80 dark:bg-gray-800/80 rounded-lg group-hover:scale-110 transition-transform backdrop-blur-sm">
                       <Brain size={24} className="text-amber-500" />
                     </div>
                     <div className="text-left flex-1">
@@ -221,10 +228,15 @@ export function QuestionExplorerPage() {
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => navigate('/categories/scenario')}
-                  className="group p-4 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-xl shadow-md hover:shadow-lg transition-all border-2 border-amber-200 dark:border-amber-800 hover:border-yellow-400 dark:hover:border-yellow-600"
+                  className="group relative p-4 rounded-xl shadow-md hover:shadow-lg transition-all border-2 border-amber-200 dark:border-amber-800 hover:border-yellow-400 dark:hover:border-yellow-600 overflow-hidden"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-white dark:bg-gray-800 rounded-lg group-hover:scale-110 transition-transform">
+                  <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: 'url(/icon-picture/icon-question1.jpg)' }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-50/90 to-yellow-50/90 dark:from-amber-900/80 dark:to-yellow-900/80" />
+                  <div className="relative flex items-center gap-3">
+                    <div className="p-2.5 bg-white/80 dark:bg-gray-800/80 rounded-lg group-hover:scale-110 transition-transform backdrop-blur-sm">
                       <Globe size={24} className="text-amber-500" />
                     </div>
                     <div className="text-left flex-1">

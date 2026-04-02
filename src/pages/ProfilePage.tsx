@@ -568,7 +568,7 @@ export function ProfilePage() {
       <main className="relative z-10 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           {/* 页面标题 */}
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center justify-center gap-3 mb-6">
             <User size={28} className="text-gray-700" />
             <h1 className="text-2xl font-bold text-gray-700">个人中心</h1>
           </div>
@@ -576,9 +576,9 @@ export function ProfilePage() {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gray-100 rounded-3xl shadow-2xl overflow-hidden border-2 border-blue-200 mb-8"
+            className="bg-white/20 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden border-2 border-blue-200 mb-8"
           >
-            <div className="bg-gradient-to-br from-gray-50/90 to-gray-100/90 backdrop-blur-xl p-8 border-b border-gray-200/50 shadow-inner">
+            <div className="bg-gradient-to-br from-white/15 to-white/25 backdrop-blur-xl p-8 border-b border-white/20 shadow-inner">
               <div className="flex items-start gap-4">
                 <div className="relative">
                   <motion.div
@@ -819,7 +819,7 @@ export function ProfilePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-gray-100 rounded-2xl shadow-lg p-6 border-2 border-blue-200 mb-8"
+            className="bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg p-6 border-2 border-blue-200 mb-8"
           >
             <h3 className="text-lg font-bold text-gray-900 mb-4">思考记录</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -893,7 +893,7 @@ export function ProfilePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="bg-gray-100 rounded-2xl shadow-lg p-6 border-2 border-indigo-200 mb-8"
+            className="bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg p-6 border-2 border-indigo-200 mb-8"
           >
             <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
               <Bot size={20} className="text-indigo-500" />
@@ -912,7 +912,7 @@ export function ProfilePage() {
               <select
                 value={aiProvider}
                 onChange={(e) => setAiProvider(e.target.value as LLMProvider)}
-                className="w-full px-3 py-2.5 bg-gray-100 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors"
+                className="w-full px-3 py-2.5 bg-white/30 backdrop-blur-sm border border-gray-300/50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors"
               >
                 <option value="deepseek">DeepSeek</option>
                 <option value="qwen">通义千问</option>
@@ -931,7 +931,7 @@ export function ProfilePage() {
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   placeholder="输入你的 API Key..."
-                  className="w-full px-3 py-2.5 pr-10 bg-gray-100 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors"
+                  className="w-full px-3 py-2.5 pr-10 bg-white/30 backdrop-blur-sm border border-gray-300/50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors"
                 />
                 <button
                   type="button"
@@ -949,7 +949,7 @@ export function ProfilePage() {
               <select
                 value={aiModel}
                 onChange={(e) => setAiModel(e.target.value)}
-                className="w-full px-3 py-2.5 bg-gray-100 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors"
+                className="w-full px-3 py-2.5 bg-white/30 backdrop-blur-sm border border-gray-300/50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors"
               >
                 {(() => {
                   const config = getProviderConfig(aiProvider);
@@ -1022,7 +1022,7 @@ export function ProfilePage() {
                 whileTap={{ scale: 0.98 }}
                 onClick={handleTestConnection}
                 disabled={isValidating || !apiKey.trim()}
-                className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-4 py-2.5 bg-white/30 backdrop-blur-sm hover:bg-white/40 text-gray-700 rounded-xl text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isValidating ? (
                   <Loader2 size={16} className="animate-spin" />
@@ -1068,7 +1068,7 @@ export function ProfilePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-gray-100 rounded-2xl shadow-lg p-6 border-2 border-blue-200 mb-8"
+            className="bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg p-6 border-2 border-blue-200 mb-8"
           >
             <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
               <Settings size={20} className="text-blue-500" />
@@ -1082,8 +1082,8 @@ export function ProfilePage() {
                 disabled={isSyncing || !hasUnsyncedData}
                 className="w-full relative flex items-center gap-3 px-4 py-3 text-purple-700 rounded-xl transition-all overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <div className="absolute inset-0 bg-cover bg-center opacity-15" style={{ backgroundImage: "url('/icon-picture/icon-writing1.jpg')" }} />
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-50/95 to-indigo-50/95" />
+                <div className="absolute inset-0 bg-cover bg-center opacity-60" style={{ backgroundImage: "url('/icon-picture/icon-profile.jpg')" }} />
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-200/50 to-indigo-200/40" />
                 <div className="relative flex items-center gap-3 w-full">
                 {isSyncing ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-2 border-purple-500 border-t-transparent"></div>
@@ -1109,8 +1109,8 @@ export function ProfilePage() {
                 onClick={handleExport}
                 className="w-full relative flex items-center gap-3 px-4 py-3 text-blue-700 rounded-xl transition-all overflow-hidden"
               >
-                <div className="absolute inset-0 bg-cover bg-center opacity-15" style={{ backgroundImage: "url('/icon-picture/icon-index1.jpg')" }} />
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-50/95 to-cyan-50/95" />
+                <div className="absolute inset-0 bg-cover bg-center opacity-60" style={{ backgroundImage: "url('/icon-picture/icon-writing1.jpg')" }} />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-200/50 to-cyan-200/40" />
                 <div className="relative flex items-center gap-3 w-full">
                 <Download size={20} />
                 <div className="flex-1 text-left">
@@ -1126,8 +1126,8 @@ export function ProfilePage() {
                 onClick={handleImport}
                 className="w-full relative flex items-center gap-3 px-4 py-3 text-green-700 rounded-xl transition-all overflow-hidden"
               >
-                <div className="absolute inset-0 bg-cover bg-center opacity-15" style={{ backgroundImage: "url('/icon-picture/icon-knowledge1.jpg')" }} />
-                <div className="absolute inset-0 bg-gradient-to-r from-green-50/95 to-emerald-50/95" />
+                <div className="absolute inset-0 bg-cover bg-center opacity-60" style={{ backgroundImage: "url('/icon-picture/icon-knowledge1.jpg')" }} />
+                <div className="absolute inset-0 bg-gradient-to-r from-green-200/50 to-emerald-200/40" />
                 <div className="relative flex items-center gap-3 w-full">
                 <Upload size={20} />
                 <div className="flex-1 text-left">
@@ -1144,7 +1144,7 @@ export function ProfilePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-gray-100 rounded-2xl shadow-lg p-6 border-2 border-red-200"
+            className="bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg p-6 border-2 border-red-200"
           >
             <h3 className="text-lg font-bold text-red-700 mb-4 flex items-center gap-2">
               <Trash2 size={20} className="text-red-500" />
@@ -1156,8 +1156,8 @@ export function ProfilePage() {
               onClick={handleClearData}
               className="w-full relative flex items-center gap-3 px-4 py-3 text-red-700 rounded-xl transition-all overflow-hidden"
             >
-              <div className="absolute inset-0 bg-cover bg-center opacity-15" style={{ backgroundImage: "url('/icon-picture/icon-logic1.jpg')" }} />
-              <div className="absolute inset-0 bg-gradient-to-r from-red-50/95 to-rose-50/95" />
+              <div className="absolute inset-0 bg-cover bg-center opacity-60" style={{ backgroundImage: "url('/icon-picture/icon-logic1.jpg')" }} />
+              <div className="absolute inset-0 bg-gradient-to-r from-red-200/50 to-rose-200/40" />
               <div className="relative flex items-center gap-3 w-full">
               <Trash2 size={20} />
               <div className="flex-1 text-left">

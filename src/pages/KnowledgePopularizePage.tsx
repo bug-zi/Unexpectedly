@@ -79,7 +79,7 @@ export function KnowledgePopularizePage() {
       {/* 内容层 */}
       <div className="relative z-10">
       {/* 导航栏 */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/60 dark:bg-gray-900/70 backdrop-blur-2xl border-b border-green-200/60 dark:border-green-800/50 shadow-sm">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-transparent border-b border-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* 左侧：返回按钮 */}
@@ -112,11 +112,22 @@ export function KnowledgePopularizePage() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => setShowInstructions(true)}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-all"
+                title="模块说明"
+              >
+                <BookOpen size={18} />
+                <span className="hidden md:inline">模块说明</span>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={startRandomModule}
                 className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-all"
                 title="随机开始学习"
               >
-                <BarChart3 size={18} />
+                <Sparkles size={18} />
                 <span className="hidden md:inline">随机开始</span>
               </motion.button>
 
@@ -130,26 +141,15 @@ export function KnowledgePopularizePage() {
                 className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-all"
                 title="查看学习统计"
               >
-                <Trophy size={18} />
+                <BarChart3 size={18} />
                 <span className="hidden md:inline">学习统计</span>
               </motion.button>
 
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setShowInstructions(true)}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-all"
-                title="模块说明"
-              >
-                <BookOpen size={18} />
-                <span className="hidden md:inline">模块说明</span>
-              </motion.button>
-
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
                 onClick={() => navigate('/knowledge-popularize/ai-ask')}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-lg transition-all shadow-md hover:shadow-lg"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-gradient-to-r from-green-400 to-emerald-400 hover:from-green-500 hover:to-emerald-500 text-white rounded-lg transition-all shadow-sm hover:shadow-md"
                 title="AI 智能问答"
               >
                 <MessageCircle size={18} />
@@ -167,7 +167,7 @@ export function KnowledgePopularizePage() {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-12"
+            className="text-center mb-6"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
               选择你的
@@ -206,7 +206,7 @@ export function KnowledgePopularizePage() {
                   <div className={`absolute inset-0 bg-gradient-to-br ${module.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
 
                   {/* 内容 */}
-                  <div className="relative p-8">
+                  <div className="relative p-5">
                     {/* 图标和标题 */}
                     <div className="mb-6">
                       <motion.div
@@ -248,7 +248,7 @@ export function KnowledgePopularizePage() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => navigate('/knowledge-popularize/ai-ask')}
-            className="relative bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 dark:from-green-600 dark:via-emerald-600 dark:to-teal-600 rounded-3xl shadow-2xl p-8 cursor-pointer overflow-hidden group mb-8"
+            className="relative bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 dark:from-green-600 dark:via-emerald-600 dark:to-teal-600 rounded-2xl shadow-xl p-5 cursor-pointer overflow-hidden group"
           >
             {/* 背景图片 */}
             <div
@@ -258,95 +258,30 @@ export function KnowledgePopularizePage() {
             {/* 渐变遮罩层 */}
             <div className="absolute inset-0 bg-gradient-to-br from-green-200/85 via-emerald-200/80 to-teal-200/85 dark:from-green-600/90 dark:via-emerald-600/85 dark:to-teal-600/90" />
 
-            {/* 背景动画 */}
-            <div className="absolute inset-0">
-              <motion.div
-                className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"
-                animate={{ scale: [1, 1.2, 1], x: [0, 50, 0] }}
-                transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-              />
-              <motion.div
-                className="absolute -bottom-32 -left-32 w-64 h-64 bg-white/10 rounded-full blur-3xl"
-                animate={{ scale: [1, 1.3, 1], y: [0, 30, 0] }}
-                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-              />
-            </div>
-
             {/* 内容 */}
             <div className="relative flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-3 mb-3">
-                  <motion.div
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm"
-                  >
-                    <MessageCircle size={28} className="text-white" />
-                  </motion.div>
-                  <h3 className="text-3xl font-bold text-white">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                  <MessageCircle size={24} className="text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">
                     AI 智能问答
                   </h3>
+                  <p className="text-white/80 text-sm">
+                    有任何问题？直接问我，AI为你详细解答！
+                  </p>
                 </div>
-                <p className="text-white/90 text-lg max-w-2xl">
-                  有任何关于世界之最、系统思维或健康管理的问题？直接问我，我会用AI为你详细解答！
-                </p>
               </div>
 
-              {/* 右侧动画 */}
-              <motion.div
-                animate={{ x: [0, 10, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="hidden md:block"
-              >
-                <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                  <Sparkles size={40} className="text-white" />
+              <div className="hidden md:block">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                  <Sparkles size={24} className="text-white" />
                 </div>
-              </motion.div>
-            </div>
-
-            {/* 脉波效果 */}
-            <div className="absolute bottom-4 right-4 flex gap-2">
-              {[0, 1, 2].map((i) => (
-                <motion.div
-                  key={i}
-                  animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
-                  transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.2 }}
-                  className="w-2 h-2 bg-white rounded-full"
-                />
-              ))}
+              </div>
             </div>
           </motion.div>
 
-          {/* 学习提示 */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="mt-12 p-6 bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-2xl shadow-lg border-2 border-green-200/80 dark:border-green-800/60"
-          >
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <BookOpen size={24} className="text-green-500" />
-              学习建议
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700 dark:text-gray-300">
-              <div className="flex items-start gap-2">
-                <span className="text-green-500 mt-1">•</span>
-                <span><strong>每天学习</strong>少量知识点，避免信息过载</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-green-500 mt-1">•</span>
-                <span><strong>联系实际</strong>思考知识如何应用到生活</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-green-500 mt-1">•</span>
-                <span><strong>定期复习</strong>巩固已学知识，强化记忆</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-green-500 mt-1">•</span>
-                <span><strong>分享讨论</strong>与他人交流，加深理解</span>
-              </div>
-            </div>
-          </motion.div>
         </div>
       </main>
 
@@ -365,29 +300,41 @@ export function KnowledgePopularizePage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden border-2 border-green-200 dark:border-green-800"
+              className="rounded-3xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden border-2 border-green-200 dark:border-green-800 relative"
               onClick={(e) => e.stopPropagation()}
             >
+              {/* 全局背景图片 */}
+              <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: 'url(/icon-picture/icon-knowledge1.jpg)' }}
+              />
+              {/* 全局半透明遮罩 */}
+              <div className="absolute inset-0 bg-white/80 backdrop-blur-lg" />
+              <div className="hidden dark:block absolute inset-0 dark:bg-gray-900/80" />
+
               {/* 头部 */}
-              <div className="sticky top-0 z-10 bg-gradient-to-r from-green-500 to-emerald-500 px-6 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <BookOpen size={24} className="text-white" />
-                  <h3 className="text-xl font-bold text-white">模块说明</h3>
+              <div className="relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-green-500/80 to-emerald-500/80" />
+                <div className="relative px-6 py-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <BookOpen size={24} className="text-white" />
+                    <h3 className="text-xl font-bold text-white">模块说明</h3>
+                  </div>
+                  <motion.button
+                    whileHover={{ scale: 1.1, rotate: 90 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setShowInstructions(false)}
+                    className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
+                  >
+                    <X size={24} />
+                  </motion.button>
                 </div>
-                <motion.button
-                  whileHover={{ scale: 1.1, rotate: 90 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => setShowInstructions(false)}
-                  className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
-                >
-                  <X size={24} />
-                </motion.button>
               </div>
 
               {/* 内容 */}
-              <div className="p-6 overflow-y-auto max-h-[60vh]">
+              <div className="relative p-6 overflow-y-auto max-h-[60vh]">
                 <div className="space-y-4">
-                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
+                  <div className="p-4 bg-green-50/80 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
                     <h4 className="font-bold text-green-600 dark:text-green-400 mb-2 flex items-center gap-2">
                       <Trophy size={20} />
                       世界之最
@@ -402,7 +349,7 @@ export function KnowledgePopularizePage() {
                     </div>
                   </div>
 
-                  <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                  <div className="p-4 bg-emerald-50/80 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
                     <h4 className="font-bold text-emerald-600 dark:text-emerald-400 mb-2 flex items-center gap-2">
                       <Network size={20} />
                       系统思维
@@ -417,7 +364,7 @@ export function KnowledgePopularizePage() {
                     </div>
                   </div>
 
-                  <div className="p-4 bg-teal-50 dark:bg-teal-900/20 rounded-xl border border-teal-200 dark:border-teal-800">
+                  <div className="p-4 bg-teal-50/80 dark:bg-teal-900/20 rounded-xl border border-teal-200 dark:border-teal-800">
                     <h4 className="font-bold text-teal-600 dark:text-teal-400 mb-2 flex items-center gap-2">
                       <HeartPulse size={20} />
                       健康主理
@@ -453,27 +400,39 @@ export function KnowledgePopularizePage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-lg w-full border-2 border-green-200 dark:border-green-800"
+              className="rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border-2 border-green-200 dark:border-green-800 relative"
               onClick={(e) => e.stopPropagation()}
             >
+              {/* 全局背景图片 */}
+              <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: 'url(/icon-picture/icon-knowledge1.jpg)' }}
+              />
+              {/* 全局半透明遮罩 */}
+              <div className="absolute inset-0 bg-white/80 backdrop-blur-lg" />
+              <div className="hidden dark:block absolute inset-0 dark:bg-gray-900/80" />
+
               {/* 头部 */}
-              <div className="bg-gradient-to-r from-green-500 to-emerald-500 px-6 py-4 rounded-t-3xl flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Trophy size={24} className="text-white" />
-                  <h3 className="text-xl font-bold text-white">学习统计</h3>
+              <div className="relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-green-500/80 to-emerald-500/80" />
+                <div className="relative px-6 py-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Trophy size={24} className="text-white" />
+                    <h3 className="text-xl font-bold text-white">学习统计</h3>
+                  </div>
+                  <motion.button
+                    whileHover={{ scale: 1.1, rotate: 90 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setShowStats(false)}
+                    className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
+                  >
+                    <X size={24} />
+                  </motion.button>
                 </div>
-                <motion.button
-                  whileHover={{ scale: 1.1, rotate: 90 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => setShowStats(false)}
-                  className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
-                >
-                  <X size={24} />
-                </motion.button>
               </div>
 
               {/* 内容 */}
-              <div className="p-6">
+              <div className="relative p-6">
                 <div className="text-center mb-6">
                   <div className="text-5xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent mb-2">
                     {knowledgeStats.totalViewed}
@@ -482,7 +441,7 @@ export function KnowledgePopularizePage() {
                 </div>
 
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-xl">
+                  <div className="flex items-center justify-between p-4 bg-green-50/80 dark:bg-green-900/20 rounded-xl">
                     <div className="flex items-center gap-3">
                       <Trophy size={20} className="text-green-600 dark:text-green-400" />
                       <span className="text-gray-700 dark:text-gray-300">世界之最</span>
@@ -490,7 +449,7 @@ export function KnowledgePopularizePage() {
                     <span className="text-lg font-bold text-green-600 dark:text-green-400">{knowledgeStats.worldRecordsViewed}</span>
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
+                  <div className="flex items-center justify-between p-4 bg-emerald-50/80 dark:bg-emerald-900/20 rounded-xl">
                     <div className="flex items-center gap-3">
                       <Network size={20} className="text-emerald-600 dark:text-emerald-400" />
                       <span className="text-gray-700 dark:text-gray-300">系统思维</span>
@@ -498,7 +457,7 @@ export function KnowledgePopularizePage() {
                     <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{knowledgeStats.systemsThinkingViewed}</span>
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-teal-50 dark:bg-teal-900/20 rounded-xl">
+                  <div className="flex items-center justify-between p-4 bg-teal-50/80 dark:bg-teal-900/20 rounded-xl">
                     <div className="flex items-center gap-3">
                       <HeartPulse size={20} className="text-teal-600 dark:text-teal-400" />
                       <span className="text-gray-700 dark:text-gray-300">健康主理</span>

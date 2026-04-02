@@ -4,7 +4,7 @@
  * 设计风格参考写作创造页面，黄色主色调
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -17,6 +17,8 @@ import {
   X,
   History,
 } from 'lucide-react';
+import { getAnswers } from '@/utils/storage';
+import { useDebateStore } from '@/stores/debateStore';
 
 // 自定义动画
 const customEasing = {
@@ -28,6 +30,15 @@ export function QuestionThinkingHubPage() {
   const navigate = useNavigate();
   const [showInstructions, setShowInstructions] = useState(false);
   const [showStats, setShowStats] = useState(false);
+
+  // 思考统计数据
+  const debateSessions = useDebateStore(state => state.sessions);
+  const stats = useMemo(() => {
+    const answers = getAnswers();
+    const questionCount = answers.length;
+    const debateCount = debateSessions.length;
+    return { questionCount, debateCount, total: questionCount + debateCount };
+  }, [debateSessions]);
 
   // 思考模块配置
   const thinkingModules = [
@@ -67,7 +78,7 @@ export function QuestionThinkingHubPage() {
       {/* 内容层 */}
       <div className="relative z-10">
       {/* 导航栏 */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/60 dark:bg-gray-900/60 backdrop-blur-lg border-b border-gray-200/30 dark:border-gray-800/30">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-transparent border-b border-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative grid grid-cols-3 items-center h-16">
             {/* 左侧：返回按钮 */}
@@ -140,6 +151,7 @@ export function QuestionThinkingHubPage() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/growth')}
                 className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg transition-all whitespace-nowrap"
                 title="查看历史记录"
               >
@@ -166,12 +178,18 @@ export function QuestionThinkingHubPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-              className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden border-2 border-yellow-200 dark:border-yellow-800"
+              className="relative rounded-3xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden border-2 border-yellow-200 dark:border-yellow-800"
               onClick={(e) => e.stopPropagation()}
             >
+              {/* 背景图 */}
+              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/icon-picture/icon-question1.jpg')" }} />
+              <div className="absolute inset-0 bg-white/30 dark:bg-gray-900/30 backdrop-blur-[2px]" />
+
               {/* 头部 */}
-              <div className="sticky top-0 z-10 bg-gradient-to-r from-yellow-500 to-amber-500 px-6 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="relative sticky top-0 z-10 overflow-hidden px-6 py-4 flex items-center justify-between">
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/icon-picture/icon-question1.jpg')" }} />
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-900/80 to-amber-900/70" />
+                <div className="relative flex items-center gap-3">
                   <BookOpen size={24} className="text-white" />
                   <h3 className="text-xl font-bold text-white">模式说明</h3>
                 </div>
@@ -179,14 +197,14 @@ export function QuestionThinkingHubPage() {
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setShowInstructions(false)}
-                  className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
+                  className="relative p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
                 >
                   <X size={24} />
                 </motion.button>
               </div>
 
               {/* 内容 */}
-              <div className="p-6 overflow-y-auto max-h-[60vh]">
+              <div className="relative p-6 overflow-y-auto max-h-[60vh]">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border border-yellow-200 dark:border-yellow-800">
                     <h4 className="font-bold text-yellow-600 dark:text-yellow-400 mb-2 flex items-center gap-2">
@@ -279,12 +297,18 @@ export function QuestionThinkingHubPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-              className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-lg w-full border-2 border-yellow-200 dark:border-yellow-800"
+              className="relative rounded-3xl shadow-2xl max-w-lg w-full border-2 border-yellow-200 dark:border-yellow-800"
               onClick={(e) => e.stopPropagation()}
             >
+              {/* 背景图 */}
+              <div className="absolute inset-0 bg-cover bg-center rounded-3xl" style={{ backgroundImage: "url('/icon-picture/icon-question1.jpg')" }} />
+              <div className="absolute inset-0 bg-white/30 dark:bg-gray-900/30 rounded-3xl backdrop-blur-[2px]" />
+
               {/* 头部 */}
-              <div className="bg-gradient-to-r from-yellow-500 to-amber-500 px-6 py-4 rounded-t-3xl flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="relative overflow-hidden px-6 py-4 rounded-t-3xl flex items-center justify-between">
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/icon-picture/icon-question1.jpg')" }} />
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-900/80 to-amber-900/70" />
+                <div className="relative flex items-center gap-3">
                   <BarChart3 size={24} className="text-white" />
                   <h3 className="text-xl font-bold text-white">思考统计</h3>
                 </div>
@@ -292,25 +316,25 @@ export function QuestionThinkingHubPage() {
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setShowStats(false)}
-                  className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
+                  className="relative p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
                 >
                   <X size={24} />
                 </motion.button>
               </div>
 
               {/* 内容 */}
-              <div className="p-6">
+              <div className="relative p-6">
                 <div className="text-center mb-6">
                   <div className="text-5xl font-bold bg-gradient-to-r from-yellow-500 to-amber-500 bg-clip-text text-transparent mb-2">
-                    --
+                    {stats.total}
                   </div>
-                  <div className="text-gray-600 dark:text-gray-400">总思考字数</div>
+                  <div className="text-gray-600 dark:text-gray-400">总思考次数</div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl">
                     <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-                      --
+                      {stats.questionCount}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                       问题探索次数
@@ -318,7 +342,7 @@ export function QuestionThinkingHubPage() {
                   </div>
                   <div className="text-center p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl">
                     <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
-                      --
+                      {stats.debateCount}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                       辩论次数
@@ -328,7 +352,9 @@ export function QuestionThinkingHubPage() {
 
                 <div className="mt-4 p-4 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-xl text-center">
                   <p className="text-sm text-gray-700 dark:text-gray-300">
-                    开始你的第一次深度思考吧！
+                    {stats.total > 0
+                      ? `累计思考 ${stats.total} 次，继续加油！`
+                      : '开始你的第一次深度思考吧！'}
                   </p>
                 </div>
               </div>
@@ -380,34 +406,13 @@ export function QuestionThinkingHubPage() {
               >
                 {/* 背景遮罩 */}
                 <div className="absolute inset-0 bg-gradient-to-br from-yellow-50/80 via-amber-50/70 to-orange-50/75 dark:from-gray-900/85 dark:via-yellow-900/80 dark:to-gray-800/85" />
-
-                {/* 背景动画 */}
-                <div className="absolute inset-0 overflow-hidden">
-                  <motion.div
-                    className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-500/10 to-amber-500/10 rounded-bl-full"
-                    animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
-                    transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-                  />
-                  <motion.div
-                    className="absolute -bottom-8 -left-8 w-24 h-24 bg-yellow-500/5 rounded-full"
-                    animate={{ scale: [1, 1.3, 1], x: [0, 10, 0] }}
-                    transition={{
-                      duration: 6,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    }}
-                  />
-                </div>
+                {/* 悬停时的主题色覆盖 */}
+                <div className="absolute inset-0 bg-gradient-to-br from-yellow-500 to-amber-500 opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
 
                 {/* 脉波效果 */}
                 <div className="absolute top-6 right-6">
                   <div className="relative">
                     <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center">
-                      <motion.div
-                        animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                        className="absolute inset-0 bg-yellow-500/30 rounded-full"
-                      />
                       <Brain size={20} className="text-yellow-500" />
                     </div>
                   </div>
@@ -416,7 +421,7 @@ export function QuestionThinkingHubPage() {
                 <div className="relative">
                   <div className="mb-6">
                     <motion.div
-                      className="p-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl inline-block"
+                      className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl inline-block"
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       transition={{ type: 'spring', stiffness: 300 }}
                     >
@@ -459,34 +464,13 @@ export function QuestionThinkingHubPage() {
               >
                 {/* 背景遮罩 */}
                 <div className="absolute inset-0 bg-gradient-to-br from-amber-50/80 via-yellow-50/70 to-orange-50/75 dark:from-gray-900/85 dark:via-amber-900/80 dark:to-gray-800/85" />
-
-                {/* 背景动画 */}
-                <div className="absolute inset-0 overflow-hidden">
-                  <motion.div
-                    className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-500/10 to-amber-500/10 rounded-bl-full"
-                    animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
-                    transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-                  />
-                  <motion.div
-                    className="absolute -bottom-8 -left-8 w-24 h-24 bg-yellow-500/5 rounded-full"
-                    animate={{ scale: [1, 1.3, 1], x: [0, 10, 0] }}
-                    transition={{
-                      duration: 6,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    }}
-                  />
-                </div>
+                {/* 悬停时的主题色覆盖 */}
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-orange-500 opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
 
                 {/* 脉波效果 */}
                 <div className="absolute top-6 right-6">
                   <div className="relative">
                     <div className="w-12 h-12 bg-amber-500/20 rounded-full flex items-center justify-center">
-                      <motion.div
-                        animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                        className="absolute inset-0 bg-amber-500/30 rounded-full"
-                      />
                       <Swords size={20} className="text-amber-500" />
                     </div>
                   </div>
@@ -495,7 +479,7 @@ export function QuestionThinkingHubPage() {
                 <div className="relative">
                   <div className="mb-6">
                     <motion.div
-                      className="p-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl inline-block"
+                      className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl inline-block"
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       transition={{ type: 'spring', stiffness: 300 }}
                     >

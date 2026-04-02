@@ -195,21 +195,21 @@ export function TaskPage() {
     switch (taskId) {
       case 'daily-question':
         return {
-          iconBg: 'bg-gradient-to-br from-blue-100 to-indigo-100',
-          iconColor: 'text-blue-600',
-          numberBg: 'bg-gradient-to-br from-blue-100 to-indigo-100',
-          numberColor: 'bg-gradient-to-br from-blue-600 to-indigo-600 bg-clip-text text-transparent',
-          progressBg: 'bg-gradient-to-r from-blue-400 via-indigo-400 to-blue-500',
-          percentBg: 'bg-blue-100 text-blue-700',
-        };
-      case 'daily-writing':
-        return {
           iconBg: 'bg-gradient-to-br from-yellow-100 to-amber-100',
           iconColor: 'text-yellow-600',
           numberBg: 'bg-gradient-to-br from-yellow-100 to-amber-100',
           numberColor: 'bg-gradient-to-br from-yellow-600 to-amber-600 bg-clip-text text-transparent',
           progressBg: 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500',
           percentBg: 'bg-yellow-100 text-yellow-700',
+        };
+      case 'daily-writing':
+        return {
+          iconBg: 'bg-gradient-to-br from-blue-100 to-indigo-100',
+          iconColor: 'text-blue-600',
+          numberBg: 'bg-gradient-to-br from-blue-100 to-indigo-100',
+          numberColor: 'bg-gradient-to-br from-blue-600 to-indigo-600 bg-clip-text text-transparent',
+          progressBg: 'bg-gradient-to-r from-blue-400 via-indigo-400 to-blue-500',
+          percentBg: 'bg-blue-100 text-blue-700',
         };
       case 'daily-reasoning':
         return {
@@ -256,15 +256,6 @@ export function TaskPage() {
               <ArrowLeft size={20} />
               <span className="font-medium">返回</span>
             </motion.button>
-
-            <div className="flex items-center gap-3">
-              <Sparkles size={24} className="text-pink-500" />
-              <h1 className="text-xl font-bold bg-gradient-to-r from-pink-600 to-sky-600 bg-clip-text text-transparent">
-                任务中心
-              </h1>
-            </div>
-
-            <div className="w-16" />
           </div>
         </div>
       </nav>
@@ -272,6 +263,18 @@ export function TaskPage() {
       {/* 主要内容 */}
       <main className="relative z-10 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
+          {/* 页面标题 */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-center gap-3 mb-6"
+          >
+            <Sparkles size={28} className="text-pink-500" />
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-sky-600 bg-clip-text text-transparent">
+              任务中心
+            </h1>
+          </motion.div>
+
           {/* 统计卡片 */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -340,24 +343,6 @@ export function TaskPage() {
                   )}
                 </div>
 
-                <motion.div
-                  animate={
-                    dailyCompleted
-                      ? {
-                          rotate: [0, -10, 10, -10, 10, 0],
-                          scale: [1, 1.1, 1],
-                        }
-                      : {}
-                  }
-                  transition={{ duration: 0.5 }}
-                  className="relative"
-                >
-                  <div className="absolute inset-0 bg-white/20 rounded-full blur-xl" />
-                  <Trophy
-                    size={80}
-                    className="relative text-pink-200/60 drop-shadow-2xl"
-                  />
-                </motion.div>
               </div>
 
               {/* 底部成就指示 */}
@@ -727,14 +712,10 @@ export function TaskPage() {
                             <motion.div
                               whileHover={{ rotate: task.completed ? 0 : 90 }}
                               transition={{ duration: 0.3 }}
-                              className={`p-3 rounded-2xl ${
-                                task.completed
-                                  ? 'bg-gradient-to-br from-green-100 to-emerald-100'
-                                  : getTaskStyle(task.id).iconBg
-                              }`}
+                              className={`p-3 rounded-2xl ${getTaskStyle(task.id).iconBg}`}
                             >
                               {task.completed ? (
-                                <CheckCircle2 size={26} className="text-green-600" />
+                                <CheckCircle2 size={26} className={getTaskStyle(task.id).iconColor} />
                               ) : (
                                 <Circle size={26} className={getTaskStyle(task.id).iconColor} />
                               )}
@@ -752,13 +733,9 @@ export function TaskPage() {
 
                           <motion.div
                             whileHover={{ scale: 1.1 }}
-                            className={`text-center px-4 py-2 rounded-xl ${
-                              task.completed
-                                ? 'bg-green-100'
-                                : getTaskStyle(task.id).numberBg
-                            }`}
+                            className={`text-center px-4 py-2 rounded-xl ${getTaskStyle(task.id).numberBg}`}
                           >
-                            <div className={`text-3xl font-black ${task.completed ? 'bg-gradient-to-br from-green-600 to-emerald-600' : getTaskStyle(task.id).numberColor}`}>
+                            <div className={`text-3xl font-black ${getTaskStyle(task.id).numberColor}`}>
                               {task.current}
                             </div>
                             <div className="text-xs text-gray-600 font-medium mt-0.5">
@@ -774,11 +751,7 @@ export function TaskPage() {
                               initial={{ width: 0 }}
                               animate={{ width: `${task.progress}%` }}
                               transition={{ duration: 0.6, ease: 'easeOut' }}
-                              className={`h-full rounded-full relative overflow-hidden ${
-                                task.completed
-                                  ? 'bg-gradient-to-r from-green-400 via-emerald-500 to-green-600'
-                                  : getTaskStyle(task.id).progressBg
-                              }`}
+                              className={`h-full rounded-full relative overflow-hidden ${getTaskStyle(task.id).progressBg}`}
                             >
                               <motion.div
                                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
@@ -801,11 +774,7 @@ export function TaskPage() {
                             className="flex-shrink-0"
                           >
                             <span
-                              className={`text-xs font-bold px-2 py-1 rounded-lg ${
-                                task.completed
-                                  ? 'bg-green-100 text-green-700'
-                                  : getTaskStyle(task.id).percentBg
-                              }`}
+                              className={`text-xs font-bold px-2 py-1 rounded-lg ${getTaskStyle(task.id).percentBg}`}
                             >
                               {Math.round(task.progress)}%
                             </span>
@@ -816,15 +785,15 @@ export function TaskPage() {
                           <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="mt-4 flex items-center gap-2 bg-green-50 rounded-xl px-4 py-2"
+                            className={`mt-4 flex items-center gap-2 ${getTaskStyle(task.id).iconBg} rounded-xl px-4 py-2`}
                           >
                             <motion.div
                               animate={{ rotate: 360 }}
                               transition={{ duration: 0.5 }}
                             >
-                              <Award size={18} className="text-green-600" />
+                              <Award size={18} className={getTaskStyle(task.id).iconColor} />
                             </motion.div>
-                            <span className="text-green-700 font-semibold text-sm">
+                            <span className={`${getTaskStyle(task.id).iconColor} font-semibold text-sm`}>
                               太棒了！任务已完成
                             </span>
                           </motion.div>
@@ -913,7 +882,7 @@ export function TaskPage() {
                       className={`group relative rounded-2xl shadow-lg overflow-hidden transition-all duration-300 ${
                         task.completed
                           ? 'border-2 border-green-200 opacity-70'
-                          : 'border-2 border-sky-200 hover:border-blue-400 hover:shadow-sky-200/50 cursor-pointer'
+                          : 'border-2 border-purple-200 hover:border-violet-400 hover:shadow-purple-200/50 cursor-pointer'
                       }`}
                     >
                       {/* 背景图片 */}
@@ -925,7 +894,7 @@ export function TaskPage() {
                       <div className="absolute inset-0 bg-gray-100/80 backdrop-blur-lg" />
                       {/* 背景装饰 */}
                       {!task.completed && (
-                        <div className="absolute inset-0 bg-gradient-to-br from-sky-50/50 to-blue-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 to-violet-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       )}
 
                       <div className="relative p-6">
@@ -936,13 +905,13 @@ export function TaskPage() {
                             className={`p-3 rounded-2xl flex-shrink-0 ${
                               task.completed
                                 ? 'bg-gradient-to-br from-green-100 to-emerald-100'
-                                : 'bg-gradient-to-br from-sky-100 to-blue-100'
+                                : 'bg-gradient-to-br from-purple-100 to-violet-100'
                             }`}
                           >
                             {task.completed ? (
                               <CheckCircle2 size={26} className="text-green-600" />
                             ) : (
-                              <Circle size={26} className="text-sky-600" />
+                              <Circle size={26} className="text-purple-600" />
                             )}
                           </motion.div>
 
@@ -971,7 +940,7 @@ export function TaskPage() {
                               <motion.div
                                 initial={{ opacity: 0 }}
                                 whileHover={{ opacity: 1 }}
-                                className="mt-3 flex items-center gap-2 text-sky-600 text-sm font-medium"
+                                className="mt-3 flex items-center gap-2 text-purple-600 text-sm font-medium"
                               >
                                 <Sparkles size={14} />
                                 <span>点击开始任务</span>
@@ -1026,7 +995,7 @@ export function TaskPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-8 relative overflow-hidden rounded-2xl p-6 shadow-lg border-2 border-sky-200"
+              className="mt-8 relative overflow-hidden rounded-2xl p-6 shadow-lg border-2 border-purple-200"
             >
               {/* 背景图片 */}
               <div
@@ -1038,13 +1007,13 @@ export function TaskPage() {
                 <motion.div
                   animate={{ scale: [1, 1.1, 1] }}
                   transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
-                  className="p-2 rounded-xl bg-sky-100 flex-shrink-0"
+                  className="p-2 rounded-xl bg-purple-100 flex-shrink-0"
                 >
-                  <Target size={20} className="text-sky-600" />
+                  <Target size={20} className="text-purple-600" />
                 </motion.div>
                 <div className="flex-1">
-                  <h5 className="font-bold text-sky-900 mb-1">每周任务</h5>
-                  <p className="text-sm text-sky-800 leading-relaxed">
+                  <h5 className="font-bold text-purple-900 mb-1">每周任务</h5>
+                  <p className="text-sm text-purple-800 leading-relaxed">
                     周末是回顾本周思考、总结收获的好时机。点击任务卡片即可开始！
                   </p>
                 </div>

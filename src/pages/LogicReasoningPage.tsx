@@ -192,7 +192,7 @@ export function LogicReasoningPage() {
       {/* 内容层 */}
       <div className="relative z-10">
       {/* 导航栏 */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg border-b border-red-200/50 dark:border-red-800/50">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-transparent border-b border-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative flex items-center justify-between h-16">
             {/* 左侧：返回按钮 */}
@@ -580,7 +580,13 @@ export function LogicReasoningPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className={`bg-gradient-to-r from-${record.color}-50 to-${record.color}-100 dark:from-${record.color}-900/20 dark:to-${record.color}-900/30 rounded-xl p-4 border border-${record.color}-200 dark:border-${record.color}-800`}
+                        className={`rounded-xl p-4 border ${
+                          record.gameType === '海龟汤' || record.gameType === '猜数字' || record.gameType === '谜语人'
+                            ? 'bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-900/30 border-red-200 dark:border-red-800'
+                            : record.gameType === 'Yes or No'
+                            ? 'bg-gradient-to-r from-rose-50 to-rose-100 dark:from-rose-900/20 dark:to-rose-900/30 border-rose-200 dark:border-rose-800'
+                            : 'bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900/20 dark:to-gray-900/30 border-gray-200 dark:border-gray-800'
+                        }`}
                       >
                         {/* 游戏类型和结果 */}
                         <div className="flex items-center justify-between mb-3">

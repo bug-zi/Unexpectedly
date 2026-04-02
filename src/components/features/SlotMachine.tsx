@@ -81,7 +81,7 @@ export function SlotMachine({ onSpinComplete }: SlotMachineProps) {
   };
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-800 dark:to-gray-900 rounded-3xl p-8 md:p-12 max-w-4xl mx-auto">
+    <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-8 md:p-12 max-w-4xl mx-auto">
       {/* 标题 */}
       <div className="text-center mb-8">
         <motion.div

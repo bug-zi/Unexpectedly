@@ -214,37 +214,13 @@ export function WritingChallengePage() {
   };
 
   // 获取难度颜色
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case '简单':
-        return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
-      case '中等':
-        return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400';
-      case '困难':
-        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
-      default:
-        return 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400';
-    }
+  const getDifficultyColor = (_difficulty: string) => {
+    return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
   };
 
   // 获取类别颜色
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case '奇幻':
-        return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400';
-      case '悬疑':
-        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
-      case '怀旧':
-        return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
-      case '人生':
-        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
-      case '探险':
-        return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
-      case '情感':
-        return 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400';
-      default:
-        return 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400';
-    }
+  const getCategoryColor = (_category: string) => {
+    return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
   };
 
   return (
@@ -320,7 +296,7 @@ export function WritingChallengePage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
-            className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 mb-6 border-2 border-blue-200 dark:border-blue-800"
+            className="bg-white/20 backdrop-blur-sm rounded-3xl shadow-xl p-8 mb-6 border-2 border-blue-200 dark:border-blue-800"
           >
             {/* 题目标签 */}
             <div className="flex items-center gap-3 mb-6">
@@ -368,7 +344,7 @@ export function WritingChallengePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 border-2 border-blue-200 dark:border-blue-800"
+            className="bg-white/20 backdrop-blur-sm rounded-3xl shadow-xl p-8 border-2 border-blue-200 dark:border-blue-800"
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -447,10 +423,10 @@ export function WritingChallengePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-200 dark:border-blue-800"
+            className="mt-6 p-4 bg-white/20 backdrop-blur-sm rounded-2xl border border-blue-200 dark:border-blue-800"
           >
             <p className="text-sm text-blue-800 dark:text-blue-200">
-              <strong>💡 写作提示：</strong>尽情发挥想象力，让故事朝着意想不到的方向发展。没有标准答案，你的创意就是最好的答案！
+              <strong>写作提示：</strong>尽情发挥想象力，让故事朝着意想不到的方向发展。没有标准答案，你的创意就是最好的答案！
             </p>
           </motion.div>
         </div>

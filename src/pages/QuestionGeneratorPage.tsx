@@ -164,7 +164,7 @@ export function QuestionGeneratorPage() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <button
-              onClick={() => navigate('/questions')}
+              onClick={() => navigate('/questions/explore')}
               className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
             >
               <ArrowLeft size={20} />

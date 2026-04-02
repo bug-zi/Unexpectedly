@@ -74,7 +74,7 @@ export function SlotMachineAnswerPage() {
 
   if (!words) {
     return (
-      <div className="min-h-screen noise-bg bg-gradient-to-br from-blue-50 via-cyan-50 to-sky-50 dark:from-gray-900 dark:via-blue-900/30 dark:to-gray-800 flex items-center justify-center">
+      <div className="min-h-screen relative flex items-center justify-center" style={{ backgroundImage: 'url(/bg-picture/bg-wirting.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">加载中...</p>
@@ -84,7 +84,7 @@ export function SlotMachineAnswerPage() {
   }
 
   return (
-    <div className="min-h-screen noise-bg bg-gradient-to-br from-blue-50 via-cyan-50 to-sky-50 dark:from-gray-900 dark:via-blue-900/30 dark:to-gray-800">
+    <div className="min-h-screen relative" style={{ backgroundImage: 'url(/bg-picture/bg-wirting.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}>
       {/* 导航栏 */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/50 dark:border-gray-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -120,7 +120,7 @@ export function SlotMachineAnswerPage() {
             initial={{ opacity: 0, y: 40, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ ease: customEasing.elastic }}
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-4 md:p-5 border-2 border-blue-200 dark:border-blue-800 warm-glow"
+            className="bg-white/20 backdrop-blur-sm rounded-2xl shadow-2xl p-4 md:p-5 border-2 border-blue-200 dark:border-blue-800 warm-glow"
           >
             {/* 抽取结果展示 */}
             <motion.div
@@ -177,7 +177,7 @@ export function SlotMachineAnswerPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-3 mb-4 border border-blue-200 dark:border-blue-800"
+              className="bg-gradient-to-r from-blue-50/60 to-cyan-50/60 dark:from-blue-900/20 dark:to-cyan-900/20 backdrop-blur-sm rounded-xl p-3 mb-4 border border-blue-200 dark:border-blue-800"
             >
               <div className="flex items-start gap-2">
                 <Lightbulb size={18} className="text-blue-500 flex-shrink-0 mt-0.5" />
@@ -209,7 +209,7 @@ export function SlotMachineAnswerPage() {
               }}
               fullWidth
               autoResize
-              className="min-h-[120px] mb-4 text-base border-2 border-blue-200 dark:border-blue-800 focus:border-blue-400 dark:focus:border-blue-600 rounded-xl"
+              className="min-h-[280px] mb-4 text-base border-2 border-blue-200 dark:border-blue-800 focus:border-blue-400 dark:focus:border-blue-600 rounded-xl"
             />
 
             {/* 字数统计 */}
@@ -240,31 +240,31 @@ export function SlotMachineAnswerPage() {
             {/* 操作按钮 */}
             <div className="flex gap-3">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="flex-1">
-                <Button
-                  variant="ghost"
+                <button
                   onClick={handleNewSpin}
-                  fullWidth
-                  className="border-2 border-gray-200 dark:border-gray-700 rounded-xl py-3 text-sm"
+                  className="w-full py-3 text-sm font-medium border-2 border-gray-200 dark:border-gray-700 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all"
                 >
                   <span className="mr-2">🎰</span>
                   再次抽取
-                </Button>
+                </button>
               </motion.div>
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="flex-1"
               >
-                <Button
+                <button
                   onClick={handleSave}
                   disabled={!response.trim() || isSaving}
-                  isLoading={isSaving}
-                  fullWidth
-                  className="rounded-xl py-3 text-base bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white border-0"
+                  className="relative w-full py-3 text-sm font-medium rounded-xl text-white overflow-hidden transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Save size={18} className="mr-2" />
-                  保存联想
-                </Button>
+                  <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/icon-picture/icon-writing1.jpg)' }} />
+                  <div className="absolute inset-0 bg-black/30" />
+                  <span className="relative z-10 flex items-center justify-center gap-1">
+                    <Save size={18} />
+                    保存联想
+                  </span>
+                </button>
               </motion.div>
             </div>
           </motion.div>

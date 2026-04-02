@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, History, Trash2, Settings, Swords } from 'lucide-react';
+import { ArrowLeft, History, Trash2, Swords } from 'lucide-react';
 import { useDebateStore } from '@/stores/debateStore';
 import { useRoundtableStore } from '@/stores/roundtableStore';
 import { useDebate } from '@/hooks/useDebate';
@@ -147,7 +147,7 @@ export function DebateHallPage() {
             <motion.button
               whileHover={{ scale: 1.05, x: -3 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate('/questions')}
+              onClick={() => navigate('/questions/explore')}
               className="flex items-center gap-1 px-2 py-1.5 text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors shrink-0"
             >
               <ArrowLeft size={18} />
@@ -178,16 +178,6 @@ export function DebateHallPage() {
               >
                 <History size={16} />
                 <span className="hidden lg:inline">历史</span>
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate('/profile')}
-                className="flex items-center gap-1 px-2 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20"
-                title="前往个人中心配置AI"
-              >
-                <Settings size={16} />
-                <span className="hidden lg:inline">设置</span>
               </motion.button>
             </div>
           </div>

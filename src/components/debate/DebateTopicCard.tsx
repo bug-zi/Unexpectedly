@@ -52,9 +52,14 @@ export function DebateTopicCard({ topic, isGenerating, onGenerate, onSelectStanc
           whileTap={{ scale: 0.98 }}
           onClick={onGenerate}
           disabled={disabled}
-          className="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-shadow"
+          className="relative overflow-hidden w-full py-4 text-white rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-shadow"
         >
-          生成今日辩题
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: 'url(/icon-picture/icon-question1.jpg)' }}
+          />
+          <div className="absolute inset-0 bg-black/30" />
+          <span className="relative z-10">生成今日辩题</span>
         </motion.button>
       )}
 
