@@ -230,14 +230,16 @@ export function CheckInPage() {
 
   return (
     <div
-      className="min-h-screen font-['Space_Grotesk',sans-serif] text-[#2D3436] overflow-hidden flex items-center justify-center"
-      style={{ background: 'linear-gradient(135deg, #FFEBF0 0%, #E0F7FA 50%, #F5F7FA 100%)' }}
+      className="min-h-screen font-['Space_Grotesk',sans-serif] text-[#2D3436] overflow-hidden flex items-center justify-center relative"
     >
-      {/* 背景装饰 */}
-      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full pointer-events-none"
-        style={{ background: 'linear-gradient(135deg, rgba(255,107,107,0.15), rgba(255,159,67,0.15))', filter: 'blur(100px)' }} />
-      <div className="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full pointer-events-none"
-        style={{ background: 'linear-gradient(225deg, rgba(72,219,251,0.15), rgba(29,209,161,0.15))', filter: 'blur(120px)' }} />
+      {/* 背景图片 */}
+      <div
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/bg-picture/bg-index.jpg')" }}
+      />
+      {/* 半透明渐变遮罩 */}
+      <div className="fixed inset-0" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.5) 20%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0.55) 100%)' }} />
+      <div className="hidden dark:block fixed inset-0" style={{ background: 'linear-gradient(to bottom, rgba(15,23,41,0.75) 0%, rgba(15,23,41,0.55) 20%, rgba(15,23,41,0.4) 50%, rgba(15,23,41,0.6) 100%)' }} />
 
       {/* 主容器 */}
       <div className="relative w-full max-w-[1200px] min-h-screen md:min-h-0 flex flex-col md:flex-row gap-4 md:gap-6 p-4 md:p-6">

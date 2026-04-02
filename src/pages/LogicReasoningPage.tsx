@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Puzzle, Lightbulb, HelpCircle, Hash, BookOpen, BarChart3, Shuffle, X, History, Clock, Trophy, Calendar } from 'lucide-react';
+import { ArrowLeft, PuzzlePiece, Lightbulb, Question, Hash, BookOpen, ChartBar, Shuffle, X, ClockCounterClockwise, Trophy, CalendarBlank } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
 import {
   getTurtleSoupRecords,
@@ -27,6 +27,7 @@ interface GameCard {
   textColor: string;
   disabled?: boolean;
   disabledReason?: string;
+  bgImage: string;
 }
 
 export function LogicReasoningPage() {
@@ -126,54 +127,72 @@ export function LogicReasoningPage() {
       id: 'turtle-soup',
       title: '海龟汤',
       description: '通过提问是/否问题，逐步推理出离奇故事背后的真相',
-      icon: <Puzzle size={40} />,
+      icon: <PuzzlePiece size={40} weight="duotone" className="text-white" />,
       path: '/turtle-soup',
       color: 'red',
       gradient: 'from-red-500 to-rose-500',
       borderColor: 'border-red-200 dark:border-red-800',
-      textColor: 'text-red-700 dark:text-red-300'
+      textColor: 'text-red-700 dark:text-red-300',
+      bgImage: '/UI-picture/UI-logic1.jpg'
     },
     {
       id: 'riddle',
       title: '谜语人',
       description: '猜谜语，动脑筋，锻炼联想思维和文字理解能力',
-      icon: <Lightbulb size={40} />,
+      icon: <Lightbulb size={40} weight="duotone" className="text-white" />,
       path: '/logic-reasoning/riddle',
       color: 'red',
       gradient: 'from-red-500 to-orange-500',
       borderColor: 'border-red-200 dark:border-red-800',
-      textColor: 'text-red-700 dark:text-red-300'
+      textColor: 'text-red-700 dark:text-red-300',
+      bgImage: '/UI-picture/UI-logic2.jpg'
     },
     {
       id: 'yes-or-no',
       title: 'Yes or No',
       description: 'AI出题，你提问！通过是/否问题猜出AI心中的词语',
-      icon: <HelpCircle size={40} />,
+      icon: <Question size={40} weight="duotone" className="text-white" />,
       path: '/logic-reasoning/yes-or-no',
       color: 'red',
       gradient: 'from-rose-500 to-pink-500',
       borderColor: 'border-red-200 dark:border-red-800',
       textColor: 'text-red-700 dark:text-red-300',
       disabled: true,
-      disabledReason: '稍后开放，敬请期待'
+      disabledReason: '稍后开放，敬请期待',
+      bgImage: '/UI-picture/UI-logic3.jpg'
     },
     {
       id: 'guess-number',
       title: '猜数字',
       description: '根据xAxB提示，猜出四位不重复数字的神秘答案',
-      icon: <Hash size={40} />,
+      icon: <Hash size={40} weight="duotone" className="text-white" />,
       path: '/logic-reasoning/guess-number',
       color: 'red',
       gradient: 'from-orange-500 to-red-500',
       borderColor: 'border-red-200 dark:border-red-800',
-      textColor: 'text-red-700 dark:text-red-300'
+      textColor: 'text-red-700 dark:text-red-300',
+      bgImage: '/UI-picture/UI-logic4.jpg'
     }
   ];
 
   return (
-    <div className="min-h-screen noise-bg bg-gradient-to-br from-red-50 via-rose-50 to-orange-50 dark:from-gray-900 dark:via-red-900/20 dark:to-rose-900/20">
+    <div
+      className="min-h-screen relative"
+      style={{
+        backgroundImage: 'url(/bg-picture/bg-logic.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
+      }}
+    >
+      {/* 背景遮罩层 - 保证内容可读性 */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-rose-50/80 to-orange-50/85 dark:from-gray-900/90 dark:via-red-900/85 dark:to-rose-900/90 z-0" />
+
+      {/* 内容层 */}
+      <div className="relative z-10">
       {/* 导航栏 */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-red-200 dark:border-red-800">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg border-b border-red-200/50 dark:border-red-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* 左侧：返回按钮 */}
@@ -183,7 +202,7 @@ export function LogicReasoningPage() {
               onClick={() => navigate(-1)}
               className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors"
             >
-              <ArrowLeft size={20} />
+              <ArrowLeft size={20} weight="duotone" />
               <span className="font-medium hidden sm:inline">返回</span>
             </motion.button>
 
@@ -192,9 +211,9 @@ export function LogicReasoningPage() {
               <motion.div
                 whileHover={{ rotate: 360 }}
                 transition={{ duration: 0.6 }}
-                className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-rose-500 flex items-center justify-center shadow-lg"
+                className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center"
               >
-                <Puzzle size={24} className="text-white" />
+                <PuzzlePiece size={24} weight="duotone" className="text-white" />
               </motion.div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent hidden sm:block">
                 逻辑推理
@@ -210,7 +229,7 @@ export function LogicReasoningPage() {
                 className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                 title="游戏说明"
               >
-                <BookOpen size={18} />
+                <BookOpen size={18} weight="duotone" />
                 <span className="hidden md:inline">游戏说明</span>
               </motion.button>
 
@@ -221,7 +240,7 @@ export function LogicReasoningPage() {
                 className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                 title="随机开始游戏"
               >
-                <Shuffle size={18} />
+                <Shuffle size={18} weight="duotone" />
                 <span className="hidden md:inline">随机开始</span>
               </motion.button>
 
@@ -235,7 +254,7 @@ export function LogicReasoningPage() {
                 className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                 title="查看游戏统计"
               >
-                <BarChart3 size={18} />
+                <ChartBar size={18} weight="duotone" />
                 <span className="hidden md:inline">游戏统计</span>
               </motion.button>
 
@@ -249,7 +268,7 @@ export function LogicReasoningPage() {
                 className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                 title="查看推理记录"
               >
-                <History size={18} />
+                <ClockCounterClockwise size={18} weight="duotone" />
                 <span className="hidden md:inline">推理记录</span>
               </motion.button>
             </div>
@@ -278,7 +297,7 @@ export function LogicReasoningPage() {
               {/* 头部 */}
               <div className="sticky top-0 z-10 bg-gradient-to-r from-red-500 to-rose-500 px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <BookOpen size={24} className="text-white" />
+                  <BookOpen size={24} weight="duotone" className="text-white" />
                   <h3 className="text-xl font-bold text-white">游戏说明</h3>
                 </div>
                 <motion.button
@@ -287,7 +306,7 @@ export function LogicReasoningPage() {
                   onClick={() => setShowInstructions(false)}
                   className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
                 >
-                  <X size={24} />
+                  <X size={24} weight="duotone" />
                 </motion.button>
               </div>
 
@@ -296,7 +315,7 @@ export function LogicReasoningPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
                     <h4 className="font-bold text-red-600 dark:text-red-400 mb-2 flex items-center gap-2">
-                      <Puzzle size={20} />
+                      <PuzzlePiece size={20} weight="duotone" />
                       海龟汤
                     </h4>
                     <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -310,7 +329,7 @@ export function LogicReasoningPage() {
 
                   <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-800">
                     <h4 className="font-bold text-orange-600 dark:text-orange-400 mb-2 flex items-center gap-2">
-                      <Lightbulb size={20} />
+                      <Lightbulb size={20} weight="duotone" />
                       谜语人
                     </h4>
                     <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -324,7 +343,7 @@ export function LogicReasoningPage() {
 
                   <div className="p-4 bg-rose-50 dark:bg-rose-900/20 rounded-xl border border-rose-200 dark:border-rose-800">
                     <h4 className="font-bold text-rose-600 dark:text-rose-400 mb-2 flex items-center gap-2">
-                      <HelpCircle size={20} />
+                      <Question size={20} weight="duotone" />
                       Yes or No
                     </h4>
                     <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -338,7 +357,7 @@ export function LogicReasoningPage() {
 
                   <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
                     <h4 className="font-bold text-red-600 dark:text-red-400 mb-2 flex items-center gap-2">
-                      <Hash size={20} />
+                      <Hash size={20} weight="duotone" />
                       猜数字
                     </h4>
                     <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -377,7 +396,7 @@ export function LogicReasoningPage() {
               {/* 头部 */}
               <div className="bg-gradient-to-r from-red-500 to-rose-500 px-6 py-4 rounded-t-3xl flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <BarChart3 size={24} className="text-white" />
+                  <ChartBar size={24} weight="duotone" className="text-white" />
                   <h3 className="text-xl font-bold text-white">游戏统计</h3>
                 </div>
                 <motion.button
@@ -386,7 +405,7 @@ export function LogicReasoningPage() {
                   onClick={() => setShowStats(false)}
                   className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
                 >
-                  <X size={24} />
+                  <X size={24} weight="duotone" />
                 </motion.button>
               </div>
 
@@ -444,7 +463,7 @@ export function LogicReasoningPage() {
               {/* 头部 */}
               <div className="bg-gradient-to-r from-rose-500 to-pink-500 px-6 py-4 rounded-t-3xl flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <HelpCircle size={24} className="text-white" />
+                  <Question size={24} weight="duotone" className="text-white" />
                   <h3 className="text-xl font-bold text-white">即将推出</h3>
                 </div>
                 <motion.button
@@ -453,7 +472,7 @@ export function LogicReasoningPage() {
                   onClick={() => setShowComingSoon(false)}
                   className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
                 >
-                  <X size={24} />
+                  <X size={24} weight="duotone" />
                 </motion.button>
               </div>
 
@@ -461,7 +480,7 @@ export function LogicReasoningPage() {
               <div className="p-6 text-center">
                 <div className="mb-4">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center">
-                    <HelpCircle size={32} className="text-white" />
+                    <Question size={32} weight="duotone" className="text-white" />
                   </div>
                   <h4 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                     稍后开放，敬请期待
@@ -512,7 +531,7 @@ export function LogicReasoningPage() {
               {/* 头部 */}
               <div className="bg-gradient-to-r from-red-500 to-rose-500 px-6 py-4 flex items-center justify-between flex-shrink-0">
                 <div className="flex items-center gap-3">
-                  <History size={24} className="text-white" />
+                  <ClockCounterClockwise size={24} weight="duotone" className="text-white" />
                   <h3 className="text-xl font-bold text-white">推理游戏记录</h3>
                 </div>
                 <motion.button
@@ -521,7 +540,7 @@ export function LogicReasoningPage() {
                   onClick={() => setShowRecords(false)}
                   className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
                 >
-                  <X size={24} />
+                  <X size={24} weight="duotone" />
                 </motion.button>
               </div>
 
@@ -529,7 +548,7 @@ export function LogicReasoningPage() {
               <div className="p-6 overflow-y-auto flex-1">
                 {gameRecords.length === 0 ? (
                   <div className="text-center py-12">
-                    <Trophy size={48} className="mx-auto text-gray-400 mb-4" />
+                    <Trophy size={48} weight="duotone" className="mx-auto text-gray-400 mb-4" />
                     <p className="text-gray-600 dark:text-gray-400">
                       还没有游戏记录，开始你的第一次推理吧！✨
                     </p>
@@ -562,7 +581,7 @@ export function LogicReasoningPage() {
                             )}
                           </div>
                           <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
-                            <Calendar size={14} />
+                            <CalendarBlank size={14} weight="duotone" />
                             <span>
                               {(() => {
                                 const date = new Date(record.createdAt || record.syncedAt || record.completedAt);
@@ -743,11 +762,18 @@ export function LogicReasoningPage() {
                     navigate(card.path);
                   }
                 }}
-                className={`relative bg-white dark:bg-gray-800 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 ${card.borderColor} overflow-hidden ${
+                className={`relative rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 ${card.borderColor} overflow-hidden ${
                   card.disabled ? 'opacity-50 grayscale cursor-not-allowed' : 'cursor-pointer group'
                 }`}
               >
-                {/* 背景装饰 */}
+                {/* 背景图片 */}
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                  style={{ backgroundImage: `url(${card.bgImage})` }}
+                />
+                {/* 渐变遮罩 - 保证文字可读 */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-white/75 to-white/60 dark:from-gray-900/85 dark:via-gray-800/80 dark:to-gray-900/70" />
+                {/* 悬停时的主题色覆盖 */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
 
                 {/* 禁用标记 */}
@@ -769,7 +795,7 @@ export function LogicReasoningPage() {
                         scale: [1, 1.1, 1]
                       } : {}}
                       transition={{ duration: 0.5 }}
-                      className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${card.gradient} flex items-center justify-center flex-shrink-0 shadow-lg`}
+                      className="p-4 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0"
                     >
                       <div className="text-white">
                         {card.icon}
@@ -824,6 +850,7 @@ export function LogicReasoningPage() {
           </div>
         </div>
       </main>
+      </div>{/* 内容层结束 */}
     </div>
   );
 }

@@ -28,7 +28,15 @@ export function SlotMachinePage() {
   };
 
   return (
-    <div className="min-h-screen noise-bg bg-gradient-to-br from-blue-50 via-cyan-50 to-sky-50 dark:from-gray-900 dark:via-blue-900/30 dark:to-gray-800">
+    <div
+      className="min-h-screen relative"
+      style={{
+        backgroundImage: 'url(/bg-picture/bg-wirting.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
       {/* 导航栏 */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/50 dark:border-gray-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

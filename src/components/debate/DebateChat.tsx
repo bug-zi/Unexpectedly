@@ -9,7 +9,7 @@ interface DebateChatProps {
   className?: string;
 }
 
-export function DebateChat({ messages, userStance, streamingMessageId, className }: DebateChatProps) {
+export function DebateChat({ messages, userStance: _userStance, streamingMessageId, className }: DebateChatProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -22,7 +22,6 @@ export function DebateChat({ messages, userStance, streamingMessageId, className
         <DebateBubble
           key={msg.id}
           message={msg}
-          userStance={userStance}
           isStreaming={msg.id === streamingMessageId}
         />
       ))}

@@ -1,16 +1,15 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { DebateMessage, DebateSession, DebateStance, DebateStatus, JudgeResult, LLMConfig } from '@/types';
+import { DebateMessage, DebateSession, DebateStance, DebateStatus, JudgeResult } from '@/types';
 
 /**
  * 辩论堂状态管理
- * 独立于 appStore 和 roundtableStore，不影响现有功能
+ * LLM 配置复用 roundtableStore（在个人中心统一配置）
  */
 
 interface DebateState {
   sessions: DebateSession[];
   activeSessionId: string | null;
-  llmConfig: LLMConfig | null;
 
   // 会话管理
   createSession: (topic: string, userStance: DebateStance) => string;
@@ -21,10 +20,6 @@ interface DebateState {
   setActiveSession: (sessionId: string | null) => void;
   deleteSession: (sessionId: string) => void;
 
-  // LLM 配置
-  setLLMConfig: (config: LLMConfig) => void;
-  clearLLMConfig: () => void;
-
   // 获取器
   getActiveSession: () => DebateSession | undefined;
 }
@@ -34,7 +29,6 @@ export const useDebateStore = create<DebateState>()(
     (set, get) => ({
       sessions: [],
       activeSessionId: null,
-      llmConfig: null,
 
       createSession: (topic, userStance) => {
         const id = `debate-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -114,9 +108,6 @@ export const useDebateStore = create<DebateState>()(
             state.activeSessionId === sessionId ? null : state.activeSessionId,
         })),
 
-      setLLMConfig: config => set({ llmConfig: config }),
-      clearLLMConfig: () => set({ llmConfig: null }),
-
       getActiveSession: () => {
         const state = get();
         return state.sessions.find(s => s.id === state.activeSessionId);
@@ -126,12 +117,6 @@ export const useDebateStore = create<DebateState>()(
       name: 'wwx-debate',
       partialize: state => ({
         sessions: state.sessions,
-        llmConfig: state.llmConfig ? {
-          provider: state.llmConfig.provider,
-          apiKey: state.llmConfig.apiKey,
-          model: state.llmConfig.model,
-          baseUrl: state.llmConfig.baseUrl,
-        } : null,
       }),
     }
   )

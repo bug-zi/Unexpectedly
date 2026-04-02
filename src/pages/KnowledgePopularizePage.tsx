@@ -46,6 +46,13 @@ export function KnowledgePopularizePage() {
     navigate(knowledgeModules[randomIndex].path);
   };
 
+  // 卡片背景图映射
+  const cardBgImages: Record<string, string> = {
+    'world-records': '/UI-picture/UI-knowledge1.jpg',
+    'systems-thinking': '/UI-picture/UI-knowledge2.jpg',
+    'health-management': '/UI-picture/UI-knowledge3.jpg',
+  };
+
   const getIconComponent = (iconName: string) => {
     switch (iconName) {
       case 'Trophy':
@@ -60,9 +67,19 @@ export function KnowledgePopularizePage() {
   };
 
   return (
-    <div className="min-h-screen noise-bg bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-gray-900 dark:via-green-900/20 dark:to-emerald-900/20">
+    <div className="min-h-screen relative">
+      {/* 背景图片 */}
+      <div
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'url(/bg-picture/bg-konwledge2.jpg)' }}
+      />
+      {/* 半透明渐变遮罩 */}
+      <div className="fixed inset-0 bg-gradient-to-br from-white/80 via-green-50/70 to-emerald-50/80 dark:from-gray-900/90 dark:via-green-900/80 dark:to-emerald-900/85" />
+
+      {/* 内容层 */}
+      <div className="relative z-10">
       {/* 导航栏 */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-green-200 dark:border-green-800">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/60 dark:bg-gray-900/70 backdrop-blur-2xl border-b border-green-200/60 dark:border-green-800/50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* 左侧：返回按钮 */}
@@ -176,9 +193,16 @@ export function KnowledgePopularizePage() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => navigate(module.path)}
-                  className={`relative bg-white dark:bg-gray-800 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-green-200 dark:border-green-800 overflow-hidden cursor-pointer group`}
+                  className="relative rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-green-200/80 dark:border-green-800/60 overflow-hidden cursor-pointer group"
+                  style={{
+                    backgroundImage: `url(${cardBgImages[module.id]})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}
                 >
-                  {/* 背景装饰 */}
+                  {/* 背景遮罩 */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-green-50/75 to-emerald-50/80 dark:from-gray-900/88 dark:via-green-900/82 dark:to-emerald-900/88" />
+                  {/* hover渐变装饰 */}
                   <div className={`absolute inset-0 bg-gradient-to-br ${module.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
 
                   {/* 内容 */}
@@ -186,7 +210,7 @@ export function KnowledgePopularizePage() {
                     {/* 图标和标题 */}
                     <div className="mb-6">
                       <motion.div
-                        className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
+                        className="w-16 h-16 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
                       >
                         <Icon size={32} className="text-green-600 dark:text-green-400" />
                       </motion.div>
@@ -290,7 +314,7 @@ export function KnowledgePopularizePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="mt-12 p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-2 border-green-200 dark:border-green-800"
+            className="mt-12 p-6 bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-2xl shadow-lg border-2 border-green-200/80 dark:border-green-800/60"
           >
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <BookOpen size={24} className="text-green-500" />
@@ -479,6 +503,7 @@ export function KnowledgePopularizePage() {
           </motion.div>
         )}
       </AnimatePresence>
+      </div>{/* 内容层结束 */}
     </div>
   );
 }

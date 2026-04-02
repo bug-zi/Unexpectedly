@@ -152,7 +152,15 @@ export function NotificationSettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* 背景图片 */}
+      <div
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'url(/bg-picture/bg-index.jpg)' }}
+      />
+      {/* 半透明渐变遮罩 - 顶部更实，底部自然过渡 */}
+      <div className="fixed inset-0" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.5) 20%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0.55) 100%)' }} />
+      <div className="hidden dark:block fixed inset-0" style={{ background: 'linear-gradient(to bottom, rgba(15,23,41,0.75) 0%, rgba(15,23,41,0.55) 20%, rgba(15,23,41,0.4) 50%, rgba(15,23,41,0.6) 100%)' }} />
       {/* 导航栏 */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -176,7 +184,7 @@ export function NotificationSettingsPage() {
       </nav>
 
       {/* 主要内容 */}
-      <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+      <main className="relative z-10 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
           {/* 页面标题 */}
           <motion.div

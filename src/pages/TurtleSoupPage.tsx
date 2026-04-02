@@ -131,7 +131,21 @@ export function TurtleSoupPage() {
   };
 
   return (
-    <div className="min-h-screen noise-bg bg-gradient-to-br from-red-50 via-rose-50 to-orange-50 dark:from-gray-900 dark:via-red-900/20 dark:to-rose-900/20">
+    <div
+      className="min-h-screen relative"
+      style={{
+        backgroundImage: 'url(/bg-picture/bg-logic.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
+      }}
+    >
+      {/* 背景遮罩层 - 保证内容可读性 */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-rose-50/80 to-orange-50/85 dark:from-gray-900/90 dark:via-red-900/85 dark:to-rose-900/90 z-0" />
+
+      {/* 内容层 */}
+      <div className="relative z-10">
       {/* 导航栏 */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-red-200 dark:border-red-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -253,16 +267,21 @@ export function TurtleSoupPage() {
             className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden border-2 border-red-200 dark:border-red-800"
           >
             {/* 标题区域 */}
-            <div className="bg-gradient-to-r from-red-500 to-rose-500 p-8">
+            <div className="relative p-8 overflow-hidden">
+              <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: 'url(/UI-picture/UI-turtle-soup.jpg)' }}
+              />
+              <div className="absolute inset-0 bg-transparent" />
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-3xl md:text-4xl font-bold text-white mb-2"
+                className="relative z-10 text-3xl md:text-4xl font-bold text-white mb-2"
               >
                 {currentPuzzle.title}
               </motion.h2>
-              <p className="text-red-100 text-sm">通过提问获取线索，推理出故事真相</p>
+              <p className="relative z-10 text-red-100 text-sm">通过提问获取线索，推理出故事真相</p>
             </div>
 
             {/* 汤面 - 情境 */}
@@ -366,7 +385,12 @@ export function TurtleSoupPage() {
                     whileTap={{ scale: 0.98 }}
                     onClick={handleSubmitQuestion}
                     disabled={!currentQuestion.trim() || isSubmitting || showTruth}
-                    className="px-6 py-3 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    className="px-6 py-3 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 relative overflow-hidden"
+                    style={{
+                      backgroundImage: 'url(/UI-picture/UI-turtle-soup.jpg)',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }}
                   >
                     {isSubmitting ? (
                       <>
@@ -472,7 +496,12 @@ export function TurtleSoupPage() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setShowHint(!showHint)}
-                      className="flex items-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium"
+                      className="flex items-center gap-2 px-6 py-3 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium relative overflow-hidden"
+                      style={{
+                        backgroundImage: 'url(/UI-picture/UI-turtle-soup.jpg)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }}
                     >
                       {showHint ? <EyeOff size={20} /> : <Lightbulb size={20} />}
                       <span>{showHint ? '隐藏提示' : '显示提示'}</span>
@@ -482,7 +511,12 @@ export function TurtleSoupPage() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={handleRevealTruth}
-                      className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-rose-500 to-red-500 hover:from-rose-600 hover:to-red-600 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium"
+                      className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium relative overflow-hidden"
+                      style={{
+                        backgroundImage: 'url(/UI-picture/UI-turtle-soup.jpg)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }}
                     >
                       <Eye size={20} />
                       <span>查看真相</span>
@@ -506,6 +540,7 @@ export function TurtleSoupPage() {
           </motion.div>
         </div>
       </main>
+      </div>
     </div>
   );
 }

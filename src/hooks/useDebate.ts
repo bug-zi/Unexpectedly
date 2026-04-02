@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { useDebateStore } from '@/stores/debateStore';
+import { useRoundtableStore } from '@/stores/roundtableStore';
 import { buildTopicGenerationMessages, buildOpponentMessages, buildJudgeMessages } from '@/utils/debatePrompts';
 import { streamChat, chat } from '@/services/llmService';
 import { DebateStance, JudgeResult, LLMConfig } from '@/types';
@@ -7,6 +8,7 @@ import { DebateStance, JudgeResult, LLMConfig } from '@/types';
 /**
  * 辩论堂核心 hook
  * 管理辩论的完整流程：生成辩题 → 选择立场 → 辩论 → 评委评价
+ * LLM 配置复用 roundtableStore（在个人中心统一配置）
  */
 export function useDebate() {
   const {
@@ -15,8 +17,9 @@ export function useDebate() {
     updateMessageContent,
     completeSession,
     getActiveSession,
-    llmConfig,
   } = useDebateStore();
+
+  const llmConfig = useRoundtableStore(state => state.llmConfig);
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingTopic, setIsGeneratingTopic] = useState(false);

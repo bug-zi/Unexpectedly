@@ -166,6 +166,14 @@ When working with files, data, or any content that requires storage:
 - ✅ Use instead: Code comments, JSDoc annotations, inline explanations
 - ✅ Only when requested: "请生成一个使用指南" → Then create documentation
 
+### UI Design and Visual Optimization (MANDATORY)
+**在进行UI设计网页页面效果优化时，不需要主动调用浏览器去查看效果，由用户自己查看效果再反馈。**
+
+1. **No proactive browser preview** - When doing UI/visual design work, do NOT automatically open the browser to check the result
+2. **Wait for user feedback** - After making UI changes, let the user review the visual effect and provide feedback
+3. **Browser for debugging only** - Only use browser tools when debugging functional bugs, not for checking visual design results
+4. **Icon background style** - 没有特殊说明时，项目中设计icon图标的背景颜色样式统一采用与首页一致的 `bg-white/20 backdrop-blur-sm` 灰色透明毛玻璃效果
+
 ### Debugging and Testing (MANDATORY)
 **你会自行调用浏览器工具调试修复，而不是让使用者自己去调试操作。**
 

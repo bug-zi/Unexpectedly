@@ -191,9 +191,18 @@ export function TaskPage() {
   const calendarData = getCalendarData();
 
   return (
-    <div className="min-h-screen noise-bg bg-gradient-to-br from-pink-50 via-rose-50 to-sky-50">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* 背景图片 */}
+      <div
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'url(/bg-picture/bg-index.jpg)' }}
+      />
+      {/* 半透明渐变遮罩 - 顶部更实，底部自然过渡 */}
+      <div className="fixed inset-0" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.5) 20%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0.55) 100%)' }} />
+      <div className="hidden dark:block fixed inset-0" style={{ background: 'linear-gradient(to bottom, rgba(15,23,41,0.75) 0%, rgba(15,23,41,0.55) 20%, rgba(15,23,41,0.4) 50%, rgba(15,23,41,0.6) 100%)' }} />
+
       {/* 导航栏 */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-pink-200">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-xl border-b border-pink-200/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <motion.button
@@ -219,19 +228,21 @@ export function TaskPage() {
       </nav>
 
       {/* 主要内容 */}
-      <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+      <main className="relative z-10 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           {/* 统计卡片 */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative overflow-hidden bg-gradient-to-br from-pink-400 via-rose-400 to-sky-400 rounded-3xl shadow-2xl p-6 mb-8 text-white"
+            className="relative overflow-hidden rounded-3xl shadow-2xl p-6 mb-8 text-white"
           >
-            {/* 背景装饰 */}
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-              <div className="absolute bottom-0 left-0 w-48 h-48 bg-sky-200 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-            </div>
+            {/* 背景图片 */}
+            <div
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+              style={{ backgroundImage: 'url(/UI-picture/UI-tasks1.jpg)' }}
+            />
+            {/* 半透明遮罩 */}
+            <div className="absolute inset-0 bg-gradient-to-br from-pink-400/60 via-rose-400/50 to-sky-400/60" />
 
             <div className="relative">
               {/* 顶部标签 */}
@@ -327,8 +338,15 @@ export function TaskPage() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-2 mb-6"
+            className="relative rounded-2xl shadow-xl p-2 mb-6 overflow-hidden"
           >
+            {/* 背景图片 */}
+            <div
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+              style={{ backgroundImage: 'url(/UI-picture/UI-tasks-tabs.jpg)' }}
+            />
+            {/* 半透明遮罩 */}
+            <div className="absolute inset-0 bg-white/40 backdrop-blur-md" />
             <div className="flex gap-2">
               <button
                 onClick={() => setActiveTab('daily')}
@@ -350,7 +368,10 @@ export function TaskPage() {
                 {activeTab === 'daily' && (
                   <motion.div
                     layoutId="activeTab"
-                    className="absolute inset-0 bg-gradient-to-r from-pink-500 to-sky-500 rounded-xl shadow-lg"
+                    className="absolute inset-0 rounded-xl shadow-lg bg-cover bg-center overflow-hidden"
+                    style={{
+                      backgroundImage: 'linear-gradient(to right, rgba(219,39,119,0.65), rgba(14,165,233,0.65)), url(/UI-picture/UI-tasks-tabs.jpg)'
+                    }}
                     transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                   />
                 )}
@@ -385,7 +406,10 @@ export function TaskPage() {
                 {activeTab === 'weekly' && (
                   <motion.div
                     layoutId="activeTab"
-                    className="absolute inset-0 bg-gradient-to-r from-pink-500 to-sky-500 rounded-xl shadow-lg"
+                    className="absolute inset-0 rounded-xl shadow-lg bg-cover bg-center overflow-hidden"
+                    style={{
+                      backgroundImage: 'linear-gradient(to right, rgba(219,39,119,0.65), rgba(14,165,233,0.65)), url(/UI-picture/UI-tasks-tabs.jpg)'
+                    }}
                     transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                   />
                 )}
@@ -418,7 +442,10 @@ export function TaskPage() {
                 {activeTab === 'calendar' && (
                   <motion.div
                     layoutId="activeTab"
-                    className="absolute inset-0 bg-gradient-to-r from-pink-500 to-sky-500 rounded-xl shadow-lg"
+                    className="absolute inset-0 rounded-xl shadow-lg bg-cover bg-center overflow-hidden"
+                    style={{
+                      backgroundImage: 'linear-gradient(to right, rgba(219,39,119,0.65), rgba(14,165,233,0.65)), url(/UI-picture/UI-tasks-tabs.jpg)'
+                    }}
                     transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                   />
                 )}

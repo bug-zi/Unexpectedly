@@ -538,7 +538,15 @@ export function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* 背景图片 */}
+      <div
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'url(/bg-picture/bg-index.jpg)' }}
+      />
+      {/* 半透明渐变遮罩 - 顶部更实，底部自然过渡 */}
+      <div className="fixed inset-0" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.5) 20%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0.55) 100%)' }} />
+      <div className="hidden dark:block fixed inset-0" style={{ background: 'linear-gradient(to bottom, rgba(15,23,41,0.75) 0%, rgba(15,23,41,0.55) 20%, rgba(15,23,41,0.4) 50%, rgba(15,23,41,0.6) 100%)' }} />
       {/* 导航栏 */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-blue-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -564,7 +572,7 @@ export function ProfilePage() {
       </nav>
 
       {/* 主要内容 */}
-      <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+      <main className="relative z-10 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           {/* 用户信息卡片 */}
           <motion.div
@@ -756,14 +764,22 @@ export function ProfilePage() {
                 )}
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-                  <div className="text-sm text-gray-600 mb-2">答题总数</div>
-                  <p className="text-2xl font-bold text-blue-600">{stats.totalAnswers}</p>
+                <div className="relative rounded-xl p-4 border border-blue-200 overflow-hidden">
+                  <div className="absolute inset-0 bg-cover bg-center opacity-20" style={{ backgroundImage: "url('/icon-picture/icon-index1.jpg')" }} />
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-50/90 to-rose-50/90" />
+                  <div className="relative">
+                    <div className="text-sm text-gray-600 mb-2">答题总数</div>
+                    <p className="text-2xl font-bold text-blue-600">{stats.totalAnswers}</p>
+                  </div>
                 </div>
 
-                <div className="bg-green-50 rounded-xl p-4 border border-green-200">
-                  <div className="text-sm text-gray-600 mb-2">累计签到</div>
-                  <p className="text-2xl font-bold text-green-600">{stats.totalCheckIns}</p>
+                <div className="relative rounded-xl p-4 border border-green-200 overflow-hidden">
+                  <div className="absolute inset-0 bg-cover bg-center opacity-20" style={{ backgroundImage: "url('/icon-picture/icon-knowledge1.jpg')" }} />
+                  <div className="absolute inset-0 bg-gradient-to-br from-green-50/90 to-teal-50/90" />
+                  <div className="relative">
+                    <div className="text-sm text-gray-600 mb-2">累计签到</div>
+                    <p className="text-2xl font-bold text-green-600">{stats.totalCheckIns}</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1056,8 +1072,11 @@ export function ProfilePage() {
                 whileTap={{ scale: 0.98 }}
                 onClick={handleSyncToCloud}
                 disabled={isSyncing || !hasUnsyncedData}
-                className="w-full flex items-center gap-3 px-4 py-3 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full relative flex items-center gap-3 px-4 py-3 text-purple-700 rounded-xl transition-all overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
               >
+                <div className="absolute inset-0 bg-cover bg-center opacity-15" style={{ backgroundImage: "url('/icon-picture/icon-writing1.jpg')" }} />
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-50/95 to-indigo-50/95" />
+                <div className="relative flex items-center gap-3 w-full">
                 {isSyncing ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-2 border-purple-500 border-t-transparent"></div>
                 ) : (
@@ -1073,18 +1092,23 @@ export function ProfilePage() {
                       : '所有数据已是最新'}
                   </p>
                 </div>
+                </div>
               </motion.button>
 
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleExport}
-                className="w-full flex items-center gap-3 px-4 py-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl transition-all"
+                className="w-full relative flex items-center gap-3 px-4 py-3 text-blue-700 rounded-xl transition-all overflow-hidden"
               >
+                <div className="absolute inset-0 bg-cover bg-center opacity-15" style={{ backgroundImage: "url('/icon-picture/icon-index1.jpg')" }} />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-50/95 to-cyan-50/95" />
+                <div className="relative flex items-center gap-3 w-full">
                 <Download size={20} />
                 <div className="flex-1 text-left">
                   <p className="font-medium">导出数据</p>
                   <p className="text-sm text-blue-600">备份所有数据到本地</p>
+                </div>
                 </div>
               </motion.button>
 
@@ -1092,12 +1116,16 @@ export function ProfilePage() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleImport}
-                className="w-full flex items-center gap-3 px-4 py-3 bg-green-50 hover:bg-green-100 text-green-700 rounded-xl transition-all"
+                className="w-full relative flex items-center gap-3 px-4 py-3 text-green-700 rounded-xl transition-all overflow-hidden"
               >
+                <div className="absolute inset-0 bg-cover bg-center opacity-15" style={{ backgroundImage: "url('/icon-picture/icon-knowledge1.jpg')" }} />
+                <div className="absolute inset-0 bg-gradient-to-r from-green-50/95 to-emerald-50/95" />
+                <div className="relative flex items-center gap-3 w-full">
                 <Upload size={20} />
                 <div className="flex-1 text-left">
                   <p className="font-medium">导入数据</p>
                   <p className="text-sm text-green-600">从备份文件恢复数据</p>
+                </div>
                 </div>
               </motion.button>
             </div>
@@ -1118,13 +1146,17 @@ export function ProfilePage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleClearData}
-              className="w-full flex items-center gap-3 px-4 py-3 bg-red-50 hover:bg-red-100 text-red-700 rounded-xl transition-all"
+              className="w-full relative flex items-center gap-3 px-4 py-3 text-red-700 rounded-xl transition-all overflow-hidden"
             >
+              <div className="absolute inset-0 bg-cover bg-center opacity-15" style={{ backgroundImage: "url('/icon-picture/icon-logic1.jpg')" }} />
+              <div className="absolute inset-0 bg-gradient-to-r from-red-50/95 to-rose-50/95" />
+              <div className="relative flex items-center gap-3 w-full">
               <Trash2 size={20} />
               <div className="flex-1 text-left">
                 <p className="font-medium">清除所有数据</p>
                 <p className="text-sm text-red-600">删除所有本地存储的数据（不可恢复）</p>
               </div>
+                </div>
             </motion.button>
           </motion.div>
         </div>

@@ -17,12 +17,12 @@ export function DebateJudgeResult({ result, userStance, onNewDebate }: DebateJud
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border-2 border-violet-200 dark:border-violet-700 rounded-3xl p-6 space-y-5"
+      className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-2 border-amber-200 dark:border-amber-700 rounded-3xl p-6 space-y-5"
     >
       {/* 标题 */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-violet-100 dark:bg-violet-800 flex items-center justify-center">
-          <Scale size={20} className="text-violet-600 dark:text-violet-300" />
+        <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-800 flex items-center justify-center">
+          <Scale size={20} className="text-amber-600 dark:text-amber-300" />
         </div>
         <div>
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">评委点评</h3>
@@ -95,13 +95,13 @@ export function DebateJudgeResult({ result, userStance, onNewDebate }: DebateJud
       {result.keyClashes.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles size={16} className="text-violet-500" />
+            <Sparkles size={16} className="text-amber-500" />
             <h4 className="text-sm font-bold text-gray-900 dark:text-white">关键交锋</h4>
           </div>
           <ul className="space-y-1">
             {result.keyClashes.map((c, i) => (
               <li key={i} className="text-sm text-gray-600 dark:text-gray-300 flex items-start gap-2">
-                <span className="text-violet-500 mt-0.5">-</span>
+                <span className="text-amber-500 mt-0.5">-</span>
                 {c}
               </li>
             ))}
@@ -112,7 +112,7 @@ export function DebateJudgeResult({ result, userStance, onNewDebate }: DebateJud
       {/* 建议 */}
       <div className="bg-white/60 dark:bg-gray-800/40 rounded-xl p-3">
         <p className="text-sm text-gray-600 dark:text-gray-300">
-          <span className="font-bold text-violet-600 dark:text-violet-400">提升建议：</span>
+          <span className="font-bold text-amber-600 dark:text-amber-400">提升建议：</span>
           {result.advice}
         </p>
       </div>
@@ -123,7 +123,7 @@ export function DebateJudgeResult({ result, userStance, onNewDebate }: DebateJud
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={onNewDebate}
-          className="w-full py-3 bg-gradient-to-r from-violet-500 to-purple-500 text-white rounded-2xl font-bold text-sm shadow-lg hover:shadow-xl transition-shadow"
+          className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-2xl font-bold text-sm shadow-lg hover:shadow-xl transition-shadow"
         >
           再来一局
         </motion.button>

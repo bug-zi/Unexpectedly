@@ -3,11 +3,10 @@ import { DebateMessage } from '@/types';
 
 interface DebateBubbleProps {
   message: DebateMessage;
-  userStance: 'pro' | 'con';
   isStreaming?: boolean;
 }
 
-export function DebateBubble({ message, userStance, isStreaming }: DebateBubbleProps) {
+export function DebateBubble({ message, isStreaming }: DebateBubbleProps) {
   const stanceLabel = (stance: 'pro' | 'con') => stance === 'pro' ? '正方' : '反方';
 
   if (message.role === 'user') {
@@ -45,8 +44,6 @@ export function DebateBubble({ message, userStance, isStreaming }: DebateBubbleP
   }
 
   // AI对手发言
-  const opponentColor = userStance === 'pro' ? 'indigo' : 'rose';
-
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -54,9 +51,7 @@ export function DebateBubble({ message, userStance, isStreaming }: DebateBubbleP
       className="flex gap-3"
     >
       {/* 头像 */}
-      <div className={`w-9 h-9 rounded-full flex items-center justify-center text-base shrink-0 mt-0.5 ${
-        opponentColor === 'indigo' ? 'bg-indigo-100 dark:bg-indigo-900/30' : 'bg-rose-100 dark:bg-rose-900/30'
-      }`}>
+      <div className="w-9 h-9 rounded-full flex items-center justify-center text-base shrink-0 mt-0.5 bg-orange-100 dark:bg-orange-900/30">
         🤖
       </div>
 

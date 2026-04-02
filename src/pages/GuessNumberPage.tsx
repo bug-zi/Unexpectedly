@@ -142,7 +142,21 @@ export function GuessNumberPage() {
   };
 
   return (
-    <div className="min-h-screen noise-bg bg-gradient-to-br from-orange-50 via-red-50 to-rose-50 dark:from-gray-900 dark:via-orange-900/20 dark:to-red-900/20">
+    <div
+      className="min-h-screen relative"
+      style={{
+        backgroundImage: 'url(/bg-picture/bg-logic.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
+      }}
+    >
+      {/* 背景遮罩层 - 保证内容可读性 */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-rose-50/80 to-orange-50/85 dark:from-gray-900/90 dark:via-red-900/85 dark:to-rose-900/90 z-0" />
+
+      {/* 内容层 */}
+      <div className="relative z-10">
       {/* 导航栏 */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-red-200 dark:border-red-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -472,6 +486,7 @@ export function GuessNumberPage() {
           </motion.div>
         </div>
       </main>
+      </div>
     </div>
   );
 }

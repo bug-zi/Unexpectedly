@@ -54,7 +54,7 @@ export function DebateInputBar({ onSend, onEndDebate, isGenerating, onStopGenera
             placeholder={isGenerating ? 'AI正在思考...' : '输入你的论点...'}
             disabled={disabled || isGenerating}
             rows={1}
-            className="w-full resize-none rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full resize-none rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ maxHeight: '120px' }}
             onInput={e => {
               const target = e.target as HTMLTextAreaElement;
@@ -70,7 +70,7 @@ export function DebateInputBar({ onSend, onEndDebate, isGenerating, onStopGenera
           whileTap={{ scale: 0.95 }}
           onClick={handleSend}
           disabled={!input.trim() || disabled || isGenerating}
-          className="shrink-0 p-2.5 bg-violet-500 text-white rounded-xl hover:bg-violet-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="shrink-0 p-2.5 bg-amber-500 text-white rounded-xl hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           {isGenerating ? <RefreshCw size={20} className="animate-spin" /> : <Send size={20} />}
         </motion.button>

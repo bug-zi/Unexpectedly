@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { Gamepad2, CircleDashed, Brain, Sparkles, Star, Clock, Bell, TrendingUp, ArrowRight, Lightbulb, Puzzle, Zap, Copy, RefreshCw, BookOpen, Calendar, User, Target } from 'lucide-react';
+import { PuzzlePiece, Brain as BrainIcon, Notebook, BookOpen as BookOpenIcon, Sparkle, CalendarCheck, Crosshair, BellRinging, UserCircle, Quotes } from '@phosphor-icons/react';
 import { getRandomQuestion } from '@/constants/questions';
 import { useAppStore } from '@/stores/appStore';
 import { Icon } from '@/components/ui/Icon';
@@ -179,37 +180,35 @@ export function HomePage() {
   };
 
   return (
-    <div className="min-h-screen noise-bg bg-gradient-to-br from-slate-50 via-blue-50 to-orange-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 relative overflow-hidden">
-      {/* 背景浮动装饰元素 */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <FloatingShape delay={0} duration={8} className="top-20 left-[10%]">
-          <div className="w-20 h-20 bg-purple-500/10 rounded-full blur-xl" />
-        </FloatingShape>
-        <FloatingShape delay={0.5} duration={7} className="top-40 right-[15%]">
-          <div className="w-32 h-32 bg-pink-500/10 rounded-full blur-xl" />
-        </FloatingShape>
-        <FloatingShape delay={1} duration={9} className="bottom-40 left-[20%]">
-          <div className="w-24 h-24 bg-blue-500/10 rounded-full blur-xl" />
-        </FloatingShape>
-        <FloatingShape delay={1.5} duration={6} className="bottom-20 right-[10%]">
-          <div className="w-16 h-16 bg-orange-500/10 rounded-full blur-xl" />
-        </FloatingShape>
+    <div className="min-h-screen relative overflow-hidden">
+      {/* 背景图片 */}
+      <div
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'url(/bg-picture/bg-index.jpg)' }}
+      />
+      {/* 半透明渐变遮罩 - 顶部更实，底部自然过渡 */}
+      <div className="fixed inset-0" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.5) 20%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0.55) 100%)' }} />
+      <div className="hidden dark:block fixed inset-0" style={{ background: 'linear-gradient(to bottom, rgba(15,23,41,0.75) 0%, rgba(15,23,41,0.55) 20%, rgba(15,23,41,0.4) 50%, rgba(15,23,41,0.6) 100%)' }} />
 
-        {/* 浮动图标 */}
-        <FloatingShape delay={2} duration={10} className="top-[30%] right-[8%]">
-          <Lightbulb size={40} className="text-yellow-500/20" />
-        </FloatingShape>
-        <FloatingShape delay={2.5} duration={8} className="top-[60%] left-[5%]">
-          <Puzzle size={32} className="text-blue-500/20" />
-        </FloatingShape>
-        <FloatingShape delay={3} duration={7} className="bottom-[30%] right-[25%]">
-          <Zap size={36} className="text-purple-500/20" />
-        </FloatingShape>
+      {/* 柔和的光斑装饰 - 呼应画面色彩 */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-5%] left-[5%] w-[500px] h-[500px] rounded-full opacity-20" style={{ background: 'radial-gradient(circle, rgba(147,197,253,0.6) 0%, rgba(147,197,253,0) 70%)', filter: 'blur(60px)' }} />
+        <div className="absolute top-[10%] right-[-5%] w-[600px] h-[600px] rounded-full opacity-15" style={{ background: 'radial-gradient(circle, rgba(196,181,253,0.6) 0%, rgba(196,181,253,0) 70%)', filter: 'blur(80px)' }} />
+        <div className="absolute bottom-[10%] left-[-10%] w-[700px] h-[700px] rounded-full opacity-15" style={{ background: 'radial-gradient(circle, rgba(165,180,252,0.5) 0%, rgba(165,180,252,0) 70%)', filter: 'blur(90px)' }} />
+
+        {/* 暗色模式下的云朵 */}
+        <div className="hidden dark:block">
+          <div className="absolute top-[-5%] left-[5%] w-[500px] h-[500px] rounded-full opacity-10" style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.5) 0%, rgba(99,102,241,0) 70%)', filter: 'blur(60px)' }} />
+          <div className="absolute top-[10%] right-[-5%] w-[600px] h-[600px] rounded-full opacity-8" style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.5) 0%, rgba(139,92,246,0) 70%)', filter: 'blur(80px)' }} />
+          <div className="absolute bottom-[10%] left-[-10%] w-[700px] h-[700px] rounded-full opacity-8" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.4) 0%, rgba(59,130,246,0) 70%)', filter: 'blur(90px)' }} />
+        </div>
       </div>
 
-      {/* 导航栏 */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/50 dark:border-gray-800/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* 导航栏 - 带底部渐隐过渡 */}
+      <nav className="fixed top-0 left-0 right-0 z-50 shadow-none" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.5) 70%, rgba(255,255,255,0) 100%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)', backdropFilter: 'blur(24px) saturate(180%)' }}>
+        <div className="dark:hidden absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.5) 70%, rgba(255,255,255,0) 100%)' }} />
+        <div className="hidden dark:block absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(15,23,41,0.8) 0%, rgba(15,23,41,0.5) 70%, rgba(15,23,41,0) 100%)' }} />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -245,7 +244,7 @@ export function HomePage() {
                 onClick={() => window.location.href = '/landing/'}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
               >
-                <Sparkles size={18} />
+                <Sparkle size={18} weight="duotone" />
                 <span>体验介绍</span>
               </motion.button>
               <motion.button
@@ -254,7 +253,7 @@ export function HomePage() {
                 onClick={() => navigate('/checkin')}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition-colors"
               >
-                <Calendar size={18} />
+                <CalendarCheck size={18} weight="duotone" />
                 <span>签到</span>
               </motion.button>
               <motion.button
@@ -263,7 +262,7 @@ export function HomePage() {
                 onClick={() => navigate('/tasks')}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
               >
-                <Target size={18} />
+                <Crosshair size={18} weight="duotone" />
                 <span>任务</span>
               </motion.button>
               <motion.button
@@ -272,7 +271,7 @@ export function HomePage() {
                 onClick={() => navigate('/notifications')}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
               >
-                <Bell size={18} />
+                <BellRinging size={18} weight="duotone" />
                 <span>提醒</span>
               </motion.button>
               <motion.button
@@ -281,7 +280,7 @@ export function HomePage() {
                 onClick={() => navigate('/profile')}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
               >
-                <User size={18} />
+                <UserCircle size={18} weight="duotone" />
                 <span>我的</span>
               </motion.button>
             </motion.div>
@@ -290,7 +289,7 @@ export function HomePage() {
       </nav>
 
       {/* 主要内容 */}
-      <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative z-10">
+      <main className="pt-20 pb-12 px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-6xl mx-auto">
           {/* Hero 标题 */}
           <motion.div
@@ -323,8 +322,15 @@ export function HomePage() {
                 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate('/logic-reasoning')}
-                className="group relative w-full bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-red-200 dark:border-red-800 hover:border-rose-400 dark:hover:border-rose-600 p-8 text-left overflow-hidden cursor-pointer"
+                className="group relative w-full backdrop-blur-xl rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-red-200/80 dark:border-red-800/60 hover:border-rose-400 dark:hover:border-rose-600 p-8 text-left overflow-hidden cursor-pointer"
+                style={{
+                  backgroundImage: 'url(/UI-picture/UI-index1.jpg)',
+                  backgroundSize: '100% 100%',
+                  backgroundPosition: 'center',
+                }}
               >
+                {/* 背景图遮罩 - 红色主题 */}
+                <div className="absolute inset-0 bg-gradient-to-br from-red-900/70 via-rose-800/50 to-red-700/40 dark:from-gray-900/80 dark:via-red-900/60 dark:to-gray-800/70" />
                 {/* 背景动画 */}
                 <div className="absolute inset-0 overflow-hidden">
                   <motion.div
@@ -342,13 +348,13 @@ export function HomePage() {
                 {/* 脉波效果 */}
                 <div className="absolute top-6 right-6">
                   <div className="relative">
-                    <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-white/25 rounded-full flex items-center justify-center">
                       <motion.div
                         animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
                         transition={{ duration: 2, repeat: Infinity }}
-                        className="absolute inset-0 bg-red-500/30 rounded-full"
+                        className="absolute inset-0 bg-white/20 rounded-full"
                       />
-                      <Puzzle size={20} className="text-red-500" />
+                      <PuzzlePiece size={20} weight="duotone" className="text-white" />
                     </div>
                   </div>
                 </div>
@@ -356,21 +362,21 @@ export function HomePage() {
                 <div className="relative">
                   <div className="mb-6">
                     <motion.div
-                      className="p-4 bg-white dark:bg-gray-800 rounded-2xl inline-block"
+                      className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl inline-block"
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       transition={{ type: 'spring', stiffness: 300 }}
                     >
-                      <Puzzle size={48} className="text-red-500" />
+                      <PuzzlePiece size={48} weight="duotone" className="text-white" />
                     </motion.div>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                  <h3 className="text-2xl font-bold text-white mb-3">
                     逻辑推理
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4 text-base">
+                  <p className="text-red-100 mb-4 text-base">
                     推理思考，锻炼逻辑思维
                   </p>
                   <motion.div
-                    className="flex items-center text-red-600 dark:text-red-400 font-medium"
+                    className="flex items-center text-white font-medium"
                     whileHover={{ x: 5 }}
                   >
                     开始推理
@@ -394,32 +400,26 @@ export function HomePage() {
                 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate('/questions')}
-                className="group relative w-full bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-amber-200 dark:border-amber-800 hover:border-orange-400 dark:hover:border-orange-600 p-8 text-left overflow-hidden cursor-pointer"
+                className="group relative w-full backdrop-blur-xl rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-amber-200/80 dark:border-amber-800/60 hover:border-orange-400 dark:hover:border-orange-600 p-8 text-left overflow-hidden cursor-pointer"
+                style={{
+                  backgroundImage: 'url(/UI-picture/UI-question1.jpg)',
+                  backgroundSize: '100% 100%',
+                  backgroundPosition: 'center',
+                }}
               >
-                {/* 背景动画 */}
-                <div className="absolute inset-0 overflow-hidden">
-                  <motion.div
-                    className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-bl-full"
-                    animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
-                    transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-                  />
-                  <motion.div
-                    className="absolute -bottom-8 -left-8 w-24 h-24 bg-amber-500/5 rounded-full"
-                    animate={{ scale: [1, 1.3, 1], x: [0, 10, 0] }}
-                    transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                  />
-                </div>
+                {/* 背景图遮罩 - 黄色主题 */}
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-900/70 via-yellow-800/50 to-orange-700/40 dark:from-gray-900/80 dark:via-amber-900/60 dark:to-gray-800/70" />
 
                 {/* 脉波效果 */}
                 <div className="absolute top-6 right-6">
                   <div className="relative">
-                    <div className="w-12 h-12 bg-amber-500/20 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-white/25 rounded-full flex items-center justify-center">
                       <motion.div
                         animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
                         transition={{ duration: 2, repeat: Infinity }}
-                        className="absolute inset-0 bg-amber-500/30 rounded-full"
+                        className="absolute inset-0 bg-white/20 rounded-full"
                       />
-                      <Brain size={20} className="text-amber-500" />
+                      <BrainIcon size={20} weight="duotone" className="text-white" />
                     </div>
                   </div>
                 </div>
@@ -427,21 +427,21 @@ export function HomePage() {
                 <div className="relative">
                   <div className="mb-6">
                     <motion.div
-                      className="p-4 bg-white dark:bg-gray-800 rounded-2xl inline-block"
+                      className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl inline-block"
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       transition={{ type: 'spring', stiffness: 300 }}
                     >
-                      <Brain size={48} className="text-amber-500" />
+                      <BrainIcon size={48} weight="duotone" className="text-white" />
                     </motion.div>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                  <h3 className="text-2xl font-bold text-white mb-3">
                     问题思考
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4 text-base">
+                  <p className="text-amber-100 mb-4 text-base">
                     精选问题，引导深度思考
                   </p>
                   <motion.div
-                    className="flex items-center text-amber-600 dark:text-amber-400 font-medium"
+                    className="flex items-center text-white font-medium"
                     whileHover={{ x: 5 }}
                   >
                     开始探索
@@ -465,32 +465,26 @@ export function HomePage() {
                 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate('/writing')}
-                className="group relative w-full bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-blue-200 dark:border-blue-800 hover:border-cyan-400 dark:hover:border-cyan-600 p-8 text-left overflow-hidden cursor-pointer"
+                className="group relative w-full backdrop-blur-xl rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-blue-200/80 dark:border-blue-800/60 hover:border-cyan-400 dark:hover:border-cyan-600 p-8 text-left overflow-hidden cursor-pointer"
+                style={{
+                  backgroundImage: 'url(/UI-picture/UI-writing1.jpg)',
+                  backgroundSize: '100% 100%',
+                  backgroundPosition: 'center',
+                }}
               >
-                {/* 背景动画 */}
-                <div className="absolute inset-0 overflow-hidden">
-                  <motion.div
-                    className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-bl-full"
-                    animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
-                    transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-                  />
-                  <motion.div
-                    className="absolute -bottom-8 -left-8 w-24 h-24 bg-blue-500/5 rounded-full"
-                    animate={{ scale: [1, 1.3, 1], x: [0, 10, 0] }}
-                    transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                  />
-                </div>
+                {/* 背景图遮罩 - 蓝色主题 */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-900/70 via-blue-800/50 to-cyan-700/40 dark:from-gray-900/80 dark:via-blue-900/60 dark:to-gray-800/70" />
 
                 {/* 脉波效果 */}
                 <div className="absolute top-6 right-6">
                   <div className="relative">
-                    <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-white/25 rounded-full flex items-center justify-center">
                       <motion.div
                         animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
                         transition={{ duration: 2, repeat: Infinity }}
-                        className="absolute inset-0 bg-blue-500/30 rounded-full"
+                        className="absolute inset-0 bg-white/20 rounded-full"
                       />
-                      <Sparkles size={20} className="text-blue-500" />
+                      <Notebook size={20} weight="duotone" className="text-white" />
                     </div>
                   </div>
                 </div>
@@ -498,21 +492,21 @@ export function HomePage() {
                 <div className="relative">
                   <div className="mb-6">
                     <motion.div
-                      className="p-4 bg-white dark:bg-gray-800 rounded-2xl inline-block"
+                      className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl inline-block"
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       transition={{ type: 'spring', stiffness: 300 }}
                     >
-                      <Sparkles size={48} className="text-blue-500" />
+                      <Notebook size={48} weight="duotone" className="text-white" />
                     </motion.div>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                  <h3 className="text-2xl font-bold text-white mb-3">
                     写作创造
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4 text-base">
+                  <p className="text-blue-100 mb-4 text-base">
                     激发创意，创造精彩内容
                   </p>
                   <motion.div
-                    className="flex items-center text-blue-600 dark:text-blue-400 font-medium"
+                    className="flex items-center text-white font-medium"
                     whileHover={{ x: 5 }}
                   >
                     开始创作
@@ -536,32 +530,26 @@ export function HomePage() {
                 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate('/knowledge-popularize')}
-                className="group relative w-full bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-green-200 dark:border-green-800 hover:border-emerald-400 dark:hover:border-emerald-600 p-8 text-left overflow-hidden cursor-pointer"
+                className="group relative w-full backdrop-blur-xl rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-green-200/80 dark:border-green-800/60 hover:border-emerald-400 dark:hover:border-emerald-600 p-8 text-left overflow-hidden cursor-pointer"
+                style={{
+                  backgroundImage: 'url(/UI-picture/UI-knowledge2.jpg)',
+                  backgroundSize: '100% 100%',
+                  backgroundPosition: 'center',
+                }}
               >
-                {/* 背景动画 */}
-                <div className="absolute inset-0 overflow-hidden">
-                  <motion.div
-                    className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-bl-full"
-                    animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
-                    transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-                  />
-                  <motion.div
-                    className="absolute -bottom-8 -left-8 w-24 h-24 bg-green-500/5 rounded-full"
-                    animate={{ scale: [1, 1.3, 1], x: [0, 10, 0] }}
-                    transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                  />
-                </div>
+                {/* 背景图遮罩 - 绿色主题 */}
+                <div className="absolute inset-0 bg-gradient-to-br from-green-900/70 via-emerald-800/50 to-green-700/40 dark:from-gray-900/80 dark:via-green-900/60 dark:to-gray-800/70" />
 
                 {/* 脉波效果 */}
                 <div className="absolute top-6 right-6">
                   <div className="relative">
-                    <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-white/25 rounded-full flex items-center justify-center">
                       <motion.div
                         animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
                         transition={{ duration: 2, repeat: Infinity }}
-                        className="absolute inset-0 bg-green-500/30 rounded-full"
+                        className="absolute inset-0 bg-white/20 rounded-full"
                       />
-                      <BookOpen size={20} className="text-green-500" />
+                      <BookOpenIcon size={20} weight="duotone" className="text-white" />
                     </div>
                   </div>
                 </div>
@@ -569,21 +557,21 @@ export function HomePage() {
                 <div className="relative">
                   <div className="mb-6">
                     <motion.div
-                      className="p-4 bg-white dark:bg-gray-800 rounded-2xl inline-block"
+                      className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl inline-block"
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       transition={{ type: 'spring', stiffness: 300 }}
                     >
-                      <BookOpen size={48} className="text-green-500" />
+                      <BookOpenIcon size={48} weight="duotone" className="text-white" />
                     </motion.div>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                  <h3 className="text-2xl font-bold text-white mb-3">
                     知识科普
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4 text-base">
+                  <p className="text-green-100 mb-4 text-base">
                     科学知识，拓展认知边界
                   </p>
                   <motion.div
-                    className="flex items-center text-green-600 dark:text-green-400 font-medium"
+                    className="flex items-center text-white font-medium"
                     whileHover={{ x: 5 }}
                   >
                     探索知识
@@ -604,79 +592,64 @@ export function HomePage() {
             <div className="max-w-6xl mx-auto">
               <motion.div
                 whileHover={{ scale: 1.01 }}
-                className="relative"
+                className="relative rounded-2xl overflow-hidden"
               >
-                {/* 背景光晕 */}
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-blue-500/20 blur-3xl rounded-3xl" />
+                {/* 背景图片 */}
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{
+                    backgroundImage: 'url(/UI-picture/UI-index.jpg)',
+                  }}
+                />
+                {/* 紫色渐变遮罩 - 让文字更清晰 */}
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-900/60 via-purple-800/40 to-pink-900/50" />
 
-                {/* 玻璃质感背景 */}
-                <div className="relative p-10 bg-white/50 dark:bg-gray-800/50 backdrop-blur-xl rounded-3xl border border-white/40 dark:border-gray-600/40 shadow-2xl">
-                  <div className="flex flex-col md:flex-row items-center justify-center gap-6">
-                    {/* 左侧装饰图标 */}
-                    <motion.div
-                      className="flex-shrink-0"
-                      animate={{
-                        rotate: [0, 10, -10, 0],
-                        scale: [1, 1.1, 1],
-                      }}
-                      transition={{
-                        duration: 4,
-                        repeat: Infinity,
-                        ease: 'easeInOut',
-                      }}
+                {/* 内容层 */}
+                <div className="relative px-6 py-5 flex items-center gap-4">
+                  {/* 左侧图标 */}
+                  <div className="flex-shrink-0 p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
+                    <Quotes size={24} weight="duotone" className="text-white" />
+                  </div>
+
+                  {/* 中间内容 */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-medium text-white/80 mb-1">
+                      思考金句
+                    </h3>
+                    <motion.p
+                      key={quoteIndex}
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4 }}
+                      className="text-white text-base font-medium leading-relaxed truncate"
                     >
-                      <div className="p-5 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-2xl shadow-lg">
-                        <div className="relative">
-                          <motion.div
-                            animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                            className="absolute inset-0 bg-purple-500/30 rounded-full"
-                          />
-                          <Sparkles size={48} className="text-purple-500" />
-                        </div>
-                      </div>
-                    </motion.div>
+                      "{currentThinkingQuote}"
+                    </motion.p>
+                  </div>
 
-                    {/* 中间语料库内容 */}
-                    <div className="flex-1 text-center md:text-left">
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                        思考金句
-                      </h3>
-                      <motion.p
-                        key={quoteIndex}
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                        className="text-2xl text-gray-800 dark:text-gray-200 font-medium leading-relaxed"
-                      >
-                        "{currentThinkingQuote}"
-                      </motion.p>
-                    </div>
-
-                    {/* 右侧操作按钮 */}
-                    <div className="flex items-center gap-3">
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={handleCopyQuote}
-                        className="p-3 bg-white/60 dark:bg-gray-700/60 hover:bg-white/80 dark:hover:bg-gray-700/80 rounded-2xl transition-all backdrop-blur-sm shadow-md"
-                        title={copied ? "已复制！" : "复制"}
-                      >
-                        <Copy size={24} className={copied ? "text-green-500" : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"} />
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={handleRefreshQuote}
-                        className="p-3 bg-white/60 dark:bg-gray-700/60 hover:bg-white/80 dark:hover:bg-gray-700/80 rounded-2xl transition-all backdrop-blur-sm shadow-md"
-                        title="刷新"
-                      >
-                        <RefreshCw
-                          size={24}
-                          className={`text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 ${isRefreshing ? 'animate-spin' : ''}`}
-                        />
-                      </motion.button>
-                    </div>
+                  {/* 右侧操作按钮 - 圆形半透明 */}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleCopyQuote}
+                      className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors backdrop-blur-sm"
+                      title={copied ? "已复制！" : "复制"}
+                    >
+                      <Copy size={18} className={copied ? "text-green-300" : "text-white/90"} />
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleRefreshQuote}
+                      className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors backdrop-blur-sm"
+                      title="刷新"
+                    >
+                      <RefreshCw
+                        size={18}
+                        className={`text-white/90 ${isRefreshing ? 'animate-spin' : ''}`}
+                      />
+                    </motion.button>
                   </div>
                 </div>
               </motion.div>

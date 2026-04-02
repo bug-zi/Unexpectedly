@@ -52,7 +52,22 @@ export function QuestionExplorerPage() {
   };
 
   return (
-    <div className="min-h-screen noise-bg bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-gray-900 dark:via-amber-900/20 dark:to-yellow-900/20">
+    <div
+      className="min-h-screen relative"
+      style={{
+        backgroundImage: 'url(/bg-picture/bg-question2.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
+      }}
+    >
+      {/* 背景遮罩层 - 暖色主题融合 */}
+      <div className="absolute inset-0 z-0" style={{ background: 'linear-gradient(135deg, rgba(255,251,235,0.82) 0%, rgba(254,243,199,0.75) 40%, rgba(255,237,213,0.78) 100%)' }} />
+      <div className="hidden dark:block absolute inset-0 z-0" style={{ background: 'linear-gradient(135deg, rgba(17,24,39,0.88) 0%, rgba(30,20,10,0.85) 40%, rgba(17,24,39,0.88) 100%)' }} />
+
+      {/* 内容层 */}
+      <div className="relative z-10">
       {/* 导航栏 */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-amber-200 dark:border-amber-800">
         <div className="max-w-7xl mx-auto px-2 sm:px-4">
@@ -61,7 +76,7 @@ export function QuestionExplorerPage() {
             <motion.button
               whileHover={{ scale: 1.05, x: -3 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/questions')}
               className="flex items-center gap-1 px-2 py-1.5 text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors shrink-0"
             >
               <ArrowLeft size={18} />
@@ -227,6 +242,7 @@ export function QuestionExplorerPage() {
           </div>
         </div>
       </main>
-    </div>
+      </div>
+      </div>
   );
 }

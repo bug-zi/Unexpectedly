@@ -190,7 +190,19 @@ export function WritingPage() {
   };
 
   return (
-    <div className="min-h-screen noise-bg bg-gradient-to-br from-blue-50 via-cyan-50 to-sky-50 dark:from-gray-900 dark:via-blue-900/30 dark:to-gray-800">
+    <div
+      className="min-h-screen relative"
+      style={{
+        backgroundImage: 'url(/bg-picture/bg-wirting.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
+      {/* 背景图上叠加渐变遮罩，保证内容可读性 */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-100/70 via-cyan-100/50 to-sky-100/60 dark:from-gray-900/80 dark:via-blue-900/70 dark:to-gray-800/80 pointer-events-none" />
+
+      {/* 导航栏 */}
       {/* 导航栏 */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/50 dark:border-gray-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -633,7 +645,7 @@ export function WritingPage() {
       </AnimatePresence>
 
       {/* 主要内容 */}
-      <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+      <main className="relative z-10 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           {/* 页面标题 */}
           <motion.div
@@ -666,32 +678,26 @@ export function WritingPage() {
                 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate('/slot-machine')}
-                className="group relative w-full bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-blue-200 dark:border-blue-800 hover:border-cyan-400 dark:hover:border-cyan-600 p-8 text-left overflow-hidden cursor-pointer"
+                className="group relative w-full rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-blue-200 dark:border-blue-800 hover:border-cyan-400 dark:hover:border-cyan-600 p-8 text-left overflow-hidden cursor-pointer"
+                style={{
+                  backgroundImage: 'url(/UI-picture/UI-writing1.jpg)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
               >
-                {/* 背景动画 */}
-                <div className="absolute inset-0 overflow-hidden">
-                  <motion.div
-                    className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-bl-full"
-                    animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
-                    transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-                  />
-                  <motion.div
-                    className="absolute -bottom-8 -left-8 w-24 h-24 bg-blue-500/5 rounded-full"
-                    animate={{ scale: [1, 1.3, 1], x: [0, 10, 0] }}
-                    transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                  />
-                </div>
+                {/* 背景图上的渐变遮罩 - 从左下到右上渐变，让文字区域可读 */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-900/75 via-blue-800/55 to-cyan-700/40 dark:from-gray-900/80 dark:via-blue-900/65 dark:to-cyan-900/50" />
 
                 {/* 脉波效果 */}
                 <div className="absolute top-6 right-6">
                   <div className="relative">
-                    <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-white/25 rounded-full flex items-center justify-center">
                       <motion.div
                         animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
                         transition={{ duration: 2, repeat: Infinity }}
-                        className="absolute inset-0 bg-blue-500/30 rounded-full"
+                        className="absolute inset-0 bg-white/20 rounded-full"
                       />
-                      <Sparkles size={20} className="text-blue-500" />
+                      <Sparkles size={20} className="text-white" />
                     </div>
                   </div>
                 </div>
@@ -699,20 +705,20 @@ export function WritingPage() {
                 <div className="relative">
                   <div className="mb-6">
                     <motion.div
-                      className="p-4 bg-white dark:bg-gray-800 rounded-2xl inline-block"
+                      className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl inline-block"
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       transition={{ type: 'spring', stiffness: 300 }}
                     >
-                      <Sparkles size={48} className="text-blue-500" />
+                      <Sparkles size={48} className="text-white" />
                     </motion.div>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                  <h3 className="text-2xl font-bold text-white mb-3">
                     灵感老虎机
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4 text-base">
+                  <p className="text-blue-100 mb-4 text-base">
                     随机词语组合，激发无限创意联想
                   </p>
-                  <div className="flex items-center text-blue-600 dark:text-blue-400 font-medium">
+                  <div className="flex items-center text-white font-medium">
                     开始创作
                   </div>
                 </div>
@@ -733,32 +739,26 @@ export function WritingPage() {
                 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate('/writing-challenge')}
-                className="group relative w-full bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-blue-200 dark:border-blue-800 hover:border-cyan-400 dark:hover:border-cyan-600 p-8 text-left overflow-hidden cursor-pointer"
+                className="group relative w-full rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-blue-200 dark:border-blue-800 hover:border-cyan-400 dark:hover:border-cyan-600 p-8 text-left overflow-hidden cursor-pointer"
+                style={{
+                  backgroundImage: 'url(/UI-picture/UI-writing2.jpg)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
               >
-                {/* 背景动画 */}
-                <div className="absolute inset-0 overflow-hidden">
-                  <motion.div
-                    className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-bl-full"
-                    animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
-                    transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-                  />
-                  <motion.div
-                    className="absolute -bottom-8 -left-8 w-24 h-24 bg-blue-500/5 rounded-full"
-                    animate={{ scale: [1, 1.3, 1], x: [0, 10, 0] }}
-                    transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                  />
-                </div>
+                {/* 背景图上的渐变遮罩 */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-900/75 via-blue-800/55 to-cyan-700/40 dark:from-gray-900/80 dark:via-blue-900/65 dark:to-cyan-900/50" />
 
                 {/* 脉波效果 */}
                 <div className="absolute top-6 right-6">
                   <div className="relative">
-                    <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-white/25 rounded-full flex items-center justify-center">
                       <motion.div
                         animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
                         transition={{ duration: 2, repeat: Infinity }}
-                        className="absolute inset-0 bg-blue-500/30 rounded-full"
+                        className="absolute inset-0 bg-white/20 rounded-full"
                       />
-                      <PenTool size={20} className="text-blue-500" />
+                      <PenTool size={20} className="text-white" />
                     </div>
                   </div>
                 </div>
@@ -766,20 +766,20 @@ export function WritingPage() {
                 <div className="relative">
                   <div className="mb-6">
                     <motion.div
-                      className="p-4 bg-white dark:bg-gray-800 rounded-2xl inline-block"
+                      className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl inline-block"
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       transition={{ type: 'spring', stiffness: 300 }}
                     >
-                      <PenTool size={48} className="text-blue-500" />
+                      <PenTool size={48} className="text-white" />
                     </motion.div>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                  <h3 className="text-2xl font-bold text-white mb-3">
                     文笔挑战
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4 text-base">
+                  <p className="text-blue-100 mb-4 text-base">
                     给出一句话，续写出精彩后文
                   </p>
-                  <div className="flex items-center text-blue-600 dark:text-blue-400 font-medium">
+                  <div className="flex items-center text-white font-medium">
                     开始挑战
                   </div>
                 </div>
