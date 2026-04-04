@@ -201,7 +201,7 @@ export function CollectionDetailPage() {
             initial={{ opacity: 0, scale: 0.95, y: -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -10 }}
-            className="fixed top-20 right-4 sm:right-8 z-40 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 py-2 min-w-[200px]"
+            className="fixed top-20 right-4 sm:right-8 z-40 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 py-2 w-48 sm:min-w-[200px]"
           >
             <button
               onClick={() => {

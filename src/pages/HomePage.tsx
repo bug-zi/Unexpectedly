@@ -240,46 +240,46 @@ export function HomePage() {
                 whileHover={{ scale: 1.05, rotate: 1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => window.location.href = '/landing/'}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                className="flex items-center gap-2 px-2 sm:px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
               >
                 <Sparkle size={18} weight="duotone" />
-                <span>体验介绍</span>
+                <span className="hidden sm:inline">体验介绍</span>
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05, rotate: 1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate('/checkin')}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+                className="flex items-center gap-2 px-2 sm:px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition-colors"
               >
                 <CalendarCheck size={18} weight="duotone" />
-                <span>签到</span>
+                <span className="hidden sm:inline">签到</span>
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05, rotate: 2 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate('/tasks')}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                className="flex items-center gap-2 px-2 sm:px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
               >
                 <Crosshair size={18} weight="duotone" />
-                <span>任务</span>
+                <span className="hidden sm:inline">任务</span>
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05, rotate: 3 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate('/notifications')}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
+                className="flex items-center gap-2 px-2 sm:px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
               >
                 <BellRinging size={18} weight="duotone" />
-                <span>提醒</span>
+                <span className="hidden sm:inline">提醒</span>
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05, rotate: -3 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate('/profile')}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                className="flex items-center gap-2 px-2 sm:px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
               >
                 <UserCircle size={18} weight="duotone" />
-                <span>我的</span>
+                <span className="hidden sm:inline">我的</span>
               </motion.button>
             </motion.div>
           </div>

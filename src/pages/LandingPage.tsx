@@ -138,9 +138,9 @@ export function LandingPage() {
                     <div className="absolute -inset-1 bg-gradient-to-r from-red-500 via-amber-400 to-blue-500 rounded-2xl opacity-50 blur-lg" />
                   </div>
                   <div>
-                    <h1 className="text-5xl md:text-6xl font-black leading-tight">
+                    <h1 className="text-3xl sm:text-5xl md:text-6xl font-black leading-tight">
                       <span className="block text-white">万万没想到</span>
-                      <span className="block text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 mt-1">
+                      <span className="block text-xl sm:text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 mt-1">
                         Unexpectedly
                       </span>
                     </h1>
@@ -250,7 +250,7 @@ export function LandingPage() {
       <section className="relative py-32 bg-gradient-to-b from-slate-950 to-slate-900">
         <div className="container mx-auto px-4">
           <div className="mb-20 text-center">
-            <h2 className="text-5xl md:text-7xl font-black mb-6">
+            <h2 className="text-3xl sm:text-5xl md:text-7xl font-black mb-6">
               <span className="block text-white">不是</span>
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400">
                 又一个工具
@@ -298,7 +298,7 @@ export function LandingPage() {
       <section className="relative py-32 bg-slate-900">
         <div className="container mx-auto px-4">
           <div className="text-center mb-20">
-            <h2 className="text-5xl md:text-7xl font-black text-white mb-6">
+            <h2 className="text-3xl sm:text-5xl md:text-7xl font-black text-white mb-6">
               用数据
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400">
                 说话
@@ -320,7 +320,7 @@ export function LandingPage() {
                   </div>
 
                   <div className="flex-1 text-left">
-                    <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 mb-2">
+                    <div className="text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 mb-2">
                       {stat.value}
                     </div>
                     <div className="text-xl font-bold text-gray-300 mb-1">
@@ -346,7 +346,7 @@ export function LandingPage() {
 
         <div className="relative z-10 container mx-auto px-4 text-center">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight">
+            <h2 className="text-3xl sm:text-5xl md:text-7xl font-black text-white mb-8 leading-tight">
               别让你的大脑
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400">

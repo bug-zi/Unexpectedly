@@ -90,7 +90,7 @@ export function SlotMachine({ onSpinComplete }: SlotMachineProps) {
           className="flex items-center justify-center gap-3 mb-2"
         >
           <Gamepad2 size={40} className="text-blue-500" />
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+          <h2 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
             灵感老虎机
           </h2>
         </motion.div>

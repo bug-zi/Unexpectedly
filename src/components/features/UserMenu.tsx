@@ -69,10 +69,10 @@ export function UserMenu() {
           <img
             src={avatarUrl}
             alt="Avatar"
-            className="w-8 h-8 rounded-full"
+            className="w-10 h-10 rounded-full"
           />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
             <User size={16} className="text-white" />
           </div>
         )}

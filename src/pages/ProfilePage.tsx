@@ -26,10 +26,12 @@ import {
   Eye,
   EyeOff,
   ChevronDown,
+  ChevronUp,
   Loader2,
   CheckCircle2,
   MessageSquare,
   Send,
+  HelpCircle,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { SyncStatusIndicator } from '@/components/ui/SyncStatusIndicator';
@@ -147,6 +149,7 @@ export function ProfilePage() {
   const [aiBaseUrl, setAiBaseUrl] = useState('');
   const [showApiKey, setShowApiKey] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [validationStatus, setValidationStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [validationMessage, setValidationMessage] = useState('');
@@ -953,6 +956,137 @@ export function ProfilePage() {
               )}
             </h3>
             <p className="text-sm text-gray-500 mb-4">配置 AI 模型用于圆桌讨论、海龟汤等需要 AI 的功能模块</p>
+
+            {/* 配置指南入口 */}
+            <button
+              type="button"
+              onClick={() => setShowGuide(!showGuide)}
+              className="flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors mb-4"
+            >
+              <HelpCircle size={16} />
+              不知道怎么配置？查看配置指南
+              {showGuide ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            </button>
+
+            {/* 配置指南内容 */}
+            <AnimatePresence>
+              {showGuide && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden mb-4"
+                >
+                  <div className="bg-indigo-50/60 backdrop-blur-sm rounded-xl border border-indigo-200/50 p-5 space-y-5">
+                    {/* 总体步骤 */}
+                    <div>
+                      <h4 className="text-sm font-bold text-indigo-800 mb-2">配置步骤（通用）</h4>
+                      <ol className="text-xs text-indigo-700 space-y-1.5 list-decimal list-inside">
+                        <li>选择一个 AI 服务商（下方有各服务商的获取指引）</li>
+                        <li>前往该服务商官网注册账号并登录</li>
+                        <li>在控制台 / API 管理页面创建 API Key</li>
+                        <li>将 API Key 粘贴到上方的输入框中</li>
+                        <li>选择你想要使用的模型，然后点击「保存配置」</li>
+                      </ol>
+                    </div>
+
+                    {/* 各服务商详细指南 */}
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-bold text-indigo-800">各服务商获取 API Key 指南</h4>
+
+                      {/* DeepSeek */}
+                      <div className="bg-white/60 rounded-lg p-3 border border-indigo-100">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-sm font-bold text-gray-800">DeepSeek</span>
+                          <span className="px-1.5 py-0.5 text-[10px] font-medium bg-green-100 text-green-700 rounded">推荐 · 性价比高</span>
+                        </div>
+                        <ol className="text-xs text-gray-600 space-y-1 list-decimal list-inside">
+                          <li>访问 <span className="font-mono text-indigo-600">platform.deepseek.com</span> 注册/登录</li>
+                          <li>进入左侧菜单「API Keys」</li>
+                          <li>点击「Create API Key」，复制生成的 Key</li>
+                        </ol>
+                        <p className="text-[10px] text-gray-400 mt-1.5">推荐模型：deepseek-chat（日常使用）/ deepseek-reasoner（深度推理）</p>
+                      </div>
+
+                      {/* 通义千问 */}
+                      <div className="bg-white/60 rounded-lg p-3 border border-indigo-100">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-sm font-bold text-gray-800">通义千问 (Qwen)</span>
+                          <span className="px-1.5 py-0.5 text-[10px] font-medium bg-blue-100 text-blue-700 rounded">阿里云</span>
+                        </div>
+                        <ol className="text-xs text-gray-600 space-y-1 list-decimal list-inside">
+                          <li>访问 <span className="font-mono text-indigo-600">dashscope.console.aliyun.com</span> 登录阿里云账号</li>
+                          <li>开通「DashScope」服务（开通免费）</li>
+                          <li>进入「API-KEY 管理」→「创建新的 API Key」，复制生成的 Key</li>
+                        </ol>
+                        <p className="text-[10px] text-gray-400 mt-1.5">推荐模型：qwen-plus（均衡）/ qwen-max（最强）</p>
+                      </div>
+
+                      {/* 智谱 GLM */}
+                      <div className="bg-white/60 rounded-lg p-3 border border-indigo-100">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-sm font-bold text-gray-800">智谱 GLM</span>
+                          <span className="px-1.5 py-0.5 text-[10px] font-medium bg-purple-100 text-purple-700 rounded">有免费额度</span>
+                        </div>
+                        <ol className="text-xs text-gray-600 space-y-1 list-decimal list-inside">
+                          <li>访问 <span className="font-mono text-indigo-600">open.bigmodel.cn</span> 注册/登录</li>
+                          <li>进入「API Keys」页面</li>
+                          <li>点击「添加 API Key」，复制生成的 Key</li>
+                        </ol>
+                        <p className="text-[10px] text-gray-400 mt-1.5">推荐模型：glm-4-flash（免费）/ glm-4-plus（高性能）</p>
+                      </div>
+
+                      {/* Kimi */}
+                      <div className="bg-white/60 rounded-lg p-3 border border-indigo-100">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-sm font-bold text-gray-800">Kimi (Moonshot)</span>
+                          <span className="px-1.5 py-0.5 text-[10px] font-medium bg-orange-100 text-orange-700 rounded">长文本</span>
+                        </div>
+                        <ol className="text-xs text-gray-600 space-y-1 list-decimal list-inside">
+                          <li>访问 <span className="font-mono text-indigo-600">platform.moonshot.cn</span> 注册/登录</li>
+                          <li>进入「API Key 管理」</li>
+                          <li>点击「创建新的 API Key」，复制生成的 Key</li>
+                        </ol>
+                        <p className="text-[10px] text-gray-400 mt-1.5">推荐模型：moonshot-v1-8k</p>
+                      </div>
+
+                      {/* 豆包 */}
+                      <div className="bg-white/60 rounded-lg p-3 border border-indigo-100">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-sm font-bold text-gray-800">豆包 (字节跳动)</span>
+                          <span className="px-1.5 py-0.5 text-[10px] font-medium bg-red-100 text-red-700 rounded">火山引擎</span>
+                        </div>
+                        <ol className="text-xs text-gray-600 space-y-1 list-decimal list-inside">
+                          <li>访问 <span className="font-mono text-indigo-600">console.volcengine.com/ark</span> 登录火山引擎账号</li>
+                          <li>开通「方舟」(ARK) 服务</li>
+                          <li>创建接入点（模型推理服务），获取 API Key</li>
+                        </ol>
+                        <p className="text-[10px] text-gray-400 mt-1.5">推荐模型：doubao-pro-32k</p>
+                      </div>
+                    </div>
+
+                    {/* 常见问题 */}
+                    <div>
+                      <h4 className="text-sm font-bold text-indigo-800 mb-2">常见问题</h4>
+                      <div className="space-y-2">
+                        <div className="text-xs text-gray-600">
+                          <span className="font-medium text-indigo-700">Q: API Key 是免费的吗？</span>
+                          <p className="text-gray-500 ml-2">A: 大部分服务商注册后会赠送免费额度，用完后按量付费。智谱 GLM 的 glm-4-flash 模型长期免费。</p>
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          <span className="font-medium text-indigo-700">Q: 我的 API Key 安全吗？</span>
+                          <p className="text-gray-500 ml-2">A: API Key 仅保存在你的浏览器本地（localStorage），不会上传到我们的服务器。</p>
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          <span className="font-medium text-indigo-700">Q: 保存配置后仍然连接失败？</span>
+                          <p className="text-gray-500 ml-2">A: 请检查网络环境是否可以访问对应服务商的 API 地址，部分服务商需要海外网络。</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Provider 选择 */}
             <div className="mb-4">

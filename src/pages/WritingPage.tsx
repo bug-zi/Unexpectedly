@@ -435,7 +435,7 @@ export function WritingPage() {
               {/* 内容 */}
               <div className="relative p-6">
                 <div className="text-center mb-6">
-                  <div className="text-5xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
+                  <div className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
                     {writingStats.totalWords}
                   </div>
                   <div className="text-gray-600 dark:text-gray-400">总字数</div>

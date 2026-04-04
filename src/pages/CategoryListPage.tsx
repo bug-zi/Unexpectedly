@@ -106,7 +106,7 @@ export function CategoryListPage() {
             transition={{ duration: 0.6, ease: customEasing.elastic }}
             className="text-center mb-12"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
               探索{pageTitle}
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-400">

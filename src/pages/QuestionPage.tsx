@@ -256,7 +256,7 @@ export function QuestionPage() {
             </button>
 
             {/* 中间显示问题内容 - 绝对定位居中 */}
-            <div className="absolute inset-x-0 flex items-center justify-center pointer-events-none px-32">
+            <div className="absolute inset-x-0 flex items-center justify-center pointer-events-none px-12 sm:px-32">
               <h2 className="text-lg font-medium text-gray-800 dark:text-gray-200 truncate max-w-md text-center">
                 {question.content}
               </h2>
