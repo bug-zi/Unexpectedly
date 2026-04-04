@@ -1,383 +1,351 @@
-# 万万没想到 (Unexpectedly) 🧠✨
+# 万万没想到 (Unexpectedly)
 
-> 一个每日思维提升工具，通过精心设计的问题引导深度思考，激发创造力，记录成长轨迹。
+> 每日思维提升工具 — 通过精心设计的问题引导深度思考，激发创造力，记录成长轨迹。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite)](https://vitejs.dev/)
-
-![Preview](https://img.shields.io/badge/Status-Active-success)
 ![Supabase](https://img.shields.io/badge/Backend-Supabase-3ECF8E?logo=supabase)
 
 ---
 
-## 📖 项目简介
+## 项目简介
 
-**万万没想到** 是一个交互式的思维训练平台，通过不同维度的问题引导用户进行深度思考。无论是每日反思、创意激发，还是逻辑推理，都能帮助你打破思维定式，发现新的可能。
+**万万没想到** 是一个交互式思维训练平台，通过不同维度的问题引导用户进行深度思考。整合了问题探索、AI 辩论、大咖圆桌、创意写作、逻辑推理等多种模块，帮助用户打破思维定式，发现新的可能。
 
 ### 核心理念
 
-- 🎯 **深度思考** - 每天5分钟，通过精心设计的问题启发思考
-- 💡 **创意激发** - 多维度、多场景的问题库，激发无限可能
-- 📊 **成长追踪** - 记录你的思考轨迹，见证思维成长
-- 🎮 **游戏化学习** - 逻辑推理游戏，让思考更有趣
+- **深度思考** — 每天 5 分钟，通过精心设计的问题启发思考
+- **创意激发** — 多维度问题库 + 随机词汇组合，激发无限可能
+- **成长追踪** — 记录思考轨迹，见证思维成长
+- **游戏化学习** — 逻辑推理游戏 + 每日任务系统，让思考更有趣
+- **AI 赋能** — 辩论对手、大咖圆桌、智能问答，AI 全程参与思维训练
 
 ---
 
-## ✨ 核心功能
+## 功能概览
 
-### 🎯 每日问题思考
-- **双类别系统**：思维维度 × 生活场景
-  - 思维维度：假设思维、逆向思考、联想创意、自我反思、未来设想
-  - 生活场景：职业发展、创意激发、人际关系、学习成长、生活哲学
-- **智能推荐**：随机问题推送，打破思维定式
-- **深度记录**：富文本编辑器，支持长时间思考
-- **导出分享**：支持导出为 PDF、Markdown 格式
+### 问题思考
 
-### 🎨 创意激发工具
-- **老虎机**：随机词汇组合，激发创意灵感
-  - 8大类别：人物、动物、物品、地点、动作、情感、自然、抽象概念
-  - 智能组合算法，创造有趣的碰撞
-  - 特殊彩蛋组合（如"哲学家"+"编程"+"咖啡"）
+| 功能 | 说明 |
+|------|------|
+| 双类别导航 | 思维维度 (5 类) x 生活场景 (5 类) = 25 种问题组合 |
+| 问题探索 | 175+ 精选问题，涵盖假设、逆向、联想、反思、未来五大思维维度 |
+| 深度回答 | 富文本编辑，支持自动保存草稿 |
+| 收藏 & 待思考 | 个人书签系统，随时回顾 |
+| 自定义收藏夹 | 用户自建收藏夹，灵活管理问题 |
+| 数据导出 | 支持 PDF / Markdown 格式导出 |
 
-### 🧩 逻辑推理游戏
-- **海龟汤**：通过是/否问题，推理离奇故事真相
-- **谜语人**：猜谜语，锻炼联想思维
-- **猜数字**：xAxB提示，逻辑推理猜出四位数
-- **Yes or No**：AI出题，你提问！猜出AI心中的词语
+**思维维度**：假设思维 / 逆向思考 / 联想创意 / 自我反思 / 未来设想
 
-### 📈 成长追踪系统
-- **时间轴视图**：按时间查看所有思考记录
-- **统计分析**：思考次数、字数统计、成长曲线
-- **思维变化**：对比不同时期对同一问题的看法
-- **成就系统**：连续打卡、里程碑奖励
+**生活场景**：职业发展 / 创意激发 / 人际关系 / 学习成长 / 生活哲学
 
-### 🔐 数据同步与安全
-- **云端同步**：基于 Supabase 的数据备份
-- **用户隔离**：每个用户数据完全独立
-- **本地优先**：离线可用，联网后自动同步
-- **数据导出**：随时导出个人数据
+### AI 辩论堂
+
+- AI 自动生成辩题，支持正方/反方立场选择
+- 实时辩论对话，AI 作为对手即时回应
+- 评委评价系统，给出辩论表现评分和改进建议
+- 辩论历史记录，随时回顾
+
+### 大咖圆桌
+
+- 30+ 历史与当代思想家（苏格拉底、爱因斯坦、老子、乔布斯等）
+- 每位思想家拥有独特的思维风格和系统提示词
+- 多人圆桌讨论，从不同视角探讨同一问题
+- 智能匹配：根据问题类别自动推荐适合的思想家
+
+### 写作创造
+
+| 工具 | 说明 |
+|------|------|
+| 灵感老虎机 | 697 个词汇，27 个类别，随机三词组合激发创意 |
+| 文笔挑战 | 100 道续写题目，涵盖奇幻/悬疑/情感/探险等 10 大类，随机出题，已完成题目不再出现 |
+
+**老虎机特殊彩蛋**：特定词汇组合（如"哲学家" + "编程" + "咖啡"）会触发隐藏效果。
+
+### 逻辑推理
+
+| 游戏 | 玩法 |
+|------|------|
+| 海龟汤 | 通过是/否问题推理离奇故事真相，支持 AI 提示 |
+| 谜语人 | 猜谜语，锻炼联想思维，17 道精选谜题 |
+| 猜数字 | 经典 xAxB 推理，猜出四位不重复数字 |
+| Yes or No | AI 出题，通过是/否提问猜出 AI 心中的词语 |
+
+### 知识科普
+
+- **世界之最** — 有趣的世界纪录和知识
+- **系统思维** — 理解系统与流程的思维方式
+- **健康主理** — 健康知识与管理
+- **AI 问答** — 基于 AI 的知识问答系统
+
+### 成长系统
+
+| 功能 | 说明 |
+|------|------|
+| 时间轴视图 | 按时间查看所有思考记录 |
+| 统计分析 | 思考次数、字数统计、成长曲线 |
+| 思维变化 | 对比不同时期对同一问题的看法 |
+| 每日任务 | 问题思考 / 写作创作 / 逻辑推理三类每日挑战 |
+| 每周任务 | 回顾与总结，养成思考习惯 |
+| 签到打卡 | 连续打卡记录，连续天数追踪 |
+| 成就系统 | 里程碑奖励，持续激励 |
+
+### 数据管理
+
+- **云端同步** — 基于 Supabase 的数据备份，登录即同步
+- **本地优先** — 离线可用，联网后自动同步
+- **用户隔离** — 每个用户数据完全独立
+- **数据迁移** — 自动检测并迁移旧版本数据
+- **数据导出** — 随时导出个人数据 (PDF / Markdown / JSON)
 
 ---
 
-## 🛠️ 技术栈
+## 技术栈
 
-### 前端技术
-- **框架**：React 18 + TypeScript
-- **构建工具**：Vite 5
-- **状态管理**：Zustand（轻量级状态管理）
-- **路由**：React Router v6
-- **UI库**：Tailwind CSS
-- **动画**：Framer Motion
-- **图标**：Lucide React、Iconify
-- **虚拟列表**：React Virtuoso
-- **拖拽排序**：DnD Kit
-
-### 后端服务
-- **BaaS平台**：Supabase
-  - 认证系统：Supabase Auth
-  - 数据库：PostgreSQL
-  - 文件存储：Supabase Storage
-  - 实时订阅：Supabase Realtime
-
-### 开发工具
-- **代码规范**：ESLint + Prettier
-- **包管理器**：npm
-- **版本控制**：Git
-- **类型检查**：TypeScript
+| 层级 | 技术 |
+|------|------|
+| 框架 | React 18 + TypeScript 5 |
+| 构建 | Vite 5 |
+| 状态管理 | Zustand（持久化 + 中间件） |
+| 路由 | React Router v6 |
+| 样式 | Tailwind CSS 3 |
+| 动画 | Framer Motion 11 |
+| 图标 | Lucide React / Phosphor Icons / Iconify |
+| 后端 | Supabase (Auth + PostgreSQL + Storage) |
+| AI | OpenAI API |
+| 导出 | html2canvas + jsPDF |
+| 虚拟列表 | React Virtuoso |
+| 拖拽 | dnd-kit |
+| 日期 | date-fns |
+| 通知 | react-toastify |
 
 ---
 
-## 🚀 快速开始
+## 快速开始
 
 ### 环境要求
 
 - Node.js >= 18.0.0
 - npm >= 9.0.0
-- Git
 
-### 安装步骤
+### 安装
 
-1. **克隆仓库**
 ```bash
+# 克隆仓库
 git clone https://github.com/bug-zi/Unexpectedly.git
 cd Unexpectedly
-```
 
-2. **安装依赖**
-```bash
+# 安装依赖
 npm install
+
+# 配置环境变量
+cp .env.example .env
+# 编辑 .env，填入 Supabase 配置
 ```
 
-3. **配置环境变量**
+`.env` 文件内容：
 
-创建 `.env` 文件：
 ```env
-VITE_SUPABASE_URL=你的Supabase项目URL
-VITE_SUPABASE_ANON_KEY=你的Supabase匿名密钥
+VITE_SUPABASE_URL=你的 Supabase 项目 URL
+VITE_SUPABASE_ANON_KEY=你的 Supabase 匿名密钥
 ```
 
-> 💡 如何获取 Supabase 配置：
-> 1. 访问 [supabase.com](https://supabase.com) 并创建项目
-> 2. 进入 Project Settings → API
-> 3. 复制 Project URL 和 anon public key
+### 数据库初始化
 
-4. **初始化数据库**
+在 Supabase Dashboard 的 SQL Editor 中按顺序执行 `supabase/migrations/` 目录下的迁移文件。
 
-在 Supabase Dashboard 的 SQL Editor 中执行：
-```sql
--- 按顺序执行以下迁移文件
--- 1. supabase/migrations/NEW_DATABASE.sql
--- 2. supabase/migrations/CREATE_AVATARS_BUCKET.sql
--- 3. supabase/migrations/CREATE_FAVORITES_AND_LATER_SIMPLE.sql
-```
+### 启动
 
-5. **启动开发服务器**
 ```bash
 npm run dev
-```
-
-6. **打开浏览器**
-```
-http://localhost:5173
+# 打开 http://localhost:5173
 ```
 
 ---
 
-## 📁 项目结构
+## 项目结构
 
 ```
-万万没想到/
-├── public/                 # 静态资源
-├── src/
-│   ├── components/         # React组件
-│   │   ├── features/      # 功能组件
-│   │   ├── ui/            # UI基础组件
-│   │   ├── collections/   # 收藏管理组件
-│   │   └── virtualized/   # 虚拟列表组件
-│   ├── pages/             # 页面组件
-│   ├── stores/            # Zustand状态管理
-│   ├── hooks/             # 自定义Hooks
-│   ├── services/          # 外部服务集成
-│   ├── utils/             # 工具函数
-│   ├── constants/         # 常量配置
-│   │   ├── questions.ts   # 问题库
-│   │   ├── categories.ts  # 类别配置
-│   │   └── ...
-│   ├── types/             # TypeScript类型定义
-│   └── lib/               # 第三方客户端配置
-├── supabase/
-│   └── migrations/        # 数据库迁移文件
-├── index.html             # HTML入口
-├── vite.config.ts         # Vite配置
-├── tailwind.config.js     # Tailwind配置
-├── tsconfig.json          # TypeScript配置
-└── package.json           # 项目依赖
-
+src/
+├── pages/              # 路由页面组件（30+ 页面）
+│   ├── HomePage.tsx            # 首页导航
+│   ├── QuestionExplorerPage.tsx # 问题探索
+│   ├── DebateHallPage.tsx      # AI 辩论堂
+│   ├── RoundtablePage.tsx      # 大咖圆桌
+│   ├── WritingChallengePage.tsx # 文笔挑战
+│   ├── SlotMachinePage.tsx     # 灵感老虎机
+│   ├── TurtleSoupPage.tsx      # 海龟汤
+│   ├── GuessNumberPage.tsx     # 猜数字
+│   ├── TaskPage.tsx            # 每日任务
+│   ├── CheckInPage.tsx         # 签到打卡
+│   ├── GrowthTrackerPage.tsx   # 成长追踪
+│   └── ...
+├── components/
+│   ├── features/       # 功能组件（QuestionCard, SlotMachine 等）
+│   ├── debate/         # 辩论模块组件
+│   ├── roundtable/     # 圆桌模块组件
+│   ├── collections/    # 收藏管理组件
+│   ├── virtualized/    # 虚拟列表组件
+│   └── ui/             # 基础 UI 组件（Button, Input, Card 等）
+├── stores/             # Zustand 状态管理
+│   ├── appStore.ts            # 全局应用状态
+│   ├── debateStore.ts         # 辩论会话状态
+│   └── roundtableStore.ts     # 圆桌会话状态
+├── hooks/              # 自定义 Hooks
+│   ├── useAuth.ts             # 认证状态
+│   ├── useSync.ts             # 数据同步
+│   ├── useDebate.ts           # 辩论逻辑
+│   ├── useRoundtable.ts       # 圆桌逻辑
+│   ├── useFavorites.ts        # 收藏管理
+│   ├── useCollections.ts      # 收藏夹管理
+│   └── useAutoSave.ts         # 自动保存
+├── services/           # 外部服务集成
+│   ├── authService.ts         # 认证服务
+│   └── syncService.ts         # 同步服务
+├── utils/              # 工具函数
+│   ├── taskManager.ts         # 任务系统
+│   ├── userStorage.ts         # 用户数据隔离
+│   ├── storage.ts             # 存储工具
+│   ├── export.ts              # 数据导出
+│   ├── aiQuestionGenerator.ts # AI 问题生成
+│   ├── turtleSoupAI.ts        # 海龟汤 AI
+│   ├── thinkerMatcher.ts      # 思想家匹配
+│   └── dataMigration.ts       # 数据迁移
+├── constants/          # 静态数据
+│   ├── questions.ts           # 问题库（175+）
+│   ├── categories.ts          # 类别配置
+│   ├── thinkers.ts            # 思想家（30+）
+│   ├── turtleSoup.ts          # 海龟汤题库
+│   ├── riddles.ts             # 谜语题库
+│   ├── slotMachineWords.ts    # 老虎机词汇（697 个）
+│   └── writingPrompts         # 文笔挑战（100 题，内嵌于页面）
+├── types/              # TypeScript 类型定义
+└── lib/                # 第三方客户端配置（Supabase）
 ```
 
 ---
 
-## 🎮 使用指南
+## 路由一览
 
-### 每日思考
-
-1. **选择问题类别**
-   - 浏览 8 个思维维度 × 5 个生活场景 = 40 种组合
-   - 或使用随机功能，让系统为你选择
-
-2. **深入思考**
-   - 在富文本编辑器中记录你的想法
-   - 不必追求完美，真实就好
-   - 可以随时暂停，支持自动保存草稿
-
-3. **保存回顾**
-   - 保存到个人记录
-   - 添加收藏或标记"待思考"
-   - 导出为 PDF/Markdown 分享
-
-### 逻辑推理游戏
-
-#### 海龟汤
-- 阅读离奇的故事汤面
-- 通过"是/否"问题逐步揭示真相
-- 查看提示，获取额外线索
-- 推理出完整的故事背景
-
-#### 谜语人
-- 阅读谜面
-- 输入你的答案
-- 查看正确答案和解析
-- 收集你解开的谜语
-
-#### 猜数字
-- 系统生成4位不重复数字
-- 输入你的猜测
-- 根据 xAxB 提示推理
-  - A：数字和位置都对
-  - B：数字对但位置错
-- 最少次数猜中答案
-
-#### Yes or No
-- AI从8大类别中随机选择词语
-- 你通过"是/否"问题提问
-- 用最少问题猜出答案
-
-### 老虎机创意激发
-
-1. **点击拉杆**
-2. **获得随机组合**
-   - 人物 × 2 个随机词汇
-3. **开始头脑风暴**
-   - 这个组合让你想到什么？
-   - 可以创作一个故事？
-   - 可以解决什么问题？
+| 路径 | 页面 | 说明 |
+|------|------|------|
+| `/` | HomePage | 首页导航 |
+| `/questions` | QuestionThinkingHubPage | 问题思考中心 |
+| `/questions/explore` | QuestionExplorerPage | 问题探索 |
+| `/question/:id` | QuestionPage | 回答问题 |
+| `/debate` | DebateHallPage | AI 辩论堂 |
+| `/roundtable/setup` | RoundtableSetupPage | 大咖圆桌设置 |
+| `/roundtable/discuss` | RoundtablePage | 大咖圆桌讨论 |
+| `/writing` | WritingPage | 写作创造中心 |
+| `/writing-challenge` | WritingChallengePage | 文笔挑战 |
+| `/slot-machine` | SlotMachinePage | 灵感老虎机 |
+| `/slot-machine/answer` | SlotMachineAnswerPage | 老虎机创作 |
+| `/logic-reasoning` | LogicReasoningPage | 逻辑推理中心 |
+| `/turtle-soup` | TurtleSoupPage | 海龟汤 |
+| `/logic-reasoning/riddle` | RiddlePage | 谜语人 |
+| `/logic-reasoning/guess-number` | GuessNumberPage | 猜数字 |
+| `/knowledge-popularize` | KnowledgePopularizePage | 知识科普中心 |
+| `/knowledge-popularize/world-records` | WorldRecordsPage | 世界之最 |
+| `/knowledge-popularize/systems-thinking` | SystemsThinkingPage | 系统思维 |
+| `/knowledge-popularize/health-management` | HealthManagementPage | 健康主理 |
+| `/knowledge-popularize/ai-ask` | KnowledgeAIAskPage | AI 问答 |
+| `/questions/growth` | GrowthTrackerPage | 成长追踪 |
+| `/tasks` | TaskPage | 每日任务 |
+| `/checkin` | CheckInPage | 签到打卡 |
+| `/favorites` | FavoritesPage | 我的收藏 |
+| `/later` | LaterPage | 待思考 |
+| `/profile` | ProfilePage | 个人中心 |
+| `/login` | LoginPage | 登录 |
 
 ---
 
-## 🔧 开发指南
-
-### 可用脚本
+## 开发脚本
 
 ```bash
-# 启动开发服务器
-npm run dev
-
-# 构建生产版本
-npm run build
-
-# 预览生产构建
-npm run preview
-
-# 代码检查
-npm run lint
-
-# 代码格式化
-npm run format
-
-# 类型检查
-npm run type-check
+npm run dev          # 启动开发服务器 (port 5173)
+npm run build        # 生产构建（TypeScript 检查 + Vite 构建）
+npm run preview      # 预览生产构建
+npm run lint         # ESLint 代码检查
+npm run format       # Prettier 格式化
+npm run type-check   # TypeScript 类型检查
 ```
-
-### 添加新问题
-
-编辑 `src/constants/questions.ts`：
-
-```typescript
-export const MY_NEW_QUESTIONS: Question[] = [
-  {
-    id: 'my-question-001',
-    category: {
-      primary: 'thinking',
-      secondary: 'hypothesis'
-    },
-    content: '如果你的生命只剩下24小时，你会做什么？',
-    difficulty: 3,
-    tags: ['假设', '价值观', '生死'],
-    createdAt: new Date(),
-    answerCount: 0,
-  }
-];
-```
-
-### 添加新游戏类别
-
-1. 创建新的页面组件 `src/pages/YourGamePage.tsx`
-2. 添加路由到 `src/App.tsx`
-3. 在 `src/pages/LogicReasoningPage.tsx` 添加入口卡片
 
 ---
 
-## 📊 数据库架构
+## 数据架构
 
-### 核心表结构
+### 核心存储键
 
-```sql
--- 用户表
-profiles (id, email, username, avatar_url, created_at)
+应用使用 localStorage 做本地持久化，通过 `user-{userId}-` 前缀实现用户数据隔离：
 
--- 问题库
-questions (id, content, category, difficulty, tags, answer_count)
+| 存储键 | 数据 |
+|--------|------|
+| `wwx-answers` | 用户回答记录 |
+| `wwx-slot-machine` | 老虎机结果 |
+| `wwx-debate` | 辩论会话记录 |
+| `wwx-turtle-soup` | 海龟汤记录 |
+| `wwx-riddle` | 谜语记录 |
+| `wwx-guess-number` | 猜数字记录 |
+| `wwx-yes-or-no` | Yes or No 记录 |
+| `writing-challenge-works` | 文笔挑战作品 |
+| `wanwan-task-progress` | 任务进度 |
+| `wanwan-task-completed-days` | 完成天数 |
 
--- 用户答案
-user_data (id, user_id, question_id, content, metadata, created_at)
+### Supabase 数据表
 
--- 回答记录
-answers (id, user_id, question_id, content, metadata, is_public, created_at)
-
--- 收藏
-favorites (id, user_id, question_id, notes, tags, created_at)
-
--- 待思考
-later_questions (id, user_id, question_id, priority, created_at)
-```
-
-详细架构请参考 `supabase/migrations/` 目录。
+| 表名 | 用途 |
+|------|------|
+| `profiles` | 用户资料 |
+| `questions` | 问题库 |
+| `answers` | 用户回答 |
+| `user_data` | 用户数据 |
+| `favorites` | 收藏记录 |
+| `later_questions` | 待思考记录 |
 
 ---
 
-## 🤝 贡献指南
+## 贡献指南
 
 欢迎贡献代码、报告问题或提出新功能建议！
 
-### 如何贡献
-
 1. Fork 本仓库
-2. 创建你的特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交你的修改 (`git commit -m 'Add some AmazingFeature'`)
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交修改 (`git commit -m 'Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启一个 Pull Request
-
-### 代码规范
-
-- 遵循 ESLint 规则
-- 使用 Prettier 格式化代码
-- 添加适当的注释
-- 更新相关文档
+5. 开启 Pull Request
 
 ---
 
-## 📝 更新日志
+## 更新日志
 
-### v1.0.0 (2025-03-29)
-- ✨ 初始版本发布
-- ✅ 每日问题思考功能
-- ✅ 老虎机创意工具
-- ✅ 四个逻辑推理游戏
-- ✅ 成长追踪系统
-- ✅ 云端数据同步
-- ✅ 用户认证和资料管理
+### v1.0.0
+- 问题思考系统（双类别导航、深度回答、收藏管理）
+- AI 辩论堂（自动出题、实时辩论、评委评价）
+- 大咖圆桌（30+ 思想家、多人讨论、智能匹配）
+- 灵感老虎机（697 词库、27 类别、彩蛋系统）
+- 文笔挑战（100 道续写题、随机出题、排除已完成）
+- 逻辑推理游戏（海龟汤、谜语人、猜数字、Yes or No）
+- 知识科普模块（世界之最、系统思维、健康主理、AI 问答）
+- 成长追踪系统（时间轴、统计、思维变化对比）
+- 每日任务 & 签到打卡 & 成就系统
+- Supabase 云端同步 & 用户认证
+- 深色模式 & 响应式设计
+- 数据导出（PDF / Markdown / JSON）
 
 ---
 
-## 📄 许可证
+## 许可证
 
 本项目基于 [MIT License](LICENSE) 开源。
 
 ---
 
-## 🙏 致谢
-
-- [React](https://react.dev/) - 前端框架
-- [Supabase](https://supabase.com/) - 后端服务
-- [Vite](https://vitejs.dev/) - 构建工具
-- [Tailwind CSS](https://tailwindcss.com/) - CSS框架
-- [Framer Motion](https://www.framer.com/motion/) - 动画库
-
----
-
-## 📮 联系方式
-
-- 项目主页：[https://github.com/bug-zi/Unexpectedly](https://github.com/bug-zi/Unexpectedly)
-- 问题反馈：[GitHub Issues](https://github.com/bug-zi/Unexpectedly/issues)
-
----
-
 <div align="center">
 
-**用思考连接创意，用创意改变世界** 💡✨
+**用思考连接创意，用创意改变世界**
 
-Made with ❤️ by [bug-zi](https://github.com/bug-zi)
+Made by [bug-zi](https://github.com/bug-zi)
 
 </div>
