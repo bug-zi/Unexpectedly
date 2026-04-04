@@ -378,7 +378,7 @@ export function TurtleSoupPage() {
                     value={currentQuestion}
                     onChange={(e) => setCurrentQuestion(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder='用"是/否"的形式提问，例如："这个人是盲人吗？"'
+                    placeholder='用"是/否"的形式提问，例如："死者是意外死亡吗？"、"凶手是精神病患者或有认知障碍吗？"、"案发地点是封闭空间（密室）吗？"'
                     className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-red-500 dark:focus:border-red-400 focus:outline-none transition-colors text-gray-900 dark:text-gray-100"
                     disabled={isSubmitting || showTruth}
                   />
