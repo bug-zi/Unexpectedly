@@ -407,18 +407,25 @@ export function repairTaskProgressFromRecords(): void {
 
   console.log('🔧 [repair] 开始修复任务进度, today(本地):', today, '当前进度:', progress.dailyTasks);
 
-  // 1. 统计问题思考 (daily-question): 从 answers 记录中找今天的回答
+  // 1. 统计问题思考 (daily-question): 从 answers 记录中找今天的回答 + 辩论记录
   const answers = findDataForKey('wwx-answers');
   console.log('🔧 [repair] wwx-answers 记录数:', answers.length);
   const todayAnswers = answers.filter((a: any) => {
     if (!a.createdAt) return false;
     return toLocalDateString(a.createdAt) === today;
   });
-  const questionCount = todayAnswers.length;
+  // 辩论记录：今天完成的辩论也计入问题思考
+  const debates = findDataForKey('wwx-debate');
+  const todayDebates = debates.filter((d: any) => {
+    const dateField = d.completedAt || d.createdAt;
+    if (!dateField) return false;
+    return (d.status === 'judged' || d.status === 'completed') && toLocalDateString(dateField) === today;
+  });
+  const questionCount = todayAnswers.length + todayDebates.length;
   if (questionCount > (progress.dailyTasks['daily-question'] || 0)) {
     progress.dailyTasks['daily-question'] = questionCount;
     changed = true;
-    console.log('🔧 修复 daily-question:', questionCount);
+    console.log('🔧 修复 daily-question:', questionCount, { answers: todayAnswers.length, debates: todayDebates.length });
   }
 
   // 2. 统计写作创作 (daily-writing): 从 slot machine 和 writing challenge 记录中找

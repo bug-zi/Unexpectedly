@@ -5,6 +5,7 @@ import { ArrowLeft, History, Trash2, Swords } from 'lucide-react';
 import { useDebateStore } from '@/stores/debateStore';
 import { useRoundtableStore } from '@/stores/roundtableStore';
 import { useDebate } from '@/hooks/useDebate';
+import { updateDailyTaskProgress } from '@/utils/taskManager';
 import { DebateStance } from '@/types';
 import { DebateTopicCard } from '@/components/debate/DebateTopicCard';
 import { DebateChat } from '@/components/debate/DebateChat';
@@ -90,6 +91,8 @@ export function DebateHallPage() {
       if (result) {
         setJudgeResult(result);
         setPhase('judged');
+        // 完成辩论也计入"问题思考"任务
+        updateDailyTaskProgress('daily-question', 1);
       }
     } catch (err) {
       console.error('评委评价失败:', err);
@@ -140,14 +143,14 @@ export function DebateHallPage() {
       {/* 内容层 */}
       <div className="relative z-10">
       {/* 导航栏 */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-amber-200 dark:border-amber-800">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-transparent border-b border-transparent">
         <div className="max-w-7xl mx-auto px-2 sm:px-4">
           <div className="flex items-center justify-between h-16 gap-2">
             {/* 左侧：返回按钮 */}
             <motion.button
               whileHover={{ scale: 1.05, x: -3 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate('/questions/explore')}
+              onClick={() => navigate('/questions')}
               className="flex items-center gap-1 px-2 py-1.5 text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors shrink-0"
             >
               <ArrowLeft size={18} />
@@ -250,16 +253,16 @@ export function DebateHallPage() {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-4 p-3 bg-amber-100/50 dark:bg-amber-900/20 rounded-xl"
+                className="mb-6 p-4 sm:p-5 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-2xl border border-amber-200/50 dark:border-amber-800/50"
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-amber-500 shrink-0">辩题</span>
-                  <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+                <div className="flex items-start gap-3">
+                  <span className="text-xs text-amber-500 shrink-0 mt-1 font-medium bg-amber-100 dark:bg-amber-900/40 px-2 py-0.5 rounded">辩题</span>
+                  <p className="text-base sm:text-lg text-gray-800 dark:text-gray-200 font-semibold leading-relaxed">
                     {activeSession.topic}
                   </p>
                 </div>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
+                <div className="flex items-center gap-2 mt-3 ml-1">
+                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
                     activeSession.userStance === 'pro'
                       ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
                       : 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400'

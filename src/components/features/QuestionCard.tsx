@@ -259,14 +259,14 @@ export function QuestionCard({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={onStart}
-          className="relative overflow-hidden w-full py-2.5 px-4 rounded-lg text-white font-medium shadow-md hover:shadow-lg transition-all"
+          className="relative overflow-hidden w-full py-2.5 px-4 rounded-lg font-medium transition-all border border-amber-200 dark:border-amber-800"
         >
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: 'url(/icon-picture/icon-question1.jpg)' }}
           />
-          <div className="absolute inset-0 bg-black/30" />
-          <span className="relative z-10">开始思考</span>
+          <div className="absolute inset-0 bg-white/70 dark:bg-gray-900/70" />
+          <span className="relative z-10 text-gray-700 dark:text-gray-300">开始思考</span>
         </motion.button>
         {onRoundtable && (
           <motion.button
@@ -280,7 +280,7 @@ export function QuestionCard({
               style={{ backgroundImage: 'url(/icon-picture/icon-question1.jpg)' }}
             />
             <div className="absolute inset-0 bg-white/60 dark:bg-gray-800/70" />
-            <span className="relative z-10 flex items-center justify-center text-amber-700 dark:text-amber-300">
+            <span className="relative z-10 flex items-center justify-center text-black dark:text-amber-300">
               <Users size={16} className="mr-1" />
               大咖圆桌
             </span>

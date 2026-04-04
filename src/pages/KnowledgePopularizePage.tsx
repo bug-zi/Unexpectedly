@@ -306,25 +306,26 @@ export function KnowledgePopularizePage() {
               {/* 全局背景图片 */}
               <div
                 className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: 'url(/icon-picture/icon-knowledge1.jpg)' }}
+                style={{ backgroundImage: 'url(/bg-picture/bg-konwledge2.jpg)' }}
               />
               {/* 全局半透明遮罩 */}
-              <div className="absolute inset-0 bg-white/80 backdrop-blur-lg" />
-              <div className="hidden dark:block absolute inset-0 dark:bg-gray-900/80" />
+              <div className="absolute inset-0 bg-white/70 backdrop-blur-md" />
+              <div className="hidden dark:block absolute inset-0 dark:bg-gray-900/75" />
 
-              {/* 头部 */}
+              {/* 头部 - 透明融入背景 */}
               <div className="relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-green-500/80 to-emerald-500/80" />
-                <div className="relative px-6 py-4 flex items-center justify-between">
+                <div className="relative px-6 py-4 flex items-center justify-between border-b border-white/30 dark:border-white/10">
                   <div className="flex items-center gap-3">
-                    <BookOpen size={24} className="text-white" />
-                    <h3 className="text-xl font-bold text-white">模块说明</h3>
+                    <div className="w-8 h-8 rounded-lg bg-green-500/20 backdrop-blur-sm flex items-center justify-center">
+                      <BookOpen size={18} className="text-green-700 dark:text-green-300" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-white">模块说明</h3>
                   </div>
                   <motion.button
                     whileHover={{ scale: 1.1, rotate: 90 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => setShowInstructions(false)}
-                    className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
+                    className="p-2 text-gray-600 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors"
                   >
                     <X size={24} />
                   </motion.button>
@@ -334,48 +335,60 @@ export function KnowledgePopularizePage() {
               {/* 内容 */}
               <div className="relative p-6 overflow-y-auto max-h-[60vh]">
                 <div className="space-y-4">
-                  <div className="p-4 bg-green-50/80 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
-                    <h4 className="font-bold text-green-600 dark:text-green-400 mb-2 flex items-center gap-2">
-                      <Trophy size={20} />
-                      世界之最
-                    </h4>
-                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
-                      探索世界纪录和自然奇观，了解地球的极限与奇迹。从最高的山峰到最深的海洋，从最大的生物到最小的国家。
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 rounded-full">地理</span>
-                      <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 rounded-full">自然</span>
-                      <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 rounded-full">纪录</span>
+                  <div className="relative p-4 rounded-xl border border-green-200/60 dark:border-green-700/40 overflow-hidden">
+                    <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/icon-picture/icon-knowledge1.jpg)' }} />
+                    <div className="absolute inset-0 bg-green-50/75 backdrop-blur-[2px]" />
+                    <div className="relative">
+                      <h4 className="font-bold text-green-600 dark:text-green-400 mb-2 flex items-center gap-2">
+                        <Trophy size={20} />
+                        世界之最
+                      </h4>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
+                        探索世界纪录和自然奇观，了解地球的极限与奇迹。从最高的山峰到最深的海洋，从最大的生物到最小的国家。
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        <span className="text-xs px-2 py-1 bg-green-100/80 dark:bg-green-900/40 text-green-600 dark:text-green-400 rounded-full">地理</span>
+                        <span className="text-xs px-2 py-1 bg-green-100/80 dark:bg-green-900/40 text-green-600 dark:text-green-400 rounded-full">自然</span>
+                        <span className="text-xs px-2 py-1 bg-green-100/80 dark:bg-green-900/40 text-green-600 dark:text-green-400 rounded-full">纪录</span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-emerald-50/80 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
-                    <h4 className="font-bold text-emerald-600 dark:text-emerald-400 mb-2 flex items-center gap-2">
-                      <Network size={20} />
-                      系统思维
-                    </h4>
-                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
-                      多学科知识体系，融合心理学、社会学、科学、数学、哲学、医学等学科，培养系统性思考能力。
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      <span className="text-xs px-2 py-1 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-full">心理学</span>
-                      <span className="text-xs px-2 py-1 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-full">社会学</span>
-                      <span className="text-xs px-2 py-1 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-full">跨学科</span>
+                  <div className="relative p-4 rounded-xl border border-emerald-200/60 dark:border-emerald-700/40 overflow-hidden">
+                    <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/icon-picture/icon-knowledge1.jpg)' }} />
+                    <div className="absolute inset-0 bg-emerald-50/75 backdrop-blur-[2px]" />
+                    <div className="relative">
+                      <h4 className="font-bold text-emerald-600 dark:text-emerald-400 mb-2 flex items-center gap-2">
+                        <Network size={20} />
+                        系统思维
+                      </h4>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
+                        多学科知识体系，融合心理学、社会学、科学、数学、哲学、医学等学科，培养系统性思考能力。
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        <span className="text-xs px-2 py-1 bg-emerald-100/80 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-full">心理学</span>
+                        <span className="text-xs px-2 py-1 bg-emerald-100/80 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-full">社会学</span>
+                        <span className="text-xs px-2 py-1 bg-emerald-100/80 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-full">跨学科</span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-teal-50/80 dark:bg-teal-900/20 rounded-xl border border-teal-200 dark:border-teal-800">
-                    <h4 className="font-bold text-teal-600 dark:text-teal-400 mb-2 flex items-center gap-2">
-                      <HeartPulse size={20} />
-                      健康主理
-                    </h4>
-                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
-                      普及重要的健康知识，涵盖运动、饮食、睡眠、心理健康等方面，科学管理身体健康。
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      <span className="text-xs px-2 py-1 bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 rounded-full">健康</span>
-                      <span className="text-xs px-2 py-1 bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 rounded-full">生活</span>
-                      <span className="text-xs px-2 py-1 bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 rounded-full">科学</span>
+                  <div className="relative p-4 rounded-xl border border-teal-200/60 dark:border-teal-700/40 overflow-hidden">
+                    <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/icon-picture/icon-knowledge1.jpg)' }} />
+                    <div className="absolute inset-0 bg-teal-50/75 backdrop-blur-[2px]" />
+                    <div className="relative">
+                      <h4 className="font-bold text-teal-600 dark:text-teal-400 mb-2 flex items-center gap-2">
+                        <HeartPulse size={20} />
+                        健康主理
+                      </h4>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
+                        普及重要的健康知识，涵盖运动、饮食、睡眠、心理健康等方面，科学管理身体健康。
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        <span className="text-xs px-2 py-1 bg-teal-100/80 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 rounded-full">健康</span>
+                        <span className="text-xs px-2 py-1 bg-teal-100/80 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 rounded-full">生活</span>
+                        <span className="text-xs px-2 py-1 bg-teal-100/80 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 rounded-full">科学</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -406,25 +419,26 @@ export function KnowledgePopularizePage() {
               {/* 全局背景图片 */}
               <div
                 className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: 'url(/icon-picture/icon-knowledge1.jpg)' }}
+                style={{ backgroundImage: 'url(/bg-picture/bg-konwledge2.jpg)' }}
               />
               {/* 全局半透明遮罩 */}
-              <div className="absolute inset-0 bg-white/80 backdrop-blur-lg" />
-              <div className="hidden dark:block absolute inset-0 dark:bg-gray-900/80" />
+              <div className="absolute inset-0 bg-white/70 backdrop-blur-md" />
+              <div className="hidden dark:block absolute inset-0 dark:bg-gray-900/75" />
 
-              {/* 头部 */}
+              {/* 头部 - 透明融入背景 */}
               <div className="relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-green-500/80 to-emerald-500/80" />
-                <div className="relative px-6 py-4 flex items-center justify-between">
+                <div className="relative px-6 py-4 flex items-center justify-between border-b border-white/30 dark:border-white/10">
                   <div className="flex items-center gap-3">
-                    <Trophy size={24} className="text-white" />
-                    <h3 className="text-xl font-bold text-white">学习统计</h3>
+                    <div className="w-8 h-8 rounded-lg bg-green-500/20 backdrop-blur-sm flex items-center justify-center">
+                      <Trophy size={18} className="text-green-700 dark:text-green-300" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-white">学习统计</h3>
                   </div>
                   <motion.button
                     whileHover={{ scale: 1.1, rotate: 90 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => setShowStats(false)}
-                    className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
+                    className="p-2 text-gray-600 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors"
                   >
                     <X size={24} />
                   </motion.button>
@@ -441,28 +455,34 @@ export function KnowledgePopularizePage() {
                 </div>
 
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between p-4 bg-green-50/80 dark:bg-green-900/20 rounded-xl">
-                    <div className="flex items-center gap-3">
+                  <div className="relative flex items-center justify-between p-4 rounded-xl border border-green-200/60 dark:border-green-700/40 overflow-hidden">
+                    <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/icon-picture/icon-knowledge1.jpg)' }} />
+                    <div className="absolute inset-0 bg-green-50/75 backdrop-blur-[2px]" />
+                    <div className="relative flex items-center gap-3">
                       <Trophy size={20} className="text-green-600 dark:text-green-400" />
                       <span className="text-gray-700 dark:text-gray-300">世界之最</span>
                     </div>
-                    <span className="text-lg font-bold text-green-600 dark:text-green-400">{knowledgeStats.worldRecordsViewed}</span>
+                    <span className="relative text-lg font-bold text-green-600 dark:text-green-400">{knowledgeStats.worldRecordsViewed}</span>
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-emerald-50/80 dark:bg-emerald-900/20 rounded-xl">
-                    <div className="flex items-center gap-3">
+                  <div className="relative flex items-center justify-between p-4 rounded-xl border border-emerald-200/60 dark:border-emerald-700/40 overflow-hidden">
+                    <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/icon-picture/icon-knowledge1.jpg)' }} />
+                    <div className="absolute inset-0 bg-emerald-50/75 backdrop-blur-[2px]" />
+                    <div className="relative flex items-center gap-3">
                       <Network size={20} className="text-emerald-600 dark:text-emerald-400" />
                       <span className="text-gray-700 dark:text-gray-300">系统思维</span>
                     </div>
-                    <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{knowledgeStats.systemsThinkingViewed}</span>
+                    <span className="relative text-lg font-bold text-emerald-600 dark:text-emerald-400">{knowledgeStats.systemsThinkingViewed}</span>
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-teal-50/80 dark:bg-teal-900/20 rounded-xl">
-                    <div className="flex items-center gap-3">
+                  <div className="relative flex items-center justify-between p-4 rounded-xl border border-teal-200/60 dark:border-teal-700/40 overflow-hidden">
+                    <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/icon-picture/icon-knowledge1.jpg)' }} />
+                    <div className="absolute inset-0 bg-teal-50/75 backdrop-blur-[2px]" />
+                    <div className="relative flex items-center gap-3">
                       <HeartPulse size={20} className="text-teal-600 dark:text-teal-400" />
                       <span className="text-gray-700 dark:text-gray-300">健康主理</span>
                     </div>
-                    <span className="text-lg font-bold text-teal-600 dark:text-teal-400">{knowledgeStats.healthManagementViewed}</span>
+                    <span className="relative text-lg font-bold text-teal-600 dark:text-teal-400">{knowledgeStats.healthManagementViewed}</span>
                   </div>
                 </div>
               </div>

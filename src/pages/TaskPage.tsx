@@ -32,6 +32,10 @@ import {
 } from '@/utils/taskManager';
 import { WeeklyTask } from '@/types/tasks';
 import { toast } from 'react-toastify';
+import { getAnswers } from '@/utils/storage';
+import { getQuestionById } from '@/constants/questions';
+import { getCategoryConfig } from '@/constants/categories';
+import { Answer } from '@/types';
 
 export function TaskPage() {
   const navigate = useNavigate();
@@ -43,6 +47,7 @@ export function TaskPage() {
   const [weeklyCompleted, setWeeklyCompleted] = useState(false);
   const [completedDates, setCompletedDates] = useState<Set<string>>(new Set());
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [showWeeklyReviewDialog, setShowWeeklyReviewDialog] = useState(false);
 
   // 加载任务数据
   const loadTasks = () => {
@@ -129,8 +134,7 @@ export function TaskPage() {
     if (task.completed) return;
 
     if (task.id === 'weekly-review') {
-      navigate('/history');
-      toast.info('在历史记录中选择一个最值得思考的问题吧！');
+      setShowWeeklyReviewDialog(true);
     } else if (task.id === 'weekly-summary') {
       navigate('/writing');
       toast.info('开始写你的周末总结吧！');
@@ -1022,6 +1026,150 @@ export function TaskPage() {
           )}
         </div>
       </main>
+
+      {/* 每周回顾 - 问题选择对话框 */}
+      {showWeeklyReviewDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col shadow-2xl"
+          >
+            {/* 标题栏 */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-gradient-to-br from-purple-500 to-violet-500 rounded-xl shadow-md">
+                  <Sparkles size={22} className="text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">选出上周最值得思考的问题</h2>
+                  <p className="text-sm text-gray-500">选择一个问题，再次深入思考</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowWeeklyReviewDialog(false)}
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* 问题列表 */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {(() => {
+                // 计算上周的日期范围（周一到周日）
+                const now = new Date();
+                const dayOfWeek = now.getDay();
+                const mondayOfThisWeek = new Date(now);
+                const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                mondayOfThisWeek.setDate(now.getDate() - daysSinceMonday);
+                mondayOfThisWeek.setHours(0, 0, 0, 0);
+
+                const startOfLastWeek = new Date(mondayOfThisWeek);
+                startOfLastWeek.setDate(mondayOfThisWeek.getDate() - 7);
+
+                const endOfLastWeek = new Date(mondayOfThisWeek);
+                endOfLastWeek.setDate(mondayOfThisWeek.getDate() - 1);
+                endOfLastWeek.setHours(23, 59, 59, 999);
+
+                // 获取上周的回答
+                const allAnswers = getAnswers();
+                const lastWeekAnswers = allAnswers.filter(a => {
+                  const date = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
+                  return date >= startOfLastWeek && date <= endOfLastWeek;
+                });
+
+                // 按问题ID去重，保留最新回答
+                const uniqueAnswers = lastWeekAnswers
+                  .sort((a, b) => {
+                    const dateA = a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt).getTime();
+                    const dateB = b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt).getTime();
+                    return dateB - dateA;
+                  })
+                  .reduce((unique, answer) => {
+                    if (!unique.some(u => u.questionId === answer.questionId)) {
+                      unique.push(answer);
+                    }
+                    return unique;
+                  }, [] as Answer[]);
+
+                if (uniqueAnswers.length === 0) {
+                  return (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-violet-100 rounded-2xl flex items-center justify-center mb-4">
+                        <Sparkles size={36} className="text-purple-400" />
+                      </div>
+                      <p className="text-lg font-medium text-gray-900 mb-2">上周没有思考记录</p>
+                      <p className="text-gray-500 text-sm">本周多思考一些问题，下周就可以回顾了！</p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="space-y-3">
+                    {uniqueAnswers.map((answer) => {
+                      const question = getQuestionById(answer.questionId);
+                      const answerDate = answer.createdAt instanceof Date ? answer.createdAt : new Date(answer.createdAt);
+                      return (
+                        <motion.button
+                          key={answer.questionId}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          whileHover={{ scale: 1.01, x: 4 }}
+                          whileTap={{ scale: 0.99 }}
+                          onClick={() => {
+                            setShowWeeklyReviewDialog(false);
+                            navigate(`/questions/${answer.questionId}?source=weekly-review&returnTo=/tasks`);
+                          }}
+                          className="w-full text-left p-4 bg-gradient-to-r from-gray-50 to-purple-50/30 rounded-xl border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all group"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="p-1.5 bg-gradient-to-br from-purple-100 to-violet-100 rounded-lg">
+                                  <Target size={14} className="text-purple-500" />
+                                </div>
+                                {question?.category && question.category.secondary && (
+                                  <span className="px-2 py-0.5 bg-purple-50 text-purple-600 rounded-full text-xs font-medium">
+                                    {(question.category.primary === 'thinking' || question.category.primary === 'scenario')
+                                      ? getCategoryConfig(question.category.primary, question.category.secondary)?.name || question.category.primary
+                                      : question.category.primary}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="font-medium text-gray-900 mb-1.5 line-clamp-2 group-hover:text-purple-700 transition-colors">
+                                {question?.content || '未知问题'}
+                              </p>
+                              <div className="flex items-center gap-3 text-xs text-gray-400">
+                                <span>{answer.metadata.wordCount} 字</span>
+                                <span>{answerDate.toLocaleDateString()}</span>
+                              </div>
+                              {answer.content && (
+                                <p className="text-sm text-gray-400 mt-2 line-clamp-2">
+                                  上次回答: {answer.content.substring(0, 80)}{answer.content.length > 80 ? '...' : ''}
+                                </p>
+                              )}
+                            </div>
+                            <ChevronRight size={20} className="text-gray-300 group-hover:text-purple-400 flex-shrink-0 mt-2 transition-colors" />
+                          </div>
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* 底部提示 */}
+            <div className="p-4 bg-gradient-to-r from-purple-50 to-violet-50 border-t border-gray-200">
+              <div className="flex items-center gap-2 text-sm text-purple-600">
+                <Sparkles size={16} />
+                <span>点击问题即可再次思考，系统会保留你所有的回答记录</span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

@@ -46,9 +46,12 @@ export function HealthManagementPage() {
   };
 
   return (
-    <div className="min-h-screen noise-bg bg-gradient-to-br from-teal-50 via-green-50 to-emerald-50 dark:from-gray-900 dark:via-teal-900/20 dark:to-green-900/20">
+    <div className="min-h-screen noise-bg relative bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/bg-picture/bg-konwledge2.jpg')" }}>
+      {/* 背景融合层 */}
+      <div className="absolute inset-0 bg-gradient-to-br from-teal-50/90 via-green-50/85 to-emerald-50/90 dark:from-gray-900/95 dark:via-teal-900/90 dark:to-green-900/90" />
+      <div className="relative z-10 min-h-screen">
       {/* 导航栏 */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-teal-200 dark:border-teal-800">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <motion.button
@@ -90,8 +93,10 @@ export function HealthManagementPage() {
               className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border-2 border-teal-200 dark:border-teal-800 overflow-hidden"
             >
               {/* 头部 */}
-              <div className="bg-gradient-to-r from-teal-500 to-green-500 px-8 py-6">
-                <div className="flex items-center justify-between">
+              <div className="relative overflow-hidden px-8 py-6">
+                <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/UI-picture/UI-knowledge3.jpg')" }} />
+                <div className="absolute inset-0 bg-gradient-to-r from-teal-600/85 to-green-600/85" />
+                <div className="relative z-10 flex items-center justify-between">
                   <div className="flex-1">
                     <div className="text-white/80 text-sm mb-2 flex items-center gap-2">
                       <HeartPulse size={16} />
@@ -107,7 +112,7 @@ export function HealthManagementPage() {
                       rotate: [0, 5, -5, 0]
                     }}
                     transition={{ duration: 1, repeat: Infinity, repeatDelay: 2 }}
-                    className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center ml-4"
+                    className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center ml-4"
                   >
                     {(() => {
                       const Icon = getHealthIcon(currentItem.title);
@@ -169,28 +174,31 @@ export function HealthManagementPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="mt-8 p-6 bg-gradient-to-r from-teal-50 to-green-50 dark:from-teal-900/20 dark:to-green-900/20 rounded-2xl border-2 border-teal-200 dark:border-teal-800"
+            className="mt-8 relative overflow-hidden rounded-2xl border-2 border-teal-200 dark:border-teal-800"
           >
-            <h3 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-              <HeartPulse size={20} className="text-teal-500" />
-              健康提醒
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700 dark:text-gray-300">
-              <div className="flex items-start gap-2">
-                <span className="text-teal-500 mt-1">•</span>
-                <span>健康是长期投资，每天的小改变会积累成大不同</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-green-500 mt-1">•</span>
-                <span>平衡饮食、规律运动、充足睡眠是健康三要素</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-teal-500 mt-1">•</span>
-                <span>定期体检，预防胜于治疗</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-green-500 mt-1">•</span>
-                <span>心理健康同样重要，必要时寻求专业帮助</span>
+            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/UI-picture/UI-knowledge2.jpg')" }} />
+            <div className="relative z-10 p-6 bg-gradient-to-r from-teal-50/80 to-green-50/80 dark:from-teal-900/80 dark:to-green-900/80 backdrop-blur-md">
+              <h3 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                <HeartPulse size={20} className="text-teal-500" />
+                健康提醒
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700 dark:text-gray-300">
+                <div className="flex items-start gap-2">
+                  <span className="text-teal-500 mt-1">•</span>
+                  <span>健康是长期投资，每天的小改变会积累成大不同</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-green-500 mt-1">•</span>
+                  <span>平衡饮食、规律运动、充足睡眠是健康三要素</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-teal-500 mt-1">•</span>
+                  <span>定期体检，预防胜于治疗</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-green-500 mt-1">•</span>
+                  <span>心理健康同样重要，必要时寻求专业帮助</span>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -200,9 +208,11 @@ export function HealthManagementPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="mt-6 p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl border border-teal-200 dark:border-teal-800"
+            className="mt-6 relative overflow-hidden rounded-2xl border border-teal-200 dark:border-teal-800"
           >
-            <h3 className="font-bold text-gray-900 dark:text-white mb-4">快速跳转</h3>
+            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/icon-picture/icon-knowledge1.jpg')" }} />
+            <div className="relative z-10 p-6 bg-white/75 dark:bg-gray-800/80 backdrop-blur-md">
+              <h3 className="font-bold text-gray-900 dark:text-white mb-4">快速跳转</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {[
                 { index: 0, label: '睡眠' },
@@ -225,9 +235,11 @@ export function HealthManagementPage() {
                 </motion.button>
               ))}
             </div>
+            </div>
           </motion.div>
         </div>
       </main>
+      </div>
     </div>
   );
 }

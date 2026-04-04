@@ -38,9 +38,12 @@ export function WorldRecordsPage() {
   };
 
   return (
-    <div className="min-h-screen noise-bg bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-gray-900 dark:via-green-900/20 dark:to-emerald-900/20">
+    <div className="min-h-screen noise-bg relative bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/bg-picture/bg-konwledge2.jpg')" }}>
+      {/* 背景融合层 */}
+      <div className="absolute inset-0 bg-gradient-to-br from-green-50/90 via-emerald-50/85 to-teal-50/90 dark:from-gray-900/95 dark:via-green-900/90 dark:to-emerald-900/90" />
+      <div className="relative z-10 min-h-screen">
       {/* 导航栏 */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-green-200 dark:border-green-800">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <motion.button
@@ -82,8 +85,10 @@ export function WorldRecordsPage() {
               className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border-2 border-green-200 dark:border-green-800 overflow-hidden"
             >
               {/* 头部 */}
-              <div className="bg-gradient-to-r from-green-500 to-emerald-500 px-8 py-6">
-                <div className="flex items-center justify-between">
+              <div className="relative overflow-hidden px-8 py-6">
+                <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/UI-picture/UI-knowledge2.jpg')" }} />
+                <div className="absolute inset-0 bg-gradient-to-r from-green-600/85 to-emerald-600/85" />
+                <div className="relative z-10 flex items-center justify-between">
                   <div>
                     <div className="text-white/80 text-sm mb-2 flex items-center gap-2">
                       <Trophy size={16} />
@@ -96,7 +101,7 @@ export function WorldRecordsPage() {
                   <motion.div
                     animate={{ rotate: [0, -10, 10, -10, 0] }}
                     transition={{ duration: 0.5, delay: 0.2 }}
-                    className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center"
+                    className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center"
                   >
                     <Trophy size={32} className="text-white" />
                   </motion.div>
@@ -157,14 +162,18 @@ export function WorldRecordsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="mt-8 p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl border border-green-200 dark:border-green-800 text-center"
+            className="mt-8 relative overflow-hidden rounded-2xl border border-green-200 dark:border-green-800 text-center"
           >
-            <p className="text-gray-600 dark:text-gray-400">
-              💡 点击进度点可以直接跳转到对应的知识点
-            </p>
+            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/icon-picture/icon-knowledge1.jpg')" }} />
+            <div className="relative z-10 p-6 bg-white/75 dark:bg-gray-800/80 backdrop-blur-md">
+              <p className="text-gray-600 dark:text-gray-400">
+                💡 点击进度点可以直接跳转到对应的知识点
+              </p>
+            </div>
           </motion.div>
         </div>
       </main>
+      </div>
     </div>
   );
 }

@@ -337,7 +337,22 @@ export function GrowthTrackerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-gray-900 dark:via-amber-900/20 dark:to-yellow-900/20">
+    <div
+      className="min-h-screen relative"
+      style={{
+        backgroundImage: 'url(/bg-picture/bg-question2.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
+      }}
+    >
+      {/* 背景遮罩层 - 暖色主题融合 */}
+      <div className="absolute inset-0 z-0" style={{ background: 'linear-gradient(135deg, rgba(255,251,235,0.82) 0%, rgba(254,243,199,0.75) 40%, rgba(255,237,213,0.78) 100%)' }} />
+      <div className="hidden dark:block absolute inset-0 z-0" style={{ background: 'linear-gradient(135deg, rgba(17,24,39,0.88) 0%, rgba(30,20,10,0.85) 40%, rgba(17,24,39,0.88) 100%)' }} />
+
+      {/* 内容层 */}
+      <div className="relative z-10">
       {/* 导航栏 */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-amber-200 dark:border-amber-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -405,11 +420,17 @@ export function GrowthTrackerPage() {
             className="flex flex-wrap items-center justify-between gap-4 mb-8"
           >
             {/* 时间筛选 */}
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+            <div
+              className="flex items-center gap-3 p-2 rounded-2xl shadow-lg relative overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/bg-picture/bg-question2.jpg)' }} />
+              <div className="absolute inset-0 bg-amber-50/60 dark:bg-gray-900/60" />
+              <div className="relative p-2 bg-white/20 backdrop-blur-sm rounded-lg shadow-sm">
                 <Icon icon="ph:faders" width={20} height={20} className="text-gray-600 dark:text-gray-400" />
               </div>
-              <div className="flex gap-2 p-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+              <div
+                className="relative flex gap-2 p-1 rounded-xl shadow-sm overflow-hidden"
+              >
                 {[
                   { key: '7days', label: '7天' },
                   { key: '30days', label: '30天' },
@@ -418,10 +439,10 @@ export function GrowthTrackerPage() {
                   <button
                     key={period.key}
                     onClick={() => setSelectedPeriod(period.key as any)}
-                    className={`px-5 py-2 rounded-lg font-medium transition-all ${
+                    className={`relative px-5 py-2 rounded-lg font-medium transition-all ${
                       selectedPeriod === period.key
-                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        ? 'bg-white/70 dark:bg-gray-700/80 text-gray-900 dark:text-white shadow-md backdrop-blur-sm'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-white/40 dark:hover:bg-gray-700/50 backdrop-blur-sm'
                     }`}
                   >
                     {period.label}
@@ -431,14 +452,20 @@ export function GrowthTrackerPage() {
             </div>
 
             {/* 导出按钮 */}
-            <Button
-              variant="secondary"
-              onClick={handleExport}
-              className="shadow-md hover:shadow-lg"
+            <div
+              className="relative overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-shadow"
             >
-              <Icon icon="ph:download-simple" width={18} height={18} className="mr-2" />
-              导出数据
-            </Button>
+              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/bg-picture/bg-question2.jpg)' }} />
+              <div className="absolute inset-0 bg-white/60 dark:bg-gray-900/60" />
+              <Button
+                variant="ghost"
+                onClick={handleExport}
+                className="relative"
+              >
+                <Icon icon="ph:download-simple" width={18} height={18} className="mr-2" />
+                导出数据
+              </Button>
+            </div>
           </motion.div>
 
           {/* 统计卡片 */}
@@ -448,29 +475,25 @@ export function GrowthTrackerPage() {
                 label: '累计回答',
                 value: stats.totalAnswers,
                 icon: 'lucide:message-circle',
-                gradient: 'from-amber-500 to-yellow-500',
-                bgColor: 'bg-amber-50 dark:bg-amber-900/20',
+                bgImage: '/UI-picture/UI-question3.jpg',
               },
               {
                 label: '总字数',
                 value: stats.totalWords.toLocaleString(),
                 icon: 'ph:text-aa',
-                gradient: 'from-orange-500 to-amber-500',
-                bgColor: 'bg-orange-50 dark:bg-orange-900/20',
+                bgImage: '/UI-picture/UI-question3.jpg',
               },
               {
                 label: '创建问题数',
                 value: stats.createdQuestionsCount,
                 icon: 'ph:plus-circle',
-                gradient: 'from-yellow-500 to-amber-500',
-                bgColor: 'bg-yellow-50 dark:bg-yellow-900/20',
+                bgImage: '/UI-picture/UI-question3.jpg',
               },
               {
                 label: '再思考',
                 value: stats.uniqueQuestions,
                 icon: 'ph:arrow-u-up-left',
-                gradient: 'from-amber-600 to-yellow-500',
-                bgColor: 'bg-amber-50 dark:bg-amber-900/20',
+                bgImage: '/UI-picture/UI-question3.jpg',
                 action: () => setShowRethinkDialog(true),
                 isButton: true,
               },
@@ -484,11 +507,14 @@ export function GrowthTrackerPage() {
                 onClick={stat.action}
                 className={stat.isButton ? 'cursor-pointer' : 'cursor-default'}
               >
-                <Card className="overflow-hidden h-full">
-                  <div className={`p-5 bg-gradient-to-br ${stat.bgColor} h-full`}>
+                <Card variant="glass" className="overflow-hidden h-full shadow-lg relative">
+                  {/* 背景图片 */}
+                  <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${stat.bgImage})` }} />
+                  <div className="absolute inset-0 bg-white/60 dark:bg-gray-900/70" />
+                  <div className="relative p-5 h-full">
                     <div className="flex items-start justify-between mb-3">
-                      <div className={`p-3 bg-gradient-to-br ${stat.gradient} rounded-xl shadow-md`}>
-                        <Icon icon={stat.icon} width={28} height={28} className="text-white" />
+                      <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl shadow-md">
+                        <Icon icon={stat.icon} width={28} height={28} className="text-amber-500" />
                       </div>
                     </div>
                     <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
@@ -510,11 +536,14 @@ export function GrowthTrackerPage() {
               animate={{ opacity: 1, y: 0 }}
               className="mb-8"
             >
-              <Card className="overflow-hidden border-2 border-primary-200 dark:border-primary-800 shadow-lg">
-                <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 p-6 border-b border-primary-200 dark:border-primary-800">
+              <Card variant="glass" className="overflow-hidden border-2 border-primary-200 dark:border-primary-800 shadow-lg relative">
+                {/* 背景图片 */}
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/UI-picture/UI-question3.jpg)' }} />
+                <div className="absolute inset-0 bg-white/60 dark:bg-gray-900/70" />
+                <div className="relative p-6 border-b border-primary-200 dark:border-primary-800">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="p-3 bg-white dark:bg-gray-800 rounded-xl shadow-md">
+                      <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl shadow-md">
                         <Icon icon="ph:lightbulb-duotone" width={32} height={32} className="text-yellow-500" />
                       </div>
                       <div>
@@ -529,14 +558,14 @@ export function GrowthTrackerPage() {
                   </div>
                 </div>
 
-                <div className="p-6 space-y-3">
+                <div className="relative p-6 space-y-3">
                   {comparisonPairs.slice(0, 3).map((pair, index) => {
                     const question = getQuestionById(pair.old.questionId);
                     return (
                       <button
                         key={index}
                         onClick={() => setShowComparison(pair)}
-                        className="w-full text-left p-4 bg-gradient-to-r from-gray-50 to-amber-50 dark:from-gray-800 dark:to-amber-900/20 rounded-xl hover:shadow-md transition-all border border-gray-200 dark:border-gray-700 hover:border-amber-300 dark:hover:border-amber-700"
+                        className="w-full text-left p-4 rounded-xl hover:shadow-md transition-all border border-gray-200 dark:border-gray-700 hover:border-amber-300 dark:hover:border-amber-700"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex-1 min-w-0">
@@ -571,7 +600,7 @@ export function GrowthTrackerPage() {
 
                 {comparisonPairs.length > 3 && (
                   <div className="px-6 pb-6">
-                    <div className="text-center py-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="text-center py-3 rounded-lg">
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         还有 {comparisonPairs.length - 3} 个问题可以对比...
                       </p>
@@ -589,8 +618,8 @@ export function GrowthTrackerPage() {
             className="mb-8"
           >
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2.5 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl shadow-lg">
-                <Icon icon="ph:clock-counter-clockwise-duotone" width={28} height={28} className="text-white" />
+              <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
+                <Icon icon="ph:clock-counter-clockwise-duotone" width={28} height={28} className="text-amber-500" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
                 活动时间线
@@ -598,9 +627,12 @@ export function GrowthTrackerPage() {
             </div>
 
             {Object.keys(activitiesByDate).length === 0 ? (
-              <Card className="p-12 text-center">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="w-20 h-20 bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 rounded-2xl flex items-center justify-center shadow-lg">
+              <Card variant="glass" className="p-12 text-center shadow-lg relative">
+                {/* 背景图片 */}
+                <div className="absolute inset-0 bg-cover bg-center rounded-2xl" style={{ backgroundImage: 'url(/UI-picture/UI-question3.jpg)' }} />
+                <div className="absolute inset-0 bg-white/60 dark:bg-gray-900/70 rounded-2xl" />
+                <div className="relative flex flex-col items-center gap-4">
+                  <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
                     <Icon icon="ph:calendar-x-duotone" width={40} height={40} className="text-amber-500 dark:text-amber-400" />
                   </div>
                   <div>
@@ -624,13 +656,16 @@ export function GrowthTrackerPage() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
                     >
-                      <Card className="overflow-hidden">
+                      <Card variant="glass" className="overflow-hidden shadow-lg relative">
+                        {/* 背景图片 */}
+                        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/UI-picture/UI-question4.jpg)' }} />
+                        <div className="absolute inset-0 bg-white/60 dark:bg-gray-900/70" />
                         {/* 日期头部 */}
-                        <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <div className="relative px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                              <div className="p-2.5 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl shadow-lg">
-                                <Icon icon="ph:calendar-check-duotone" width={24} height={24} className="text-white" />
+                              <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
+                                <Icon icon="ph:calendar-check-duotone" width={24} height={24} className="text-amber-500" />
                               </div>
                               <div>
                                 <p className="font-bold text-gray-900 dark:text-white">
@@ -643,7 +678,7 @@ export function GrowthTrackerPage() {
                                 </p>
                               </div>
                             </div>
-                            <div className="px-4 py-2 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 rounded-full border border-amber-200 dark:border-amber-700">
+                            <div className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full border border-amber-200 dark:border-amber-700">
                               <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
                                 {dayActivities.length} 个活动
                               </span>
@@ -652,7 +687,7 @@ export function GrowthTrackerPage() {
                         </div>
 
                         {/* 活动列表 */}
-                        <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                        <div className="relative divide-y divide-gray-100 dark:divide-gray-700">
                           {dayActivities.map((activity) => {
                             // 只渲染问答记录
                             if (activity.type === 'answer') {
@@ -668,8 +703,8 @@ export function GrowthTrackerPage() {
                                 {/* 问题标题 */}
                                 <div className="flex items-start gap-3">
                                   <div className="flex-shrink-0 mt-1">
-                                    <div className="p-2.5 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-xl shadow-md">
-                                      <Icon icon="ph:question-duotone" width={20} height={20} className="text-white" />
+                                    <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl shadow-md">
+                                      <Icon icon="ph:question-duotone" width={20} height={20} className="text-amber-500" />
                                     </div>
                                   </div>
                                   <div className="flex-1 min-w-0">
@@ -677,23 +712,23 @@ export function GrowthTrackerPage() {
                                       {question?.content || '未知问题'}
                                     </p>
                                     <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                                      <span className="flex items-center gap-1.5 px-2 py-1 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-full border border-amber-200 dark:border-amber-700">
+                                      <span className="flex items-center gap-1.5 px-2 py-1 rounded-full border border-amber-200 dark:border-amber-700">
                                         <Icon icon="ph:text-t-duotone" width={16} height={16} className="text-amber-600 dark:text-amber-400" />
                                         <span className="font-medium text-amber-700 dark:text-amber-300">{answer.metadata.wordCount} 字</span>
                                       </span>
-                                      <span className="flex items-center gap-1.5 px-2 py-1 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-full border border-amber-200 dark:border-amber-700">
+                                      <span className="flex items-center gap-1.5 px-2 py-1 rounded-full border border-amber-200 dark:border-amber-700">
                                         <Icon icon="ph:clock-duotone" width={16} height={16} className="text-amber-600 dark:text-amber-400" />
                                         <span className="font-medium text-amber-700 dark:text-amber-300">{format(new Date(answer.createdAt), 'HH:mm')}</span>
                                       </span>
                                       {question?.category && (
-                                        <span className="px-2.5 py-1 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-full border border-orange-200 dark:border-orange-700 text-orange-700 dark:text-orange-300 font-medium">
+                                        <span className="px-2.5 py-1 rounded-full border border-orange-200 dark:border-orange-700 text-orange-700 dark:text-orange-300 font-medium">
                                           {getCategoryConfig(question.category.primary)?.label || question.category.primary}
                                         </span>
                                       )}
                                     </div>
                                   </div>
                                   <div className="flex-shrink-0">
-                                    <div className="p-2 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-lg">
+                                    <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
                                       <Icon icon="ph:arrow-right-duotone" width={20} height={20} className="text-gray-600 dark:text-gray-400" />
                                     </div>
                                   </div>
@@ -753,21 +788,21 @@ export function GrowthTrackerPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleEditAnswer(selectedActivity.data as Answer)}
-                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl transition-all shadow-md hover:shadow-lg"
+                  className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl transition-all shadow-md hover:shadow-lg"
                 >
                   <Icon icon="ph:pencil-simple-line" width={18} height={18} />
                   <span>编辑</span>
                 </button>
                 <button
                   onClick={() => handleDeleteAnswer(selectedActivity.id)}
-                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-xl transition-all shadow-md hover:shadow-lg"
+                  className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl transition-all shadow-md hover:shadow-lg"
                 >
                   <Icon icon="ph:trash-duotone" width={18} height={18} />
                   <span>删除</span>
                 </button>
                 <button
                   onClick={() => setSelectedActivity(null)}
-                  className="p-2 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 hover:from-gray-200 hover:to-gray-300 rounded-xl transition-all"
+                  className="p-2 bg-white/30 backdrop-blur-sm hover:bg-white/50 rounded-xl transition-all"
                 >
                   <Icon icon="ph:x" width={20} height={20} className="text-gray-600 dark:text-gray-400" />
                 </button>
@@ -782,20 +817,20 @@ export function GrowthTrackerPage() {
                   {/* 问题 */}
                   <div>
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="p-2.5 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-xl shadow-md">
+                      <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl shadow-md">
                         <Icon icon="ph:question-duotone" width={22} height={22} className="text-white" />
                       </div>
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">问题</h3>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
+                    <div className="p-4 bg-white/30 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-gray-700">
                       <p className="text-gray-900 dark:text-white font-medium mb-2">{question?.content || '未知问题'}</p>
                       <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                        <span className="flex items-center gap-1.5 px-2 py-1 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-full border border-amber-200 dark:border-amber-700">
+                        <span className="flex items-center gap-1.5 px-2 py-1 rounded-full border border-amber-200 dark:border-amber-700">
                           <Icon icon="ph:calendar-blank-duotone" width={16} height={16} className="text-amber-600 dark:text-amber-400" />
                           <span className="font-medium text-amber-700 dark:text-amber-300">{format(new Date(answer.createdAt), 'yyyy年MM月dd日 HH:mm')}</span>
                         </span>
                         {question?.category && (
-                          <span className="px-2.5 py-1 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-full border border-orange-200 dark:border-orange-700 text-orange-700 dark:text-orange-300 font-medium">
+                          <span className="px-2.5 py-1 rounded-full border border-orange-200 dark:border-orange-700 text-orange-700 dark:text-orange-300 font-medium">
                             {getCategoryConfig(question.category.primary)?.label || question.category.primary}
                           </span>
                         )}
@@ -806,15 +841,15 @@ export function GrowthTrackerPage() {
                   {/* 回答 */}
                   <div>
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="p-2.5 bg-gradient-to-br from-amber-600 to-orange-500 rounded-xl shadow-md">
+                      <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl shadow-md">
                         <Icon icon="ph:chat-circle-text-duotone" width={22} height={22} className="text-white" />
                       </div>
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">我的回答</h3>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
+                    <div className="p-4 bg-white/30 backdrop-blur-sm rounded-xl border border-amber-200 dark:border-amber-800">
                       <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">{answer.content}</p>
                       <div className="flex items-center gap-3 mt-4 text-xs text-gray-500 dark:text-gray-400">
-                        <span className="flex items-center gap-1.5 px-2 py-1 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-full border border-amber-200 dark:border-amber-700">
+                        <span className="flex items-center gap-1.5 px-2 py-1 rounded-full border border-amber-200 dark:border-amber-700">
                           <Icon icon="ph:text-t-duotone" width={16} height={16} className="text-amber-600 dark:text-amber-400" />
                           <span className="font-medium text-amber-700 dark:text-amber-300">{answer.metadata.wordCount} 字</span>
                         </span>
@@ -857,7 +892,7 @@ export function GrowthTrackerPage() {
 
             <div className="space-y-4">
               {/* 问题 */}
-              <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
+              <div className="p-4 bg-white/30 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-gray-700">
                 <p className="text-gray-900 dark:text-white font-medium">
                   {getQuestionById(editingAnswer.questionId)?.content || '未知问题'}
                 </p>
@@ -874,7 +909,7 @@ export function GrowthTrackerPage() {
                   className="w-full px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-amber-500 dark:focus:border-amber-400 focus:outline-none transition-colors text-gray-900 dark:text-gray-100 min-h-[200px] resize-y"
                   placeholder="在这里修改你的回答..."
                 />
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg border border-amber-200 dark:border-amber-700">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-200 dark:border-amber-700">
                   <Icon icon="ph:text-t-duotone" width={16} height={16} className="text-amber-600 dark:text-amber-400" />
                   <span className="text-sm font-medium text-amber-700 dark:text-amber-300">{editingAnswer.content.length} 字</span>
                 </div>
@@ -954,7 +989,7 @@ export function GrowthTrackerPage() {
             {/* 标题栏 */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-gradient-to-br from-amber-600 to-orange-500 rounded-xl shadow-md">
+                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl shadow-md">
                   <Icon icon="ph:arrow-u-up-left" width={28} height={28} className="text-white" />
                 </div>
                 <div>
@@ -991,7 +1026,7 @@ export function GrowthTrackerPage() {
                 if (answeredQuestions.length === 0) {
                   return (
                     <div className="flex flex-col items-center justify-center h-full text-center py-12">
-                      <div className="w-20 h-20 bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-900/30 dark:to-yellow-900/30 rounded-full flex items-center justify-center mb-4">
+                      <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-4">
                         <Icon icon="ph:question" width={40} height={40} className="text-amber-500" />
                       </div>
                       <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">
@@ -1019,12 +1054,12 @@ export function GrowthTrackerPage() {
                             setShowRethinkDialog(false);
                             navigate(`/questions/${answer.questionId}`);
                           }}
-                          className="w-full text-left p-5 bg-gradient-to-r from-gray-50 to-amber-50 dark:from-gray-800 dark:to-amber-900/20 rounded-xl hover:shadow-md transition-all border border-gray-200 dark:border-gray-700 hover:border-amber-300 dark:hover:border-amber-600 group"
+                          className="w-full text-left p-5 bg-white/30 backdrop-blur-sm rounded-xl hover:shadow-md transition-all border border-gray-200 dark:border-gray-700 hover:border-amber-300 dark:hover:border-amber-600 group"
                         >
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-2">
-                                <div className="p-2 bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-900/30 dark:to-yellow-900/30 rounded-lg">
+                                <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
                                   <Icon icon="ph:question-duotone" width={18} height={18} className="text-amber-500" />
                                 </div>
                                 {question?.category && (
@@ -1052,7 +1087,7 @@ export function GrowthTrackerPage() {
                               </div>
                             </div>
                             <div className="flex-shrink-0">
-                              <div className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm group-hover:bg-amber-50 dark:group-hover:bg-amber-900/30 transition-colors">
+                              <div className="p-2 bg-white/30 backdrop-blur-sm rounded-lg shadow-sm group-hover:bg-white/50 transition-colors">
                                 <Icon icon="ph:arrow-right" width={20} height={20} className="text-amber-500" />
                               </div>
                             </div>
@@ -1066,7 +1101,7 @@ export function GrowthTrackerPage() {
             </div>
 
             {/* 底部提示 */}
-            <div className="p-4 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border-t border-gray-200 dark:border-gray-700">
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                 <Icon icon="ph:info" width={18} height={18} className="text-amber-500" />
                 <span>点击问题即可查看并重新思考，系统会保留你的所有回答记录</span>
@@ -1082,6 +1117,7 @@ export function GrowthTrackerPage() {
         isOpen={showBatchExport}
         onClose={() => setShowBatchExport(false)}
       />
-    </div>
+      </div>
+      </div>
   );
 }

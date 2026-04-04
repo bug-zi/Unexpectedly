@@ -92,32 +92,52 @@ export function LaterPage() {
   };
 
   return (
-    <div className="min-h-screen noise-bg bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 dark:from-gray-900 dark:via-yellow-900/20 dark:to-orange-900/20">
+    <div
+      className="min-h-screen relative"
+      style={{
+        backgroundImage: 'url(/UI-picture/UI-question4.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
+      }}
+    >
+      {/* 背景遮罩层 - 暖色主题融合 */}
+      <div className="absolute inset-0 z-0" style={{ background: 'linear-gradient(135deg, rgba(255,251,235,0.82) 0%, rgba(254,243,199,0.75) 40%, rgba(255,237,213,0.78) 100%)' }} />
+      <div className="hidden dark:block absolute inset-0 z-0" style={{ background: 'linear-gradient(135deg, rgba(17,24,39,0.88) 0%, rgba(30,20,10,0.85) 40%, rgba(17,24,39,0.88) 100%)' }} />
+
+      {/* 内容层 */}
+      <div className="relative z-10">
       {/* 导航栏 */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/50 dark:border-gray-800/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-amber-200 dark:border-amber-800">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4">
+          <div className="relative flex items-center justify-between h-16 gap-2">
             <motion.button
               whileHover={{ scale: 1.05, x: -3 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate('/questions')}
-              className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
+              onClick={() => navigate('/questions/explore')}
+              className="flex items-center gap-1 px-2 py-1.5 text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors shrink-0"
             >
-              <ArrowLeft size={20} />
-              <span>返回</span>
+              <ArrowLeft size={18} />
+              <span className="text-sm hidden sm:inline">返回</span>
             </motion.button>
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ ease: customEasing.unexpected }}
-              className="flex items-center gap-3"
-            >
-              <Clock size={24} className="text-yellow-500" />
-              <h1 className="text-xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
-                待思考
-              </h1>
-            </motion.div>
-            <div className="w-16" />
+
+            {/* 中间：标题 - 绝对居中 */}
+            <div className="absolute inset-x-0 flex justify-center pointer-events-none">
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ease: customEasing.unexpected }}
+                className="flex items-center gap-2 px-2 pointer-events-auto"
+              >
+                <Clock size={20} className="text-yellow-500 shrink-0" />
+                <h1 className="text-base sm:text-xl font-bold text-amber-700 dark:text-amber-300 whitespace-nowrap">
+                  待思考
+                </h1>
+              </motion.div>
+            </div>
+
+            <div className="w-16 shrink-0" />
           </div>
         </div>
       </nav>
@@ -178,7 +198,7 @@ export function LaterPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-8 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-2xl p-8 border-2 border-yellow-200 dark:border-yellow-800"
+              className="mb-8 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-2xl p-8 border-2 border-amber-200 dark:border-amber-800"
             >
               <div className="flex items-start gap-6">
                 <div className="flex-shrink-0">
@@ -231,59 +251,32 @@ export function LaterPage() {
                 initial={{ opacity: 0, y: -30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, ease: customEasing.elastic }}
-                className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
+                className="mb-8"
               >
-                {[
-                  {
-                    key: 'total',
-                    label: '待思考总数',
-                    value: stats.total,
-                    icon: Clock,
-                    color: 'text-yellow-500',
-                    bgColor: 'bg-yellow-100 dark:bg-yellow-900/30',
-                    borderColor: 'border-yellow-400 dark:border-yellow-600',
-                  },
-                  {
-                    key: 'high',
-                    label: '高优先级',
-                    value: stats.highPriority,
-                    icon: Clock,
-                    color: 'text-red-500',
-                    bgColor: 'bg-red-100 dark:bg-red-900/30',
-                    borderColor: 'border-red-400 dark:border-red-600',
-                  },
-                  {
-                    key: 'normal',
-                    label: '普通优先级',
-                    value: stats.normalPriority,
-                    icon: Clock,
-                    color: 'text-gray-500',
-                    bgColor: 'bg-gray-100 dark:bg-gray-900/30',
-                    borderColor: 'border-gray-400 dark:border-gray-600',
-                  },
-                ].map((stat) => (
-                  <motion.div
-                    key={stat.key}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.1 }}
-                    whileHover={{ scale: 1.05, y: -4 }}
-                    className={clsx(
-                      'bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all border-2',
-                      stat.borderColor
-                    )}
-                  >
-                    <div className={`p-3 rounded-lg ${stat.bgColor} mb-3 inline-block`}>
-                      <stat.icon size={28} className={stat.color} />
-                    </div>
-                    <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-                      {stat.value}
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      {stat.label}
-                    </div>
-                  </motion.div>
-                ))}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.1 }}
+                  whileHover={{ scale: 1.02, y: -4 }}
+                  className="relative rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all cursor-pointer border-2 border-yellow-400 dark:border-yellow-600 overflow-hidden"
+                >
+                  {/* 背景图 */}
+                  <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: "url('/UI-picture/UI-question3.jpg')" }}
+                  />
+                  <div className="absolute inset-0 bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm" />
+
+                  <div className="relative p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 mb-3 inline-block">
+                    <Clock size={24} className="text-yellow-500" />
+                  </div>
+                  <div className="relative text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                    {stats.total}
+                  </div>
+                  <div className="relative text-sm text-gray-600 dark:text-gray-400">
+                    待思考总数
+                  </div>
+                </motion.div>
               </motion.div>
 
               {/* 搜索和视图切换 */}
@@ -303,19 +296,19 @@ export function LaterPage() {
                     placeholder="搜索待思考的问题..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-12 py-3 text-base border-2 border-gray-200 dark:border-gray-700 focus:border-yellow-400 dark:focus:border-yellow-600 rounded-2xl"
+                    className="pl-12 py-3 text-base border-2 border-amber-200 dark:border-amber-800 focus:border-amber-400 dark:focus:border-amber-600 rounded-2xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm"
                     fullWidth
                   />
                 </div>
 
                 {/* 视图切换 */}
-                <div className="flex bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 p-1">
+                <div className="flex bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl border-2 border-amber-200 dark:border-amber-800 p-1">
                   <button
                     onClick={() => setViewMode('grid')}
                     className={`p-2 rounded-lg transition-all ${
                       viewMode === 'grid'
-                        ? 'bg-yellow-500 text-white'
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        ? 'bg-amber-500 text-white'
+                        : 'text-gray-600 dark:text-gray-400 hover:bg-amber-50 dark:hover:bg-amber-900/20'
                     }`}
                   >
                     <Grid size={18} />
@@ -324,8 +317,8 @@ export function LaterPage() {
                     onClick={() => setViewMode('list')}
                     className={`p-2 rounded-lg transition-all ${
                       viewMode === 'list'
-                        ? 'bg-yellow-500 text-white'
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        ? 'bg-amber-500 text-white'
+                        : 'text-gray-600 dark:text-gray-400 hover:bg-amber-50 dark:hover:bg-amber-900/20'
                     }`}
                   >
                     <List size={18} />
@@ -344,14 +337,16 @@ export function LaterPage() {
                 </h2>
 
                 {filteredLaterQuestions.length === 0 ? (
-                  <div className="text-center py-20">
-                    <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-full mb-6">
+                  <div className="relative text-center py-20 rounded-2xl border border-amber-200/50 dark:border-amber-800/50 overflow-hidden">
+                    <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/UI-picture/UI-question3.jpg')" }} />
+                    <div className="absolute inset-0 bg-white/65 dark:bg-gray-900/65 backdrop-blur-sm" />
+                    <div className="relative inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-amber-100/80 to-yellow-200/80 dark:from-amber-900/30 dark:to-yellow-900/30 rounded-full mb-6">
                       <Clock size={48} className="text-gray-400" />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                    <h3 className="relative text-2xl font-bold text-gray-900 dark:text-white mb-3">
                       {searchQuery ? '没有找到匹配的问题' : '待思考列表是空的'}
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    <p className="relative text-gray-600 dark:text-gray-400 mb-6">
                       {searchQuery
                         ? '试试调整搜索关键词'
                         : '点击问题卡片上的时钟图标标记为待思考'}
@@ -401,6 +396,7 @@ export function LaterPage() {
           )}
         </div>
       </main>
+      </div>{/* 内容层结束 */}
     </div>
   );
 }

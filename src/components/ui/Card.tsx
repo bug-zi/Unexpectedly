@@ -8,7 +8,7 @@ interface CardProps extends HTMLMotionProps<'div'> {
 
 const variantStyles = {
   default: 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700',
-  glass: 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border border-white/20 dark:border-gray-700/50',
+  glass: 'bg-white/40 dark:bg-gray-800/40 backdrop-blur-md border border-white/30 dark:border-gray-700/30',
   elevated: 'bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700',
 };
 

@@ -15,7 +15,6 @@ import {
   BarChart3,
   Shuffle,
   X,
-  History,
 } from 'lucide-react';
 import { getAnswers } from '@/utils/storage';
 import { useDebateStore } from '@/stores/debateStore';
@@ -36,7 +35,7 @@ export function QuestionThinkingHubPage() {
   const stats = useMemo(() => {
     const answers = getAnswers();
     const questionCount = answers.length;
-    const debateCount = debateSessions.length;
+    const debateCount = debateSessions.filter(s => s.status === 'judged').length;
     return { questionCount, debateCount, total: questionCount + debateCount };
   }, [debateSessions]);
 
@@ -148,16 +147,6 @@ export function QuestionThinkingHubPage() {
                 <span>思考统计</span>
               </motion.button>
 
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate('/growth')}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg transition-all whitespace-nowrap"
-                title="查看历史记录"
-              >
-                <History size={18} />
-                <span>历史记录</span>
-              </motion.button>
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Sparkles, Lightbulb, Save } from 'lucide-react';
+import { ArrowLeft, Sparkles, Lightbulb, Save, Dices } from 'lucide-react';
 import { EasterEgg } from '@/types';
 import { saveSlotMachineResult } from '@/utils/storage';
 import { updateDailyTaskProgress } from '@/utils/taskManager';
@@ -189,7 +189,7 @@ export function SlotMachineAnswerPage() {
                     用上面三个词语写一段话，可以是故事、感悟或联想...
                   </p>
                   <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    💡 没有标准答案，让思维自由飞翔吧！
+                    没有标准答案，让思维自由飞翔吧！
                   </p>
                 </div>
               </div>
@@ -244,7 +244,7 @@ export function SlotMachineAnswerPage() {
                   onClick={handleNewSpin}
                   className="w-full py-3 text-sm font-medium border-2 border-gray-200 dark:border-gray-700 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all"
                 >
-                  <span className="mr-2">🎰</span>
+                  <Dices size={16} className="mr-2 inline-block text-gray-500/70" />
                   再次抽取
                 </button>
               </motion.div>

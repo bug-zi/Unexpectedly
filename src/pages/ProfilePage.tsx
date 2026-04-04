@@ -28,6 +28,8 @@ import {
   ChevronDown,
   Loader2,
   CheckCircle2,
+  MessageSquare,
+  Send,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { SyncStatusIndicator } from '@/components/ui/SyncStatusIndicator';
@@ -48,6 +50,7 @@ import { toast } from 'react-toastify';
 import { getProviderConfig, validateApiKey } from '@/services/llmService';
 import { useRoundtableStore } from '@/stores/roundtableStore';
 import type { LLMProvider } from '@/types';
+import { submitFeedback, checkRateLimit } from '@/services/feedbackService';
 
 interface CheckInRecord {
   date: string;
@@ -147,6 +150,14 @@ export function ProfilePage() {
   const [isValidating, setIsValidating] = useState(false);
   const [validationStatus, setValidationStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [validationMessage, setValidationMessage] = useState('');
+
+  // 反馈相关状态
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackContent, setFeedbackContent] = useState('');
+  const [feedbackEmail, setFeedbackEmail] = useState('');
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+  const [feedbackSuccess, setFeedbackSuccess] = useState(false);
+  const [feedbackError, setFeedbackError] = useState('');
 
   // 从 store 加载已有配置
   useEffect(() => {
@@ -506,6 +517,43 @@ export function ProfilePage() {
         window.location.reload();
       }, 500);
     }
+  };
+
+  // 提交用户反馈
+  const handleSubmitFeedback = async () => {
+    setIsSubmittingFeedback(true);
+    setFeedbackError('');
+
+    const result = await submitFeedback({
+      content: feedbackContent,
+      contactEmail: feedbackEmail || undefined,
+    });
+
+    setIsSubmittingFeedback(false);
+
+    if (result.success) {
+      setFeedbackSuccess(true);
+      setTimeout(() => {
+        setShowFeedbackModal(false);
+        setFeedbackSuccess(false);
+        setFeedbackContent('');
+        setFeedbackEmail('');
+      }, 2000);
+    } else {
+      setFeedbackError(result.error || '提交失败');
+    }
+  };
+
+  // 打开反馈弹窗
+  const handleOpenFeedback = () => {
+    const rateLimit = checkRateLimit();
+    if (!rateLimit.allowed) {
+      toast.warning(`请稍后再试，还需等待约 ${rateLimit.remainingMinutes} 分钟`);
+      return;
+    }
+    setFeedbackError('');
+    setFeedbackSuccess(false);
+    setShowFeedbackModal(true);
   };
 
   // 手动同步到云端
@@ -1138,6 +1186,147 @@ export function ProfilePage() {
               </motion.button>
             </div>
           </motion.div>
+
+          {/* 用户体验反馈 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg p-6 border-2 border-emerald-200 mb-8"
+          >
+            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-2">
+              <MessageSquare size={20} className="text-emerald-500" />
+              用户体验反馈
+            </h3>
+            <p className="text-sm text-gray-500 mb-4">分享你的使用感受、建议或遇到的问题，帮助我们做得更好</p>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleOpenFeedback}
+              className="w-full relative flex items-center gap-3 px-4 py-3 text-emerald-700 rounded-xl transition-all overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-cover bg-center opacity-60" style={{ backgroundImage: "url('/icon-picture/icon-creative1.jpg')" }} />
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-200/50 to-teal-200/40" />
+              <div className="relative flex items-center gap-3 w-full">
+                <Send size={20} />
+                <div className="flex-1 text-left">
+                  <p className="font-medium">提交反馈</p>
+                  <p className="text-sm text-emerald-600">告诉我们你的想法</p>
+                </div>
+              </div>
+            </motion.button>
+          </motion.div>
+
+          {/* 反馈弹窗 */}
+          <AnimatePresence>
+            {showFeedbackModal && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+                onClick={() => {
+                  if (!isSubmittingFeedback) setShowFeedbackModal(false);
+                }}
+              >
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                  className="w-full max-w-md bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 overflow-hidden"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {feedbackSuccess ? (
+                    <div className="p-8 text-center">
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+                      >
+                        <CheckCircle2 size={48} className="text-emerald-500 mx-auto mb-4" />
+                      </motion.div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">感谢你的反馈！</h3>
+                      <p className="text-sm text-gray-500">我们会认真阅读并持续改进</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="p-6 border-b border-gray-100">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                            <MessageSquare size={20} className="text-emerald-500" />
+                            提交反馈
+                          </h3>
+                          <button
+                            onClick={() => setShowFeedbackModal(false)}
+                            disabled={isSubmittingFeedback}
+                            className="p-1 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+                          >
+                            <X size={20} />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="p-6 space-y-4">
+                        <div>
+                          <textarea
+                            value={feedbackContent}
+                            onChange={(e) => setFeedbackContent(e.target.value)}
+                            placeholder="分享你的使用感受、建议或遇到的问题..."
+                            rows={5}
+                            maxLength={2000}
+                            className="w-full px-4 py-3 bg-gray-50/80 text-gray-800 placeholder-gray-400 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300 resize-none text-sm transition-colors"
+                          />
+                          <div className="flex justify-end mt-1">
+                            <span className="text-xs text-gray-400">
+                              {feedbackContent.length}/2000
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* 游客或未填 email 时显示联系方式 */}
+                        {(!isAuthenticated || !profile?.email) && (
+                          <div>
+                            <input
+                              type="email"
+                              value={feedbackEmail}
+                              onChange={(e) => setFeedbackEmail(e.target.value)}
+                              placeholder="联系方式（可选，方便我们回复你）"
+                              className="w-full px-4 py-2.5 bg-gray-50/80 text-gray-800 placeholder-gray-400 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300 text-sm transition-colors"
+                            />
+                          </div>
+                        )}
+
+                        {feedbackError && (
+                          <div className="px-3 py-2 bg-red-50 text-red-600 rounded-lg text-sm border border-red-200">
+                            {feedbackError}
+                          </div>
+                        )}
+
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={handleSubmitFeedback}
+                          disabled={isSubmittingFeedback || feedbackContent.trim().length < 5}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-medium shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isSubmittingFeedback ? (
+                            <>
+                              <Loader2 size={16} className="animate-spin" />
+                              提交中...
+                            </>
+                          ) : (
+                            <>
+                              <Send size={16} />
+                              提交反馈
+                            </>
+                          )}
+                        </motion.button>
+                      </div>
+                    </>
+                  )}
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* 危险区域 */}
           <motion.div

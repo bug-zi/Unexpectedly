@@ -59,9 +59,12 @@ export function SystemsThinkingPage() {
   };
 
   return (
-    <div className="min-h-screen noise-bg bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50 dark:from-gray-900 dark:via-emerald-900/20 dark:to-teal-900/20">
+    <div className="min-h-screen noise-bg relative bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/bg-picture/bg-konwledge2.jpg')" }}>
+      {/* 背景融合层 */}
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/90 via-teal-50/85 to-green-50/90 dark:from-gray-900/95 dark:via-emerald-900/90 dark:to-teal-900/90" />
+      <div className="relative z-10 min-h-screen">
       {/* 导航栏 */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-emerald-200 dark:border-emerald-800">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <motion.button
@@ -128,8 +131,10 @@ export function SystemsThinkingPage() {
               className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border-2 border-emerald-200 dark:border-emerald-800 overflow-hidden"
             >
               {/* 头部 */}
-              <div className="bg-gradient-to-r from-emerald-500 to-teal-500 px-8 py-6">
-                <div className="flex items-center justify-between">
+              <div className="relative overflow-hidden px-8 py-6">
+                <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/UI-picture/UI-knowledge2.jpg')" }} />
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/85 to-teal-600/85" />
+                <div className="relative z-10 flex items-center justify-between">
                   <div className="flex-1">
                     <div className="text-white/80 text-sm mb-2 flex items-center gap-2">
                       <Network size={16} />
@@ -143,7 +148,7 @@ export function SystemsThinkingPage() {
                   <motion.div
                     animate={{ rotate: [0, -10, 10, -10, 0] }}
                     transition={{ duration: 0.5, delay: 0.2 }}
-                    className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center ml-4"
+                    className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center ml-4"
                   >
                     <Network size={32} className="text-white" />
                   </motion.div>
@@ -209,33 +214,37 @@ export function SystemsThinkingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="mt-8 p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl border border-emerald-200 dark:border-emerald-800"
+            className="mt-8 relative overflow-hidden rounded-2xl border border-emerald-200 dark:border-emerald-800"
           >
-            <h3 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-              <Network size={20} className="text-emerald-500" />
-              系统思维要点
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-600 dark:text-gray-400">
-              <div className="flex items-start gap-2">
-                <span className="text-emerald-500 mt-1">•</span>
-                <span>各学科知识相互关联，形成整体认知</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-emerald-500 mt-1">•</span>
-                <span>理解复杂系统的动态变化和相互作用</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-emerald-500 mt-1">•</span>
-                <span>多角度思考问题，避免单一视角</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-emerald-500 mt-1">•</span>
-                <span>关注长远影响和系统性后果</span>
+            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/UI-picture/UI-knowledge3.jpg')" }} />
+            <div className="relative z-10 p-6 bg-white/75 dark:bg-gray-800/80 backdrop-blur-md">
+              <h3 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                <Network size={20} className="text-emerald-500" />
+                系统思维要点
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-600 dark:text-gray-400">
+                <div className="flex items-start gap-2">
+                  <span className="text-emerald-500 mt-1">•</span>
+                  <span>各学科知识相互关联，形成整体认知</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-emerald-500 mt-1">•</span>
+                  <span>理解复杂系统的动态变化和相互作用</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-emerald-500 mt-1">•</span>
+                  <span>多角度思考问题，避免单一视角</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-emerald-500 mt-1">•</span>
+                  <span>关注长远影响和系统性后果</span>
+                </div>
               </div>
             </div>
           </motion.div>
         </div>
       </main>
+      </div>
     </div>
   );
 }

@@ -25,7 +25,7 @@ import {
   analyzeGuessHistory,
   type GuessResult
 } from '@/utils/guessNumber';
-import { saveGuessNumberRecord } from '@/utils/storage';
+import { saveGuessNumberRecord, getGuessNumberRecords } from '@/utils/storage';
 import { updateDailyTaskProgress } from '@/utils/taskManager';
 
 export function GuessNumberPage() {
@@ -53,11 +53,14 @@ export function GuessNumberPage() {
   };
 
   useEffect(() => {
-    // 加载历史最佳成绩
+    // 加载历史最佳成绩和总挑战局数
     const savedBest = localStorage.getItem('guessNumberBestScore');
     if (savedBest) {
       setBestScore(parseInt(savedBest));
     }
+    // 从 storage 加载总游戏记录数
+    const records = getGuessNumberRecords();
+    setTotalGames(records.length);
   }, []);
 
   const handleSubmitGuess = () => {

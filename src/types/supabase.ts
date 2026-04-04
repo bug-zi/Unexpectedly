@@ -341,6 +341,41 @@ export interface Database {
           created_at?: string
         }
       }
+      feedback: {
+        Row: {
+          id: string
+          user_id: string | null
+          content: string
+          page_url: string | null
+          user_agent: string | null
+          contact_email: string | null
+          status: 'open' | 'reviewed' | 'resolved' | 'closed'
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          content: string
+          page_url?: string | null
+          user_agent?: string | null
+          contact_email?: string | null
+          status?: 'open' | 'reviewed' | 'resolved' | 'closed'
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          content?: string
+          page_url?: string | null
+          user_agent?: string | null
+          contact_email?: string | null
+          status?: 'open' | 'reviewed' | 'resolved' | 'closed'
+          created_at?: string
+          updated_at?: string
+        }
+      }
       comments: {
         Row: {
           id: string

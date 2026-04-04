@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gamepad2, Sparkles } from 'lucide-react';
+import { Gamepad2, Sparkles, Dices, Loader2, Lightbulb } from 'lucide-react';
 import {
   getRandomWords,
   checkSpecialCombination,
@@ -104,7 +104,7 @@ export function SlotMachine({ onSpinComplete }: SlotMachineProps) {
         {[0, 1, 2].map((index) => (
           <motion.div
             key={index}
-            className="relative w-28 h-36 md:w-40 md:h-48 bg-white dark:bg-gray-700 rounded-2xl shadow-lg flex items-center justify-center overflow-hidden border-4 border-blue-200 dark:border-blue-800"
+            className="relative w-28 h-36 md:w-40 md:h-48 bg-blue-100/40 dark:bg-blue-900/30 backdrop-blur-md rounded-2xl shadow-lg flex items-center justify-center overflow-hidden border-4 border-blue-300/50 dark:border-blue-700/50"
           >
             <AnimatePresence mode="wait">
               {isSpinning ? (
@@ -201,18 +201,12 @@ export function SlotMachine({ onSpinComplete }: SlotMachineProps) {
         >
           {isSpinning ? (
             <>
-              <motion.span
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                className="mr-2 inline-block"
-              >
-                🎰
-              </motion.span>
+              <Loader2 size={22} className="mr-2 inline-block animate-spin text-white/70" />
               抽取中...
             </>
           ) : (
             <>
-              <span className="mr-2">🎰</span>
+              <Dices size={22} className="mr-2 inline-block text-white/70" />
               抽取灵感
             </>
           )}
@@ -227,7 +221,7 @@ export function SlotMachine({ onSpinComplete }: SlotMachineProps) {
           className="mt-8 text-center"
         >
           <p className="text-gray-600 dark:text-gray-400 mb-2">
-            💭 用这三个词语写一段话
+            <Lightbulb size={16} className="inline mr-1 text-white/70" /> 用这三个词语写一段话
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-500">
             可以是故事、感悟或联想...

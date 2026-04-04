@@ -163,8 +163,8 @@ export function NotificationSettingsPage() {
       <div className="hidden dark:block fixed inset-0" style={{ background: 'linear-gradient(to bottom, rgba(15,23,41,0.75) 0%, rgba(15,23,41,0.55) 20%, rgba(15,23,41,0.4) 50%, rgba(15,23,41,0.6) 100%)' }} />
       {/* 导航栏 */}
       <nav className="fixed top-0 left-0 right-0 z-50 shadow-none">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+        <div className="px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center h-16">
             <button
               onClick={() => navigate('/')}
               className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
@@ -172,13 +172,6 @@ export function NotificationSettingsPage() {
               <ArrowLeft size={20} />
               <span>返回</span>
             </button>
-            <div className="flex items-center gap-2">
-              <Bell size={24} className="text-purple-500" />
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                每日提醒
-              </h1>
-            </div>
-            <div className="w-16" />
           </div>
         </div>
       </nav>
@@ -239,7 +232,7 @@ export function NotificationSettingsPage() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-6"
           >
-            <Card className="p-6">
+            <Card variant="glass" className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
@@ -390,7 +383,7 @@ export function NotificationSettingsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <Card className="p-6">
+            <Card variant="glass" className="p-6">
               <div className="flex items-center gap-3 mb-6">
                 {isEnabled ? (
                   <Bell className="text-purple-500" size={24} />
@@ -417,7 +410,7 @@ export function NotificationSettingsPage() {
                     type="time"
                     value={timeInput}
                     onChange={(e) => setTimeInput(e.target.value)}
-                    className="flex-1 px-4 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:border-primary-500 focus:outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                    className="flex-1 px-4 py-2 border-2 border-gray-200/50 dark:border-gray-700/50 rounded-lg focus:border-primary-500 focus:outline-none bg-white/25 dark:bg-gray-800/25 backdrop-blur-sm text-gray-900 dark:text-white"
                     disabled={!isEnabled}
                   />
                   {isEnabled && (
@@ -496,7 +489,7 @@ export function NotificationSettingsPage() {
             transition={{ delay: 0.2 }}
             className="mt-6"
           >
-            <Card className="p-6">
+            <Card variant="glass" className="p-6">
               <h4 className="font-semibold text-gray-900 dark:text-white mb-3">
                 💡 使用说明
               </h4>
@@ -518,7 +511,7 @@ export function NotificationSettingsPage() {
               transition={{ delay: 0.3 }}
               className="mt-6"
             >
-              <Card className="p-6">
+              <Card variant="glass" className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="font-semibold text-gray-900 dark:text-white">
                     🔍 调试工具
