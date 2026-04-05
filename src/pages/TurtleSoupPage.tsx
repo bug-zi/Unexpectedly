@@ -3,7 +3,7 @@
  * 玩家通过提问是/否问题来推理出故事的真相
  */
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Lightbulb, Eye, EyeOff, Shuffle, CheckCircle2, AlertCircle, CircleDashed, Send, MessageSquare, Sparkles, HelpCircle } from 'lucide-react';
@@ -13,6 +13,7 @@ import { Icon } from '@/components/ui/Icon';
 import { answerTurtleSoupQuestion, isValidYesNoQuestion, getSuggestedQuestions, type QAPair } from '@/utils/turtleSoupAI';
 import { saveTurtleSoupRecord } from '@/utils/storage';
 import { updateDailyTaskProgress } from '@/utils/taskManager';
+import { useTurtleSoupAI } from '@/hooks/useTurtleSoupAI';
 
 export function TurtleSoupPage() {
   const navigate = useNavigate();
@@ -28,6 +29,20 @@ export function TurtleSoupPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const qaListRef = useRef<HTMLDivElement>(null);
 
+  // AI Hook - 流式回调实时更新最后一条 QA
+  const onStreaming = useCallback((text: string) => {
+    setQaHistory(prev => {
+      const updated = [...prev];
+      if (updated.length > 0) {
+        const last = updated[updated.length - 1];
+        updated[updated.length - 1] = { ...last, answerText: text };
+      }
+      return updated;
+    });
+  }, []);
+
+  const { askQuestion: askLLM, hasAI } = useTurtleSoupAI({ onStreaming });
+
   const handleNewGame = () => {
     let newPuzzle = getRandomPuzzle();
     // 确保不会随机到同一个谜题
@@ -42,7 +57,7 @@ export function TurtleSoupPage() {
     setCurrentQuestion('');
   };
 
-  const handleSubmitQuestion = () => {
+  const handleSubmitQuestion = async () => {
     const question = currentQuestion.trim();
     if (!question) return;
 
@@ -50,7 +65,6 @@ export function TurtleSoupPage() {
 
     // 检查是否是有效的yes/no问题
     if (!isValidYesNoQuestion(question)) {
-      // 添加一个"无关"回答，提示用户
       const irrelevantAnswer: QAPair = {
         question,
         answer: 'irrelevant',
@@ -63,13 +77,43 @@ export function TurtleSoupPage() {
       return;
     }
 
-    // 模拟AI思考延迟
-    setTimeout(() => {
+    if (hasAI) {
+      // AI 模式：先添加占位条目，流式更新
+      const placeholder: QAPair = {
+        question,
+        answer: 'irrelevant',
+        answerText: '',
+        timestamp: new Date(),
+      };
+      setQaHistory(prev => [...prev, placeholder]);
+      setCurrentQuestion('');
+
+      const result = await askLLM(question, currentPuzzle.scenario, currentPuzzle.truth, qaHistory);
+
+      if (result) {
+        // AI 成功，用最终结果替换占位条目
+        setQaHistory(prev => {
+          const updated = [...prev];
+          updated[updated.length - 1] = result;
+          return updated;
+        });
+      } else {
+        // AI 失败，回退到规则引擎
+        const fallback = answerTurtleSoupQuestion(question, currentPuzzle.scenario, currentPuzzle.truth);
+        setQaHistory(prev => {
+          const updated = [...prev];
+          updated[updated.length - 1] = fallback;
+          return updated;
+        });
+      }
+    } else {
+      // 无 AI 配置，使用规则引擎
       const answer = answerTurtleSoupQuestion(question, currentPuzzle.scenario, currentPuzzle.truth);
       setQaHistory(prev => [...prev, answer]);
       setCurrentQuestion('');
-      setIsSubmitting(false);
-    }, 500);
+    }
+
+    setIsSubmitting(false);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -361,6 +405,9 @@ export function TurtleSoupPage() {
                             }`}>
                               <p className="text-gray-800 dark:text-gray-200 font-medium">
                                 {qa.answerText}
+                                {isSubmitting && index === qaHistory.length - 1 && !qa.answerText && (
+                                  <span className="inline-block w-2 h-4 bg-gray-400 dark:bg-gray-500 animate-pulse ml-1 align-middle" />
+                                )}
                               </p>
                             </div>
                           </div>
@@ -378,7 +425,7 @@ export function TurtleSoupPage() {
                     value={currentQuestion}
                     onChange={(e) => setCurrentQuestion(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder='用"是/否"的形式提问，例如："死者是意外死亡吗？"、"凶手是精神病患者或有认知障碍吗？"、"案发地点是封闭空间（密室）吗？"'
+                    placeholder='用是/否形式的句子提问'
                     className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-red-500 dark:focus:border-red-400 focus:outline-none transition-colors text-gray-900 dark:text-gray-100"
                     disabled={isSubmitting || showTruth}
                   />

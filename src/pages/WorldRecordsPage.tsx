@@ -3,13 +3,24 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Trophy, ChevronLeft, ChevronRight } from 'lucide-react';
 import { worldRecordsData } from '@/constants/knowledgePopularize';
 
+// Fisher-Yates 洗牌算法
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export function WorldRecordsPage() {
   const navigate = useNavigate();
+  const [shuffledData] = useState(() => shuffleArray(worldRecordsData));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [viewedItems, setViewedItems] = useState<string[]>([]);
 
@@ -18,23 +29,24 @@ export function WorldRecordsPage() {
     const viewed = JSON.parse(localStorage.getItem('knowledgeViewed') || '[]');
     setViewedItems(viewed);
 
-    // 标记当前为已查看
-    if (!viewed.includes(`world-records-${currentIndex}`)) {
-      const newViewed = [...viewed, `world-records-${currentIndex}`];
+    // 标记当前为已查看（用标题作为唯一标识）
+    const itemKey = `world-records-${shuffledData[currentIndex].title}`;
+    if (!viewed.includes(itemKey)) {
+      const newViewed = [...viewed, itemKey];
       localStorage.setItem('knowledgeViewed', JSON.stringify(newViewed));
       setViewedItems(newViewed);
     }
-  }, [currentIndex]);
+  }, [currentIndex, shuffledData]);
 
-  const currentItem = worldRecordsData[currentIndex];
-  const isViewed = viewedItems.includes(`world-records-${currentIndex}`);
+  const currentItem = shuffledData[currentIndex];
+  const isViewed = viewedItems.includes(`world-records-${currentItem.title}`);
 
   const handlePrevious = () => {
-    setCurrentIndex((prev) => (prev - 1 + worldRecordsData.length) % worldRecordsData.length);
+    setCurrentIndex((prev) => (prev - 1 + shuffledData.length) % shuffledData.length);
   };
 
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % worldRecordsData.length);
+    setCurrentIndex((prev) => (prev + 1) % shuffledData.length);
   };
 
   return (
@@ -66,7 +78,7 @@ export function WorldRecordsPage() {
             </div>
 
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              {currentIndex + 1} / {worldRecordsData.length}
+              {currentIndex + 1} / {shuffledData.length}
             </div>
           </div>
         </div>
@@ -127,23 +139,6 @@ export function WorldRecordsPage() {
                   上一个
                 </motion.button>
 
-                {/* 进度指示器 */}
-                <div className="flex gap-2">
-                  {worldRecordsData.map((_, index) => (
-                    <div
-                      key={index}
-                      className={`h-2 rounded-full transition-all cursor-pointer ${
-                        index === currentIndex
-                          ? 'w-8 bg-green-500'
-                          : index < currentIndex
-                          ? 'w-2 bg-green-300 dark:bg-green-700'
-                          : 'w-2 bg-gray-300 dark:bg-gray-600'
-                      }`}
-                      onClick={() => setCurrentIndex(index)}
-                    />
-                  ))}
-                </div>
-
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -156,21 +151,6 @@ export function WorldRecordsPage() {
               </div>
             </motion.div>
           </AnimatePresence>
-
-          {/* 提示 */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mt-8 relative overflow-hidden rounded-2xl border border-green-200 dark:border-green-800 text-center"
-          >
-            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/icon-picture/icon-knowledge1.jpg')" }} />
-            <div className="relative z-10 p-6 bg-white/75 dark:bg-gray-800/80 backdrop-blur-md">
-              <p className="text-gray-600 dark:text-gray-400">
-                💡 点击进度点可以直接跳转到对应的知识点
-              </p>
-            </div>
-          </motion.div>
         </div>
       </main>
       </div>

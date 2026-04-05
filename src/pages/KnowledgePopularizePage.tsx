@@ -8,9 +8,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, BookOpen, BarChart3, Trophy, Network, HeartPulse, X, MessageCircle, Sparkles } from 'lucide-react';
 import { knowledgeModules } from '@/constants/knowledgePopularize';
 import { GiWorld } from 'react-icons/gi';
+import { useLLMConfig } from '@/hooks/useLLMConfig';
 
 export function KnowledgePopularizePage() {
   const navigate = useNavigate();
+  const { isConfigured: isAIConfigured } = useLLMConfig();
   const [showInstructions, setShowInstructions] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [knowledgeStats, setKnowledgeStats] = useState({
@@ -81,7 +83,7 @@ export function KnowledgePopularizePage() {
       {/* 导航栏 */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-transparent border-b border-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="relative flex items-center justify-between h-16">
             {/* 左侧：返回按钮 */}
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -94,7 +96,7 @@ export function KnowledgePopularizePage() {
             </motion.button>
 
             {/* 中间：标题和图标 */}
-            <div className="flex items-center gap-3">
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-3">
               <motion.div
                 whileHover={{ rotate: 360 }}
                 transition={{ duration: 0.6 }}
@@ -145,16 +147,6 @@ export function KnowledgePopularizePage() {
                 <span className="hidden md:inline">学习统计</span>
               </motion.button>
 
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate('/knowledge-popularize/ai-ask')}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-gradient-to-r from-green-400 to-emerald-400 hover:from-green-500 hover:to-emerald-500 text-white rounded-lg transition-all shadow-sm hover:shadow-md"
-                title="AI 智能问答"
-              >
-                <MessageCircle size={18} />
-                <span className="hidden md:inline">AI 问答</span>
-              </motion.button>
             </div>
           </div>
         </div>
@@ -245,38 +237,50 @@ export function KnowledgePopularizePage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => navigate('/knowledge-popularize/ai-ask')}
-            className="relative bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 dark:from-green-600 dark:via-emerald-600 dark:to-teal-600 rounded-2xl shadow-xl p-5 cursor-pointer overflow-hidden group"
+            whileHover={isAIConfigured ? { scale: 1.02 } : undefined}
+            whileTap={isAIConfigured ? { scale: 0.98 } : undefined}
+            onClick={isAIConfigured ? () => navigate('/knowledge-popularize/ai-ask') : undefined}
+            className={`relative rounded-2xl shadow-xl p-5 overflow-hidden group ${
+              isAIConfigured
+                ? 'bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 dark:from-green-600 dark:via-emerald-600 dark:to-teal-600 cursor-pointer'
+                : 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed'
+            }`}
           >
             {/* 背景图片 */}
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: 'url(/icon-picture/icon-knowledge1.jpg)' }}
-            />
+            {isAIConfigured && (
+              <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: 'url(/icon-picture/icon-knowledge1.jpg)' }}
+              />
+            )}
             {/* 渐变遮罩层 */}
-            <div className="absolute inset-0 bg-gradient-to-br from-green-200/85 via-emerald-200/80 to-teal-200/85 dark:from-green-600/90 dark:via-emerald-600/85 dark:to-teal-600/90" />
+            {isAIConfigured ? (
+              <div className="absolute inset-0 bg-gradient-to-br from-green-200/85 via-emerald-200/80 to-teal-200/85 dark:from-green-600/90 dark:via-emerald-600/85 dark:to-teal-600/90" />
+            ) : (
+              <div className="absolute inset-0 bg-gray-200/80 dark:bg-gray-700/80" />
+            )}
 
             {/* 内容 */}
             <div className="relative flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                  <MessageCircle size={24} className="text-white" />
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center backdrop-blur-sm ${
+                  isAIConfigured ? 'bg-white/20' : 'bg-white/20'
+                }`}>
+                  <MessageCircle size={24} className={isAIConfigured ? 'text-white' : 'text-gray-500 dark:text-gray-400'} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white">
+                  <h3 className={`text-xl font-bold ${isAIConfigured ? 'text-white' : 'text-gray-500 dark:text-gray-400'}`}>
                     AI 智能问答
                   </h3>
-                  <p className="text-white/80 text-sm">
-                    有任何问题？直接问我，AI为你详细解答！
+                  <p className={`text-sm ${isAIConfigured ? 'text-white/80' : 'text-gray-400 dark:text-gray-500'}`}>
+                    {isAIConfigured ? '有任何问题？直接问我，AI为你详细解答！' : '请配置AI大模型后再来访问'}
                   </p>
                 </div>
               </div>
 
               <div className="hidden md:block">
                 <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                  <Sparkles size={24} className="text-white" />
+                  <Sparkles size={24} className={isAIConfigured ? 'text-white' : 'text-gray-500 dark:text-gray-400'} />
                 </div>
               </div>
             </div>

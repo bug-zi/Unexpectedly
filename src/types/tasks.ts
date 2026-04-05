@@ -36,7 +36,7 @@ export const DAILY_TASKS_CONFIG: Omit<DailyTask, 'current' | 'completed'>[] = [
   {
     id: 'daily-reasoning',
     title: '逻辑推理',
-    description: '进行两次逻辑推理',
+    description: '完成两次逻辑推理',
     type: 'reasoning',
     target: 2,
   },

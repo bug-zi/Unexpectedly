@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { getAnswers } from '@/utils/storage';
 import { useDebateStore } from '@/stores/debateStore';
+import { useLLMConfig } from '@/hooks/useLLMConfig';
 
 // 自定义动画
 const customEasing = {
@@ -27,8 +28,10 @@ const customEasing = {
 
 export function QuestionThinkingHubPage() {
   const navigate = useNavigate();
+  const { isConfigured: isAIConfigured } = useLLMConfig();
   const [showInstructions, setShowInstructions] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [showAIRequiredTip, setShowAIRequiredTip] = useState(false);
 
   // 思考统计数据
   const debateSessions = useDebateStore(state => state.sessions);
@@ -437,14 +440,22 @@ export function QuestionThinkingHubPage() {
               transition={{ delay: 0.3, ease: customEasing.unexpected }}
             >
               <motion.button
-                whileHover={{
+                whileHover={isAIConfigured ? {
                   scale: 1.02,
                   y: -8,
                   boxShadow: '0 25px 50px -12px rgba(234, 179, 8, 0.25)',
+                } : {}}
+                whileTap={isAIConfigured ? { scale: 0.98 } : {}}
+                onClick={() => {
+                  if (!isAIConfigured) {
+                    setShowAIRequiredTip(true);
+                  } else {
+                    navigate('/debate');
+                  }
                 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => navigate('/debate')}
-                className="group relative w-full rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-yellow-200 dark:border-yellow-800 hover:border-amber-400 dark:hover:border-amber-600 p-8 text-left overflow-hidden cursor-pointer"
+                className={`group relative w-full rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-yellow-200 dark:border-yellow-800 hover:border-amber-400 dark:hover:border-amber-600 p-8 text-left overflow-hidden ${
+                  isAIConfigured ? 'cursor-pointer' : 'cursor-not-allowed opacity-50 grayscale'
+                }`}
                 style={{
                   backgroundImage: 'url(/UI-picture/UI-question2.jpg)',
                   backgroundSize: 'cover',
@@ -455,6 +466,15 @@ export function QuestionThinkingHubPage() {
                 <div className="absolute inset-0 bg-gradient-to-br from-amber-50/80 via-yellow-50/70 to-orange-50/75 dark:from-gray-900/85 dark:via-amber-900/80 dark:to-gray-800/85" />
                 {/* 悬停时的主题色覆盖 */}
                 <div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-orange-500 opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+
+                {/* 需要AI标记 */}
+                {!isAIConfigured && (
+                  <div className="absolute top-4 right-4 z-10">
+                    <div className="px-3 py-1 bg-gray-500 text-white text-xs font-bold rounded-full shadow-lg">
+                      需要AI配置
+                    </div>
+                  </div>
+                )}
 
                 {/* 脉波效果 */}
                 <div className="absolute top-6 right-6">
@@ -482,7 +502,7 @@ export function QuestionThinkingHubPage() {
                     与AI辩手辩论，锻炼思辨能力
                   </p>
                   <div className="flex items-center text-yellow-600 dark:text-yellow-400 font-medium">
-                    开始辩论
+                    {isAIConfigured ? '开始辩论' : '请配置AI大模型后再来访问'}
                   </div>
                 </div>
               </motion.button>
@@ -490,6 +510,72 @@ export function QuestionThinkingHubPage() {
           </div>
         </div>
       </main>
+
+      {/* AI配置提示弹窗 */}
+      <AnimatePresence>
+        {showAIRequiredTip && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowAIRequiredTip(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+              className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-md w-full border-2 border-gray-200 dark:border-gray-700"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="bg-gradient-to-r from-gray-500 to-gray-600 px-6 py-4 rounded-t-3xl flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Swords size={24} className="text-white" />
+                  <h3 className="text-xl font-bold text-white">需要AI配置</h3>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowAIRequiredTip(false)}
+                  className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
+                >
+                  <X size={24} />
+                </motion.button>
+              </div>
+              <div className="p-6 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                  <Swords size={32} className="text-gray-400" />
+                </div>
+                <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  请配置AI大模型后再来访问
+                </h4>
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  此功能需要AI大模型支持，请先在个人中心配置您的AI大模型
+                </p>
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={() => setShowAIRequiredTip(false)}
+                    className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    稍后再说
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowAIRequiredTip(false);
+                      navigate('/profile');
+                    }}
+                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-gray-500 to-gray-600 text-white hover:from-gray-600 hover:to-gray-700 transition-colors"
+                  >
+                    去配置
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       </div>{/* 内容层结束 */}
     </div>
   );

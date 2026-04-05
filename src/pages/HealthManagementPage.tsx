@@ -8,8 +8,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, HeartPulse, Activity, Apple, Moon, Droplets } from 'lucide-react';
 import { healthKnowledgeData } from '@/constants/knowledgePopularize';
 
+// Fisher-Yates 洗牌算法
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export function HealthManagementPage() {
   const navigate = useNavigate();
+  const [shuffledData] = useState(() => shuffleArray(healthKnowledgeData));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [viewedItems, setViewedItems] = useState<string[]>([]);
 
@@ -18,23 +29,24 @@ export function HealthManagementPage() {
     const viewed = JSON.parse(localStorage.getItem('knowledgeViewed') || '[]');
     setViewedItems(viewed);
 
-    // 标记当前为已查看
-    if (!viewed.includes(`health-management-${currentIndex}`)) {
-      const newViewed = [...viewed, `health-management-${currentIndex}`];
+    // 标记当前为已查看（用标题作为唯一标识）
+    const itemKey = `health-management-${shuffledData[currentIndex].title}`;
+    if (!viewed.includes(itemKey)) {
+      const newViewed = [...viewed, itemKey];
       localStorage.setItem('knowledgeViewed', JSON.stringify(newViewed));
       setViewedItems(newViewed);
     }
-  }, [currentIndex]);
+  }, [currentIndex, shuffledData]);
 
-  const currentItem = healthKnowledgeData[currentIndex];
-  const isViewed = viewedItems.includes(`health-management-${currentIndex}`);
+  const currentItem = shuffledData[currentIndex];
+  const isViewed = viewedItems.includes(`health-management-${currentItem.title}`);
 
   const handlePrevious = () => {
-    setCurrentIndex((prev) => (prev - 1 + healthKnowledgeData.length) % healthKnowledgeData.length);
+    setCurrentIndex((prev) => (prev - 1 + shuffledData.length) % shuffledData.length);
   };
 
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % healthKnowledgeData.length);
+    setCurrentIndex((prev) => (prev + 1) % shuffledData.length);
   };
 
   const getHealthIcon = (title: string) => {
@@ -74,7 +86,7 @@ export function HealthManagementPage() {
             </div>
 
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              {currentIndex + 1} / {healthKnowledgeData.length}
+              {currentIndex + 1} / {shuffledData.length}
             </div>
           </div>
         </div>
@@ -140,23 +152,6 @@ export function HealthManagementPage() {
                   上一个
                 </motion.button>
 
-                {/* 进度指示器 */}
-                <div className="flex gap-2">
-                  {healthKnowledgeData.map((_, index) => (
-                    <div
-                      key={index}
-                      className={`h-2 rounded-full transition-all cursor-pointer ${
-                        index === currentIndex
-                          ? 'w-8 bg-teal-500'
-                          : index < currentIndex
-                          ? 'w-2 bg-teal-300 dark:bg-teal-700'
-                          : 'w-2 bg-gray-300 dark:bg-gray-600'
-                      }`}
-                      onClick={() => setCurrentIndex(index)}
-                    />
-                  ))}
-                </div>
-
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -200,41 +195,6 @@ export function HealthManagementPage() {
                   <span>心理健康同样重要，必要时寻求专业帮助</span>
                 </div>
               </div>
-            </div>
-          </motion.div>
-
-          {/* 快速跳转 */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="mt-6 relative overflow-hidden rounded-2xl border border-teal-200 dark:border-teal-800"
-          >
-            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/icon-picture/icon-knowledge1.jpg')" }} />
-            <div className="relative z-10 p-6 bg-white/75 dark:bg-gray-800/80 backdrop-blur-md">
-              <h3 className="font-bold text-gray-900 dark:text-white mb-4">快速跳转</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {[
-                { index: 0, label: '睡眠' },
-                { index: 1, label: '运动' },
-                { index: 2, label: '饮食' },
-                { index: 3, label: '水分' },
-                { index: 4, label: '心血管' },
-                { index: 5, label: '心理' },
-                { index: 6, label: '防晒' },
-                { index: 7, label: '口腔' }
-              ].map((item) => (
-                <motion.button
-                  key={item.index}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setCurrentIndex(item.index)}
-                  className="px-4 py-2 bg-teal-50 dark:bg-teal-900/20 hover:bg-teal-100 dark:hover:bg-teal-900/40 text-teal-700 dark:text-teal-400 rounded-lg text-sm font-medium transition-all"
-                >
-                  {item.label}
-                </motion.button>
-              ))}
-            </div>
             </div>
           </motion.div>
         </div>

@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, MessageCircle, Send, Loader2, Sparkles, User, Bot, Settings } from 'lucide-react';
 import { useRoundtableStore } from '@/stores/roundtableStore';
+import { useAuth } from '@/hooks/useAuth';
 import { streamChat } from '@/services/llmService';
 
 interface Message {
@@ -33,6 +34,8 @@ const SYSTEM_PROMPT = `你是一个博学多才的知识科普助手，你的名
 export function KnowledgeAIAskPage() {
   const navigate = useNavigate();
   const llmConfig = useRoundtableStore(state => state.llmConfig);
+  const { user } = useAuth();
+  const userAvatarUrl = user?.user_metadata?.avatar_url;
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -168,21 +171,6 @@ export function KnowledgeAIAskPage() {
                 AI 问答
               </h1>
             </div>
-
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => navigate('/roundtable/setup')}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                llmConfig?.apiKey
-                  ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20'
-                  : 'text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20'
-              }`}
-              title={llmConfig?.apiKey ? `当前模型：${llmConfig.model || '默认'}` : '未配置AI模型，点击前往配置'}
-            >
-              <Settings size={16} />
-              <span className="hidden sm:inline">{llmConfig?.apiKey ? '已连接' : '未配置'}</span>
-            </motion.button>
           </div>
         </div>
       </nav>
@@ -263,24 +251,30 @@ export function KnowledgeAIAskPage() {
                 >
                   <div className={`flex gap-3 max-w-[80%] ${message.role === 'user' ? 'flex-row-reverse' : ''}`}>
                     {/* 头像 */}
-                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                      message.role === 'user'
-                        ? 'bg-gradient-to-br from-blue-500 to-cyan-500'
-                        : 'bg-gradient-to-br from-green-500 to-emerald-500'
-                    }`}>
-                      {message.role === 'user' ? <User size={20} className="text-white" /> : <Bot size={20} className="text-white" />}
-                    </div>
+                    {message.role === 'user' ? (
+                      userAvatarUrl ? (
+                        <img src={userAvatarUrl} alt="用户头像" className="flex-shrink-0 w-10 h-10 rounded-full object-cover" />
+                      ) : (
+                        <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-green-400 to-emerald-500">
+                          <User size={20} className="text-white" />
+                        </div>
+                      )
+                    ) : (
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-green-500 to-emerald-500">
+                        <Bot size={20} className="text-white" />
+                      </div>
+                    )}
 
                     {/* 消息内容 */}
                     <div className={`relative px-4 py-3 rounded-2xl overflow-hidden ${
                       message.role === 'user'
-                        ? 'text-white border-2 border-blue-300/50 dark:border-blue-600/50'
+                        ? 'text-white border-2 border-green-300/50 dark:border-green-600/50'
                         : 'text-gray-800 dark:text-gray-200 border-2 border-green-200 dark:border-green-800'
                     }`}>
                       {message.role === 'user' ? (
                         <>
                           <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/UI-picture/UI-knowledge2.jpg')" }} />
-                          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/85 to-cyan-500/85 dark:from-blue-600/85 dark:to-cyan-600/85" />
+                          <div className="absolute inset-0 bg-gradient-to-br from-green-400/85 to-emerald-400/85 dark:from-green-500/85 dark:to-emerald-500/85" />
                         </>
                       ) : (
                         <>

@@ -176,8 +176,10 @@ export function RoundtableSetupPage() {
       </main>
 
       {/* 底部操作栏 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg border-t border-amber-200 dark:border-amber-800 p-4">
-        <div className="max-w-3xl mx-auto">
+      <div className="fixed bottom-0 left-0 right-0 border-t border-amber-200 dark:border-amber-800 p-4 overflow-hidden">
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/icon-picture/icon-question1.jpg')" }} />
+        <div className="absolute inset-0 bg-amber-50/90 dark:bg-amber-900/90 backdrop-blur-lg" />
+        <div className="relative max-w-3xl mx-auto">
           <div className="flex items-center gap-3 mb-3">
             <Users size={16} className="text-gray-500" />
             <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -201,7 +203,7 @@ export function RoundtableSetupPage() {
             onClick={handleStart}
             disabled={selectedIds.length < 2}
             fullWidth
-            className="bg-amber-500 hover:bg-amber-600 text-white border-0"
+            className="bg-amber-400 hover:bg-amber-500 disabled:bg-amber-200 dark:disabled:bg-amber-800/50 text-white disabled:text-amber-600 dark:disabled:text-amber-300 border-0"
           >
             {selectedIds.length < 2
               ? `请至少选择 2 位大咖 (${selectedIds.length}/2)`

@@ -9,6 +9,7 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { useLater } from '@/hooks/useLater';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import { useLLMConfig } from '@/hooks/useLLMConfig';
 
 interface QuestionCardProps {
   question: Question;
@@ -27,6 +28,7 @@ export function QuestionCard({
 }: QuestionCardProps) {
   const { isFavorited, addFavorite, removeFavorite } = useFavorites();
   const { isLater, addToLater, removeFromLater } = useLater();
+  const { isConfigured: isAIConfigured } = useLLMConfig();
   const [favoriteAnimating, setFavoriteAnimating] = useState(false);
   const [laterAnimating, setLaterAnimating] = useState(false);
   const navigate = useNavigate();
@@ -270,10 +272,23 @@ export function QuestionCard({
         </motion.button>
         {onRoundtable && (
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={onRoundtable}
-            className="relative overflow-hidden w-full py-2.5 px-4 rounded-lg font-medium transition-all"
+            whileHover={isAIConfigured ? { scale: 1.02 } : {}}
+            whileTap={isAIConfigured ? { scale: 0.98 } : {}}
+            onClick={() => {
+              if (!isAIConfigured) {
+                toast.warning('请配置AI大模型后再来访问', {
+                  position: 'top-center',
+                  autoClose: 2500,
+                  onClick: () => navigate('/profile'),
+                });
+                return;
+              }
+              onRoundtable();
+            }}
+            className={`relative overflow-hidden w-full py-2.5 px-4 rounded-lg font-medium transition-all ${
+              !isAIConfigured ? 'opacity-50 grayscale cursor-not-allowed' : ''
+            }`}
+            title={!isAIConfigured ? '请配置AI大模型后再来访问' : '大咖圆桌'}
           >
             <div
               className="absolute inset-0 bg-cover bg-center"
@@ -282,7 +297,7 @@ export function QuestionCard({
             <div className="absolute inset-0 bg-white/60 dark:bg-gray-800/70" />
             <span className="relative z-10 flex items-center justify-center text-black dark:text-amber-300">
               <Users size={16} className="mr-1" />
-              大咖圆桌
+              {isAIConfigured ? '大咖圆桌' : '需要AI配置'}
             </span>
           </motion.button>
         )}

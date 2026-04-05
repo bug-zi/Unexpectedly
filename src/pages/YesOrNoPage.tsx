@@ -3,7 +3,7 @@
  * AI出题，玩家通过是/否问题猜出AI心中的词语
  */
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -14,15 +14,18 @@ import {
   Sparkles,
   HelpCircle,
   RotateCcw,
-  Trophy
+  Trophy,
+  Play
 } from 'lucide-react';
-import { getRandomWord, analyzeYesNoQuestion, isValidYesOrNoQuestion, getCategories, getRandomWordFromCategory } from '@/constants/yesOrNoWords';
+import { getRandomWord, analyzeYesNoQuestion, isValidYesOrNoQuestion } from '@/constants/yesOrNoWords';
 import { saveYesOrNoRecord, getYesOrNoRecords } from '@/utils/storage';
 import { updateDailyTaskProgress } from '@/utils/taskManager';
+import { useYesNoAI } from '@/hooks/useYesNoAI';
 
 interface QAPair {
   question: string;
   answer: 'yes' | 'no';
+  answerText?: string;
   timestamp: Date;
 }
 
@@ -34,48 +37,37 @@ export function YesOrNoPage() {
   const [currentQuestion, setCurrentQuestion] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [isGiveUp, setIsGiveUp] = useState(false);
   const [questionsAsked, setQuestionsAsked] = useState(0);
   const [totalGames, setTotalGames] = useState(0);
   const [showInstructions, setShowInstructions] = useState(false);
-  const [showGuessInput, setShowGuessInput] = useState(false);
-  const [userGuess, setUserGuess] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [gameStarted, setGameStarted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const guessInputRef = useRef<HTMLInputElement>(null);
   const qaListRef = useRef<HTMLDivElement>(null);
 
-  const startNewGame = (specificCategory?: string) => {
-    let word: string;
-    let newCategory: string;
-
-    if (specificCategory) {
-      // 如果指定了类别，从该类别中获取词语
-      const wordFromCategory = getRandomWordFromCategory(specificCategory);
-      if (!wordFromCategory) {
-        // 如果类别无效，回退到随机模式
-        const random = getRandomWord();
-        word = random.word;
-        newCategory = random.category;
-      } else {
-        word = wordFromCategory;
-        newCategory = specificCategory;
+  // AI Hook - 流式回调实时更新最后一条 QA 的 answerText
+  const onStreaming = useCallback((text: string) => {
+    setQaHistory(prev => {
+      const updated = [...prev];
+      if (updated.length > 0) {
+        const last = updated[updated.length - 1];
+        updated[updated.length - 1] = { ...last, answerText: text };
       }
-    } else {
-      // 随机模式
-      const random = getRandomWord();
-      word = random.word;
-      newCategory = random.category;
-    }
+      return updated;
+    });
+  }, []);
 
-    setTargetWord(word);
-    setCategory(newCategory);
+  const { askQuestion: askLLM, hasAI } = useYesNoAI({ onStreaming });
+
+  const startNewGame = () => {
+    const random = getRandomWord();
+    setTargetWord(random.word);
+    setCategory(random.category);
     setQaHistory([]);
     setCurrentQuestion('');
     setIsCorrect(false);
     setQuestionsAsked(0);
-    setShowGuessInput(false);
-    setUserGuess('');
-    setSelectedCategory(specificCategory || null);
+    setGameStarted(true);
   };
 
   useEffect(() => {
@@ -83,54 +75,40 @@ export function YesOrNoPage() {
     const records = getYesOrNoRecords();
     const completedGames = records.filter((r: any) => r.solved).length;
     setTotalGames(completedGames);
-
-    startNewGame();
   }, []);
 
-  const handleSubmitQuestion = () => {
+  const handleSubmitQuestion = async () => {
     const question = currentQuestion.trim();
     if (!question || isCorrect) return;
 
     setIsSubmitting(true);
 
-    // 检查是否是有效的yes/no问题
-    if (!isValidYesOrNoQuestion(question)) {
-      const invalidAnswer: QAPair = {
+    // 检测是否猜对了答案
+    const normalizedInput = question.toLowerCase();
+    const normalizedTarget = targetWord.toLowerCase();
+    const cleanedInput = normalizedInput.replace(/[吗？?！!。，,、]+$/g, '');
+
+    const isCorrectGuess =
+      cleanedInput === normalizedTarget ||
+      cleanedInput === `是${normalizedTarget}` ||
+      cleanedInput === `我猜是${normalizedTarget}` ||
+      cleanedInput === `我猜${normalizedTarget}` ||
+      cleanedInput === `答案是${normalizedTarget}` ||
+      cleanedInput === `答案${normalizedTarget}` ||
+      cleanedInput === `是不是${normalizedTarget}` ||
+      cleanedInput === `是不是${normalizedTarget}吗`;
+
+    if (isCorrectGuess) {
+      setIsCorrect(true);
+      setQaHistory(prev => [...prev, {
         question,
         answer: 'yes',
-        timestamp: new Date()
-      };
-      setQaHistory(prev => [...prev, {
-        ...invalidAnswer,
-        question: `[提示] 请用"是/否"的形式提问`
-      }]);
-      setCurrentQuestion('');
-      setIsSubmitting(false);
-      return;
-    }
-
-    // 模拟AI思考延迟
-    setTimeout(() => {
-      const result = analyzeYesNoQuestion(question, targetWord, category);
-      setQaHistory(prev => [...prev, {
-        question,
-        answer: result.answer,
+        answerText: `🎉 恭喜你猜对了！答案就是「${targetWord}」！`,
         timestamp: new Date()
       }]);
       setCurrentQuestion('');
       setIsSubmitting(false);
       setQuestionsAsked(prev => prev + 1);
-    }, 500);
-  };
-
-  const handleGuess = () => {
-    const guess = userGuess.trim();
-    if (!guess) return;
-
-    const isGuessCorrect = guess.toLowerCase() === targetWord.toLowerCase();
-
-    if (isGuessCorrect) {
-      setIsCorrect(true);
 
       // 保存游戏记录
       const record = {
@@ -141,42 +119,95 @@ export function YesOrNoPage() {
         solved: true,
         completedAt: new Date()
       };
-      console.log('💾 保存Yes or No记录:', record);
       saveYesOrNoRecord(record);
-
-      // 更新每日任务进度（逻辑推理）
-      console.log('📝 更新逻辑推理任务进度');
       updateDailyTaskProgress('daily-reasoning', 1);
-
       setTotalGames(prev => prev + 1);
-    } else {
-      // 猜错了，添加到问答历史
+      return;
+    }
+
+    // 检查是否是有效的yes/no问题
+    if (!isValidYesOrNoQuestion(question)) {
+      const invalidAnswer: QAPair = {
+        question,
+        answer: 'yes',
+        answerText: '请用"是/否"的形式提问，或直接输入你的猜测答案',
+        timestamp: new Date()
+      };
       setQaHistory(prev => [...prev, {
-        question: `我猜是：${guess}`,
-        answer: 'no',
+        ...invalidAnswer,
+        question: `[提示] 请用"是/否"的形式提问，或直接输入猜测答案`
+      }]);
+      setCurrentQuestion('');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (hasAI) {
+      // AI 模式：先添加占位条目，流式更新
+      const placeholder: QAPair = {
+        question,
+        answer: 'yes',
+        answerText: '',
+        timestamp: new Date(),
+      };
+      setQaHistory(prev => [...prev, placeholder]);
+      setCurrentQuestion('');
+
+      const result = await askLLM(question, targetWord, category, qaHistory);
+
+      if (result) {
+        // AI 成功，替换占位条目
+        setQaHistory(prev => {
+          const updated = [...prev];
+          updated[updated.length - 1] = {
+            question,
+            answer: result.answer,
+            answerText: result.answerText,
+            timestamp: new Date(),
+          };
+          return updated;
+        });
+      } else {
+        // AI 失败，回退到规则引擎
+        const fallback = analyzeYesNoQuestion(question, targetWord, category);
+        setQaHistory(prev => {
+          const updated = [...prev];
+          updated[updated.length - 1] = {
+            question,
+            answer: fallback.answer,
+            timestamp: new Date(),
+          };
+          return updated;
+        });
+      }
+    } else {
+      // 无 AI 配置，使用规则引擎
+      const result = analyzeYesNoQuestion(question, targetWord, category);
+      setQaHistory(prev => [...prev, {
+        question,
+        answer: result.answer,
         timestamp: new Date()
       }]);
-      setUserGuess('');
-      guessInputRef.current?.focus();
-      setQuestionsAsked(prev => prev + 1);
+      setCurrentQuestion('');
     }
+
+    setIsSubmitting(false);
+    setQuestionsAsked(prev => prev + 1);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !isSubmitting) {
-      if (showGuessInput) {
-        handleGuess();
-      } else {
-        handleSubmitQuestion();
-      }
+      handleSubmitQuestion();
     }
   };
 
   const handleGiveUp = () => {
+    setIsGiveUp(true);
     setIsCorrect(true);
     setQaHistory(prev => [...prev, {
       question: '我放弃了',
       answer: 'yes',
+      answerText: `答案是「${targetWord}」，再接再厉！`,
       timestamp: new Date()
     }]);
 
@@ -189,7 +220,6 @@ export function YesOrNoPage() {
       solved: false,
       completedAt: new Date()
     };
-    console.log('💾 保存Yes or No记录（未完成）:', record);
     saveYesOrNoRecord(record);
   };
 
@@ -199,12 +229,20 @@ export function YesOrNoPage() {
     }
   }, [qaHistory]);
 
-  const categories = getCategories();
-
   return (
-    <div className="min-h-screen noise-bg bg-gradient-to-br from-red-50 via-rose-50 to-pink-50 dark:from-gray-900 dark:via-red-900/20 dark:to-rose-900/20">
+    <div className="min-h-screen relative">
+      {/* 背景图片 */}
+      <div
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'url(/bg-picture/bg-logic.png)' }}
+      />
+      {/* 半透明渐变遮罩 */}
+      <div className="fixed inset-0 bg-gradient-to-br from-white/80 via-rose-50/70 to-red-50/80 dark:from-gray-900/90 dark:via-red-900/80 dark:to-rose-900/85" />
+
+      {/* 内容层 */}
+      <div className="relative z-10">
       {/* 导航栏 */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-red-200 dark:border-red-800">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-transparent border-b border-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <motion.button
@@ -259,19 +297,24 @@ export function YesOrNoPage() {
             className="mb-8 flex items-center justify-between"
           >
             <div className="flex items-center gap-4">
-              <div className="px-4 py-2 bg-white dark:bg-gray-800 rounded-xl shadow-md">
-                <span className="text-sm text-gray-600 dark:text-gray-400">已挑战</span>
-                <span className="ml-2 text-lg font-bold text-red-600 dark:text-red-400">{totalGames}</span>
-                <span className="text-sm text-gray-600 dark:text-gray-400">局</span>
+              <div className="relative px-4 py-2 rounded-xl shadow-md overflow-hidden">
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/icon-picture/icon-logic1.jpg)' }} />
+                <div className="absolute inset-0 bg-white/80 backdrop-blur-sm" />
+                <div className="relative">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">已挑战</span>
+                  <span className="ml-2 text-lg font-bold text-red-600 dark:text-red-400">{totalGames}</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">局</span>
+                </div>
               </div>
-              <div className="px-4 py-2 bg-white dark:bg-gray-800 rounded-xl shadow-md">
-                <span className="text-sm text-gray-600 dark:text-gray-400">提问</span>
-                <span className="ml-2 text-lg font-bold text-red-600 dark:text-red-400">{questionsAsked}</span>
-                <span className="text-sm text-gray-600 dark:text-gray-400">次</span>
+              <div className="relative px-4 py-2 rounded-xl shadow-md overflow-hidden">
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/icon-picture/icon-logic1.jpg)' }} />
+                <div className="absolute inset-0 bg-white/80 backdrop-blur-sm" />
+                <div className="relative">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">提问</span>
+                  <span className="ml-2 text-lg font-bold text-red-600 dark:text-red-400">{questionsAsked}</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">次</span>
+                </div>
               </div>
-            </div>
-            <div className="px-4 py-2 bg-red-50 dark:bg-red-900/20 rounded-xl shadow-md border border-red-200 dark:border-red-800">
-              <span className="text-sm text-red-700 dark:text-red-300 font-medium">类别: {category}</span>
             </div>
           </motion.div>
 
@@ -285,29 +328,34 @@ export function YesOrNoPage() {
                 transition={{ duration: 0.3 }}
                 className="mb-6 overflow-hidden"
               >
-                <div className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-2 border-red-200 dark:border-red-800">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <HelpCircle size={20} className="text-red-500" />
-                    游戏说明
-                  </h3>
-                  <ul className="space-y-2 text-gray-700 dark:text-gray-300">
-                    <li className="flex items-start gap-2">
-                      <span className="text-red-500 mt-1">•</span>
-                      <span><strong>AI出题</strong>：电脑会随机选择一个词语，你需要猜出它是什么</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-red-500 mt-1">•</span>
-                      <span><strong>提问</strong>：通过"是/否"问题来获取线索</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-red-500 mt-1">•</span>
-                      <span><strong>猜测</strong>：当你有把握时，点击"我要猜测"输入答案</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-red-500 mt-1">•</span>
-                      <span><strong>目标</strong>：用最少的问题猜出答案</span>
-                    </li>
-                  </ul>
+                <div className="relative p-6 rounded-2xl shadow-lg border-2 border-red-200/80 dark:border-red-800/60 overflow-hidden">
+                  <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/icon-picture/icon-logic1.jpg)' }} />
+                  <div className="absolute inset-0 bg-white/85 backdrop-blur-sm" />
+                  <div className="hidden dark:block absolute inset-0 dark:bg-gray-900/80" />
+                  <div className="relative">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                      <HelpCircle size={20} className="text-red-500" />
+                      游戏说明
+                    </h3>
+                    <ul className="space-y-2 text-gray-700 dark:text-gray-300">
+                      <li className="flex items-start gap-2">
+                        <span className="text-red-500 mt-1">•</span>
+                        <span><strong>AI出题</strong>：电脑会随机选择一个词语，你需要猜出它是什么</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-red-500 mt-1">•</span>
+                        <span><strong>提问</strong>：通过"是/否"问题来获取线索</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-red-500 mt-1">•</span>
+                        <span><strong>猜测</strong>：有把握时直接在输入框输入你的答案即可</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-red-500 mt-1">•</span>
+                        <span><strong>目标</strong>：用最少的问题猜出答案</span>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -318,47 +366,66 @@ export function YesOrNoPage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden border-2 border-red-200 dark:border-red-800"
+            className="relative rounded-3xl shadow-2xl overflow-hidden border-2 border-red-200/80 dark:border-red-800/60"
           >
+            {/* 卡片背景图 */}
+            <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/UI-picture/UI-logic1.jpg)' }} />
+            <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px]" />
+            <div className="hidden dark:block absolute inset-0 dark:bg-gray-900/85" />
+
             {/* 标题区域 */}
-            <div className="bg-gradient-to-r from-red-500 to-pink-500 p-8">
-              <motion.h2
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-3xl md:text-4xl font-bold text-white mb-2"
-              >
-                Yes or No
-              </motion.h2>
-              <p className="text-red-100 text-sm">AI出题，你提问！猜出心中的词语</p>
+            <div className="relative p-8 overflow-hidden">
+              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/UI-picture/UI-logic1.jpg)' }} />
+              <div className="absolute inset-0 bg-white/75 backdrop-blur-sm" />
+              <div className="hidden dark:block absolute inset-0 dark:bg-gray-900/80" />
+              <div className="relative">
+                <motion.h2
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent mb-2"
+                >
+                  Yes or No
+                </motion.h2>
+                <p className="text-gray-600 dark:text-gray-300 text-sm">AI出题，你提问！猜出心中的词语</p>
+              </div>
             </div>
 
-            {/* 类别选择 */}
-            {!isCorrect && qaHistory.length === 0 && (
-              <div className="p-8 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">选择类别（可选）</h3>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => startNewGame()}
-                    className="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-700 dark:text-gray-300 rounded-full transition-colors text-sm border border-gray-300 dark:border-gray-600"
-                  >
-                    随机
-                  </button>
-                  {categories.map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => startNewGame(cat)}
-                      className="px-4 py-2 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-700 dark:text-red-300 rounded-full transition-colors text-sm border border-red-200 dark:border-red-800"
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
+            {/* 开始游戏按钮 */}
+            {!gameStarted && (
+              <div className="relative p-12 flex flex-col items-center justify-center gap-6 overflow-hidden">
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/UI-picture/UI-logic1.jpg)' }} />
+                <div className="absolute inset-0 bg-white/70 backdrop-blur-sm" />
+                <div className="hidden dark:block absolute inset-0 dark:bg-gray-900/75" />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
+                  className="relative text-center"
+                >
+                  <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg border border-white/30">
+                    <HelpCircle size={48} className="text-red-500" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">准备好了吗？</h3>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">AI会随机选择一个词语，通过是/否问题来猜出它</p>
+                </motion.div>
+                <motion.button
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5, duration: 0.4 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => startNewGame()}
+                  className="relative px-12 py-4 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white rounded-2xl shadow-xl hover:shadow-2xl transition-all font-bold text-lg flex items-center gap-3"
+                >
+                  <Play size={24} />
+                  开始游戏
+                </motion.button>
               </div>
             )}
 
             {/* 问答区域 */}
-            <div className="p-8">
+            {gameStarted && <div className="relative p-8">
               <div className="flex items-center gap-2 mb-4">
                 <MessageSquare size={24} className="text-red-500" />
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -373,7 +440,7 @@ export function YesOrNoPage() {
               {qaHistory.length > 0 && (
                 <div
                   ref={qaListRef}
-                  className="mb-4 max-h-96 overflow-y-auto space-y-3 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-200 dark:border-gray-700"
+                  className="mb-4 max-h-96 overflow-y-auto space-y-3 p-4 bg-gray-50/80 dark:bg-gray-900/50 backdrop-blur-sm rounded-2xl border border-gray-200/60 dark:border-gray-700/40"
                 >
                   <AnimatePresence>
                     {qaHistory.map((qa, index) => (
@@ -390,7 +457,7 @@ export function YesOrNoPage() {
                           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-rose-500 flex items-center justify-center flex-shrink-0">
                             <span className="text-white text-sm font-bold">你</span>
                           </div>
-                          <div className="flex-1 p-3 bg-red-50 dark:bg-red-900/20 rounded-2xl rounded-tl-none">
+                          <div className="flex-1 p-3 bg-red-50/90 dark:bg-red-900/20 rounded-2xl rounded-tl-none">
                             <p className="text-gray-800 dark:text-gray-200">{qa.question}</p>
                           </div>
                         </div>
@@ -402,11 +469,14 @@ export function YesOrNoPage() {
                           </div>
                           <div className={`flex-1 p-3 rounded-2xl rounded-tl-none ${
                             qa.answer === 'yes'
-                              ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
-                              : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+                              ? 'bg-green-50/90 dark:bg-green-900/20 border border-green-200/60 dark:border-green-800/40'
+                              : 'bg-red-50/90 dark:bg-red-900/20 border border-red-200/60 dark:border-red-800/40'
                           }`}>
                             <p className="text-gray-800 dark:text-gray-200 font-medium">
-                              {qa.answer === 'yes' ? '是' : '否'}
+                              {qa.answerText || (qa.answer === 'yes' ? '是' : '否')}
+                              {isSubmitting && index === qaHistory.length - 1 && !qa.answerText && (
+                                <span className="inline-block w-2 h-4 bg-gray-400 dark:bg-gray-500 animate-pulse ml-1 align-middle" />
+                              )}
                             </p>
                           </div>
                         </div>
@@ -416,105 +486,75 @@ export function YesOrNoPage() {
                 </div>
               )}
 
+              {/* 建议问题 */}
+              {qaHistory.length === 0 && !isCorrect && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-4"
+                >
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">不知道从何开始？试试以下提问：</p>
+                  <div className="flex flex-wrap gap-2">
+                    {['是两个字的词语吗？', '是抽象名词吗？', '是一种职业吗？'].map((q, i) => (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          setCurrentQuestion(q);
+                          inputRef.current?.focus();
+                        }}
+                        className="px-3 py-1.5 text-sm bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm hover:bg-red-100/80 dark:hover:bg-red-900/30 text-gray-700 dark:text-gray-300 rounded-full transition-colors"
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
               {/* 输入区域 */}
               {!isCorrect && (
                 <div className="space-y-3">
-                  {!showGuessInput ? (
-                    <>
-                      <div className="flex gap-3">
-                        <input
-                          ref={inputRef}
-                          type="text"
-                          value={currentQuestion}
-                          onChange={(e) => setCurrentQuestion(e.target.value)}
-                          onKeyPress={handleKeyPress}
-                          placeholder='用"是/否"的形式提问，例如："是动物吗？"'
-                          className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-red-500 dark:focus:border-red-400 focus:outline-none transition-colors text-gray-900 dark:text-gray-100"
-                          disabled={isSubmitting}
-                        />
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={handleSubmitQuestion}
-                          disabled={!currentQuestion.trim() || isSubmitting}
-                          className="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                        >
-                          {isSubmitting ? (
-                            <>
-                              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                              <span>思考中</span>
-                            </>
-                          ) : (
-                            <>
-                              <Send size={20} />
-                              <span>提问</span>
-                            </>
-                          )}
-                        </motion.button>
-                      </div>
-
-                      <div className="flex gap-3">
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => {
-                            setShowGuessInput(true);
-                            setTimeout(() => guessInputRef.current?.focus(), 100);
-                          }}
-                          className="flex-1 px-6 py-3 bg-gradient-to-r from-rose-500 to-red-500 hover:from-rose-600 hover:to-red-600 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium flex items-center justify-center gap-2"
-                        >
-                          <Trophy size={20} />
-                          <span>我要猜测答案</span>
-                        </motion.button>
-
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={handleGiveUp}
-                          className="px-6 py-3 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl shadow-md hover:shadow-lg transition-all font-medium flex items-center gap-2"
-                        >
-                          <RotateCcw size={20} />
-                          <span>放弃</span>
-                        </motion.button>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="space-y-3">
-                      <div className="flex gap-3">
-                        <input
-                          ref={guessInputRef}
-                          type="text"
-                          value={userGuess}
-                          onChange={(e) => setUserGuess(e.target.value)}
-                          onKeyPress={handleKeyPress}
-                          placeholder="输入你的答案..."
-                          className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-red-500 dark:focus:border-red-400 focus:outline-none transition-colors text-gray-900 dark:text-gray-100"
-                        />
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={handleGuess}
-                          disabled={!userGuess.trim()}
-                          className="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                        >
+                  <div className="flex gap-3">
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={currentQuestion}
+                      onChange={(e) => setCurrentQuestion(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder='用是/否形式的句子提问'
+                      className="flex-1 px-4 py-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-gray-200/80 dark:border-gray-700/60 rounded-xl focus:border-red-500 dark:focus:border-red-400 focus:outline-none transition-colors text-gray-900 dark:text-gray-100"
+                      disabled={isSubmitting}
+                    />
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleSubmitQuestion}
+                      disabled={!currentQuestion.trim() || isSubmitting}
+                      className="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>思考中</span>
+                        </>
+                      ) : (
+                        <>
                           <Send size={20} />
-                          <span>提交猜测</span>
-                        </motion.button>
-                      </div>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                          setShowGuessInput(false);
-                          setUserGuess('');
-                          inputRef.current?.focus();
-                        }}
-                        className="w-full px-6 py-3 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl shadow-md hover:shadow-lg transition-all font-medium"
-                      >
-                        返回提问模式
-                      </motion.button>
-                    </div>
-                  )}
+                          <span>发送</span>
+                        </>
+                      )}
+                    </motion.button>
+                  </div>
+
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleGiveUp}
+                    className="w-full px-6 py-2.5 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-gray-700/60 text-gray-500 dark:text-gray-400 rounded-xl transition-all font-medium text-sm flex items-center justify-center gap-2 border border-gray-200/40 dark:border-gray-700/40"
+                  >
+                    <RotateCcw size={16} />
+                    <span>放弃本轮</span>
+                  </motion.button>
                 </div>
               )}
 
@@ -523,32 +563,60 @@ export function YesOrNoPage() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="w-full p-6 bg-red-50 dark:bg-red-900/20 rounded-2xl border-2 border-red-500 flex items-center justify-center gap-3"
+                  className="relative w-full p-6 rounded-2xl border-2 border-red-500/80 overflow-hidden"
                 >
-                  <Trophy size={32} className="text-red-500" />
-                  <div className="text-center">
-                    <p className="text-lg font-bold text-red-700 dark:text-red-300">恭喜你！</p>
-                    <p className="text-sm text-red-600 dark:text-red-400">
-                      答案就是：<span className="font-bold">{targetWord}</span>
-                    </p>
-                    <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                      用了 {questionsAsked} 个问题
-                    </p>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => startNewGame()}
-                      className="mt-4 px-6 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg font-medium"
-                    >
-                      再来一局
-                    </motion.button>
+                  <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/icon-picture/icon-logic1.jpg)' }} />
+                  <div className="absolute inset-0 bg-red-50/90 backdrop-blur-sm" />
+                  <div className="hidden dark:block absolute inset-0 dark:bg-red-900/80" />
+                  <div className="relative flex items-center justify-center gap-3">
+                    <Trophy size={32} className="text-red-500" />
+                    <div className="text-center">
+                      {isGiveUp ? (
+                        <>
+                          <p className="text-lg font-bold text-red-700 dark:text-red-300">没关系！</p>
+                          <p className="text-sm text-red-600 dark:text-red-400">
+                            答案是：<span className="font-bold">{targetWord}</span>
+                          </p>
+                          <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                            下次一定能猜到！
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-lg font-bold text-red-700 dark:text-red-300">恭喜你！</p>
+                          <p className="text-sm text-red-600 dark:text-red-400">
+                            答案就是：<span className="font-bold">{targetWord}</span>
+                          </p>
+                          <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                            用了 {questionsAsked} 个问题
+                          </p>
+                        </>
+                      )}
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => {
+                          setGameStarted(false);
+                          setQaHistory([]);
+                          setIsCorrect(false);
+                          setIsGiveUp(false);
+                          setQuestionsAsked(0);
+                          setCurrentQuestion('');
+                        }}
+                        className="mt-4 px-6 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg font-medium"
+                      >
+                        再来一局
+                      </motion.button>
+                    </div>
                   </div>
                 </motion.div>
               )}
-            </div>
+            </div>}
           </motion.div>
         </div>
       </main>
+
+      </div>{/* 内容层结束 */}
     </div>
   );
 }

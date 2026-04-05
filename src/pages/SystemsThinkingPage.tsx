@@ -2,14 +2,25 @@
  * 系统思维页面 - 多学科知识体系
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Network, ChevronLeft, ChevronRight, Brain, Users, Lightbulb } from 'lucide-react';
 import { systemsThinkingData } from '@/constants/knowledgePopularize';
 
+// Fisher-Yates 洗牌算法
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export function SystemsThinkingPage() {
   const navigate = useNavigate();
+  const [shuffledData] = useState(() => shuffleArray(systemsThinkingData));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [viewedItems, setViewedItems] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -19,13 +30,17 @@ export function SystemsThinkingPage() {
     const viewed = JSON.parse(localStorage.getItem('knowledgeViewed') || '[]');
     setViewedItems(viewed);
 
-    // 标记当前为已查看
-    if (!viewed.includes(`systems-thinking-${currentIndex}`)) {
-      const newViewed = [...viewed, `systems-thinking-${currentIndex}`];
-      localStorage.setItem('knowledgeViewed', JSON.stringify(newViewed));
-      setViewedItems(newViewed);
+    // 标记当前为已查看（用标题作为唯一标识）
+    const item = filteredItems[currentIndex];
+    if (item) {
+      const itemKey = `systems-thinking-${item.title}`;
+      if (!viewed.includes(itemKey)) {
+        const newViewed = [...viewed, itemKey];
+        localStorage.setItem('knowledgeViewed', JSON.stringify(newViewed));
+        setViewedItems(newViewed);
+      }
     }
-  }, [currentIndex]);
+  }, [currentIndex, selectedCategory]);
 
   // 分类数据
   const categories = [
@@ -38,12 +53,14 @@ export function SystemsThinkingPage() {
     { id: '医学', name: '医学', icon: Brain }
   ];
 
-  const filteredItems = selectedCategory === 'all'
-    ? systemsThinkingData
-    : systemsThinkingData.filter(item => item.category === selectedCategory);
+  const filteredItems = useMemo(() => {
+    return selectedCategory === 'all'
+      ? shuffledData
+      : shuffledData.filter(item => item.category === selectedCategory);
+  }, [selectedCategory, shuffledData]);
 
-  const currentItem = filteredItems[currentIndex] || systemsThinkingData[0];
-  const isViewed = viewedItems.includes(`systems-thinking-${currentIndex}`);
+  const currentItem = filteredItems[currentIndex] || shuffledData[0];
+  const isViewed = currentItem ? viewedItems.includes(`systems-thinking-${currentItem.title}`) : false;
 
   const handlePrevious = () => {
     setCurrentIndex((prev) => (prev - 1 + filteredItems.length) % filteredItems.length);
@@ -173,28 +190,6 @@ export function SystemsThinkingPage() {
                   <ChevronLeft size={20} />
                   上一个
                 </motion.button>
-
-                {/* 进度指示器 */}
-                <div className="flex gap-2">
-                  {filteredItems.slice(0, 10).map((_, index) => (
-                    <div
-                      key={index}
-                      className={`h-2 rounded-full transition-all cursor-pointer ${
-                        index === currentIndex
-                          ? 'w-8 bg-emerald-500'
-                          : index < currentIndex
-                          ? 'w-2 bg-emerald-300 dark:bg-emerald-700'
-                          : 'w-2 bg-gray-300 dark:bg-gray-600'
-                      }`}
-                      onClick={() => setCurrentIndex(index)}
-                    />
-                  ))}
-                  {filteredItems.length > 10 && (
-                    <span className="text-xs text-gray-500 dark:text-gray-400 self-center">
-                      +{filteredItems.length - 10}
-                    </span>
-                  )}
-                </div>
 
                 <motion.button
                   whileHover={{ scale: 1.05 }}

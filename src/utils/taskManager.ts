@@ -203,7 +203,7 @@ export function saveTaskProgress(progress: TaskProgress): void {
   // 清理30天前的旧数据
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  const cutoffDate = thirtyDaysAgo.toISOString().split('T')[0];
+  const cutoffDate = toLocalDateString(thirtyDaysAgo);
 
   Object.keys(allProgress).forEach(date => {
     if (date < cutoffDate) {
@@ -322,14 +322,14 @@ export function getTaskStreak(): number {
   const today = getCurrentDateString();
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayString = yesterday.toISOString().split('T')[0];
+  const yesterdayString = toLocalDateString(yesterday);
 
   // 如果今天没完成，从昨天开始检查
   let startDate = saved[today]?.dailyCompleted ? today : yesterdayString;
   let checkDate = new Date(startDate);
 
   for (let i = 0; i < 365; i++) {
-    const dateStr = checkDate.toISOString().split('T')[0];
+    const dateStr = toLocalDateString(checkDate);
     if (saved[dateStr]?.dailyCompleted) {
       streak++;
       checkDate.setDate(checkDate.getDate() - 1);

@@ -170,9 +170,11 @@ export function TaskPage() {
     // 填充日期
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
-      const dateString = date.toISOString().split('T')[0];
+      const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       const isCompleted = completedDates.has(dateString);
-      const isToday = dateString === new Date().toISOString().split('T')[0];
+      const now = new Date();
+      const todayString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const isToday = dateString === todayString;
 
       calendar.push({
         day,
@@ -567,30 +569,44 @@ export function TaskPage() {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.01 }}
                         whileHover={dayInfo.day ? { scale: 1.1 } : {}}
-                        className={`aspect-square rounded-lg flex items-center justify-center text-sm font-medium transition-all ${
+                        className={`relative aspect-square rounded-lg flex items-center justify-center text-sm font-medium transition-all overflow-hidden ${
                           !dayInfo.day
                             ? 'bg-transparent'
                             : dayInfo.isToday
-                            ? 'bg-gradient-to-br from-pink-400 to-sky-400 text-white shadow-lg'
-                            : dayInfo.isCompleted
-                            ? 'bg-gradient-to-br from-green-100 to-emerald-100 text-green-700 border-2 border-green-300'
-                            : 'bg-white/60 text-gray-400'
+                            ? 'shadow-lg'
+                            : ''
                         }`}
                       >
                         {dayInfo.day && (
-                          <span className="relative">
-                            {dayInfo.day}
-                            {dayInfo.isCompleted && !dayInfo.isToday && (
-                              <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"
-                                      />
-                                    )}
-                            {dayInfo.isToday && (
-                                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-white rounded-full" />
-                                    )}
-                          </span>
+                          <>
+                            {/* 背景图 */}
+                            <div className="absolute inset-0 bg-cover bg-center rounded-lg"
+                              style={{
+                                backgroundImage: dayInfo.isToday
+                                  ? 'url(/UI-picture/UI-tasks1.jpg)'
+                                  : dayInfo.isCompleted
+                                  ? 'url(/UI-picture/UI-tasks2.jpg)'
+                                  : 'url(/UI-picture/UI-checkin.jpg)'
+                              }}
+                            />
+                            {/* 遮罩层 */}
+                            <div className={`absolute inset-0 rounded-lg ${
+                              dayInfo.isToday
+                                ? 'bg-gradient-to-br from-pink-400/70 to-sky-400/70'
+                                : dayInfo.isCompleted
+                                ? 'bg-gray-200/50'
+                                : 'bg-white/40'
+                            }`} />
+                            <span className={`relative ${
+                              dayInfo.isToday
+                                ? 'text-white font-bold'
+                                : dayInfo.isCompleted
+                                ? 'text-gray-500 font-bold'
+                                : 'text-gray-400'
+                            }`}>
+                              {dayInfo.day}
+                            </span>
+                          </>
                         )}
                       </motion.div>
                     ))}
@@ -599,15 +615,15 @@ export function TaskPage() {
                   {/* 图例 */}
                   <div className="relative flex items-center justify-center gap-6 mt-6 pt-4 border-t border-gray-200">
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded bg-gradient-to-br from-green-100 to-emerald-100 border-2 border-green-300"></div>
+                      <div className="w-4 h-4 rounded bg-cover bg-center" style={{ backgroundImage: 'url(/UI-picture/UI-tasks2.jpg)' }} />
                       <span className="text-sm text-gray-600">已完成</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded bg-white/60"></div>
+                      <div className="w-4 h-4 rounded bg-cover bg-center" style={{ backgroundImage: 'url(/UI-picture/UI-checkin.jpg)' }} />
                       <span className="text-sm text-gray-600">未完成</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded bg-gradient-to-br from-pink-400 to-sky-400"></div>
+                      <div className="w-4 h-4 rounded bg-cover bg-center" style={{ backgroundImage: 'url(/UI-picture/UI-tasks1.jpg)' }} />
                       <span className="text-sm text-gray-600">今天</span>
                     </div>
                   </div>

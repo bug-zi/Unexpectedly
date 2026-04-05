@@ -14,6 +14,7 @@ import {
   getYesOrNoRecords,
   getGuessNumberRecords
 } from '@/utils/storage';
+import { useLLMConfig } from '@/hooks/useLLMConfig';
 
 interface GameCard {
   id: string;
@@ -28,15 +29,18 @@ interface GameCard {
   disabled?: boolean;
   disabledReason?: string;
   bgImage: string;
+  requiresAI?: boolean;
 }
 
 export function LogicReasoningPage() {
   const navigate = useNavigate();
+  const { isConfigured: isAIConfigured } = useLLMConfig();
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [showInstructions, setShowInstructions] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showRecords, setShowRecords] = useState(false);
   const [showComingSoon, setShowComingSoon] = useState(false);
+  const [showAIRequiredTip, setShowAIRequiredTip] = useState(false);
   const [gameStats, setGameStats] = useState({
     totalGames: 0,
     turtleSoupWins: 0,
@@ -112,8 +116,8 @@ export function LogicReasoningPage() {
   };
 
   const startRandomGame = () => {
-    // 过滤掉禁用的游戏
-    const availableGames = gameCards.filter(card => !card.disabled);
+    // 过滤掉禁用和需要AI但未配置的游戏
+    const availableGames = gameCards.filter(card => !card.disabled && !(card.requiresAI && !isAIConfigured));
     if (availableGames.length === 0) {
       setShowComingSoon(true);
       return;
@@ -133,7 +137,8 @@ export function LogicReasoningPage() {
       gradient: 'from-red-500 to-rose-500',
       borderColor: 'border-red-200 dark:border-red-800',
       textColor: 'text-red-700 dark:text-red-300',
-      bgImage: '/UI-picture/UI-logic1.jpg'
+      bgImage: '/UI-picture/UI-logic1.jpg',
+      requiresAI: true
     },
     {
       id: 'riddle',
@@ -157,9 +162,9 @@ export function LogicReasoningPage() {
       gradient: 'from-rose-500 to-pink-500',
       borderColor: 'border-red-200 dark:border-red-800',
       textColor: 'text-red-700 dark:text-red-300',
-      disabled: true,
-      disabledReason: '稍后开放，敬请期待',
-      bgImage: '/UI-picture/UI-logic3.jpg'
+      disabled: false,
+      bgImage: '/UI-picture/UI-logic3.jpg',
+      requiresAI: true
     },
     {
       id: 'guess-number',
@@ -347,18 +352,17 @@ export function LogicReasoningPage() {
                     </div>
                   </div>
 
-                  <div className="p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-200 dark:border-gray-600 opacity-60">
-                    <h4 className="font-bold text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-2">
+                  <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
+                    <h4 className="font-bold text-red-600 dark:text-red-400 mb-2 flex items-center gap-2">
                       <Question size={20} weight="duotone" />
                       Yes or No
-                      <span className="text-xs font-normal text-gray-400">（待推出）</span>
                     </h4>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                       AI出题，你通过"是/否"问题猜出AI心中的词语。可以选择不同词库类别挑战。
                     </p>
                     <div className="mt-2 flex flex-wrap gap-1">
-                      <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700/40 text-gray-500 dark:text-gray-400 rounded-full">AI</span>
-                      <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700/40 text-gray-500 dark:text-gray-400 rounded-full">问答</span>
+                      <span className="text-xs px-2 py-1 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 rounded-full">AI</span>
+                      <span className="text-xs px-2 py-1 bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 rounded-full">问答</span>
                     </div>
                   </div>
 
@@ -516,6 +520,74 @@ export function LogicReasoningPage() {
                     <div className="w-2 h-2 rounded-full bg-orange-500" />
                     <span>推理记录追踪</span>
                   </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* AI配置提示弹窗 */}
+      <AnimatePresence>
+        {showAIRequiredTip && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowAIRequiredTip(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 20, stiffness: 300 }}
+              className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl max-w-md w-full border-2 border-gray-200 dark:border-gray-700"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* 头部 */}
+              <div className="bg-gradient-to-r from-gray-500 to-gray-600 px-6 py-4 rounded-t-3xl flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Question size={24} weight="duotone" className="text-white" />
+                  <h3 className="text-xl font-bold text-white">需要AI配置</h3>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowAIRequiredTip(false)}
+                  className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
+                >
+                  <X size={24} weight="duotone" />
+                </motion.button>
+              </div>
+
+              {/* 内容 */}
+              <div className="p-6 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                  <Question size={32} weight="duotone" className="text-gray-400" />
+                </div>
+                <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  请配置AI大模型后再来访问
+                </h4>
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  此功能需要AI大模型支持，请先在个人中心配置您的AI大模型
+                </p>
+                <div className="flex gap-3 justify-center">
+                  <Button
+                    onClick={() => setShowAIRequiredTip(false)}
+                    variant="outline"
+                  >
+                    稍后再说
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowAIRequiredTip(false);
+                      navigate('/profile');
+                    }}
+                    className="bg-gradient-to-r from-gray-500 to-gray-600 text-white hover:from-gray-600 hover:to-gray-700"
+                  >
+                    去配置
+                  </Button>
                 </div>
               </div>
             </motion.div>
@@ -770,25 +842,29 @@ export function LogicReasoningPage() {
 
           {/* 游戏卡片网格 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {gameCards.map((card, index) => (
+            {gameCards.map((card, index) => {
+              const isCardDisabled = card.disabled || (card.requiresAI && !isAIConfigured);
+              return (
               <motion.div
                 key={card.id}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                onHoverStart={() => !card.disabled && setHoveredCard(card.id)}
+                onHoverStart={() => !isCardDisabled && setHoveredCard(card.id)}
                 onHoverEnd={() => setHoveredCard(null)}
-                whileHover={card.disabled ? {} : { scale: 1.02 }}
-                whileTap={card.disabled ? {} : { scale: 0.98 }}
+                whileHover={isCardDisabled ? {} : { scale: 1.02 }}
+                whileTap={isCardDisabled ? {} : { scale: 0.98 }}
                 onClick={() => {
                   if (card.disabled) {
                     setShowComingSoon(true);
+                  } else if (card.requiresAI && !isAIConfigured) {
+                    setShowAIRequiredTip(true);
                   } else {
                     navigate(card.path);
                   }
                 }}
                 className={`relative rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 ${card.borderColor} overflow-hidden ${
-                  card.disabled ? 'opacity-50 grayscale cursor-not-allowed' : 'cursor-pointer group'
+                  isCardDisabled ? 'opacity-50 grayscale cursor-not-allowed' : 'cursor-pointer group'
                 }`}
               >
                 {/* 背景图片 */}
@@ -802,10 +878,10 @@ export function LogicReasoningPage() {
                 <div className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
 
                 {/* 禁用标记 */}
-                {card.disabled && (
+                {(card.disabled || (card.requiresAI && !isAIConfigured)) && (
                   <div className="absolute top-4 right-4 z-10">
-                    <div className={`px-3 py-1 bg-gradient-to-r ${card.gradient} text-white text-xs font-bold rounded-full shadow-lg`}>
-                      即将推出
+                    <div className={`px-3 py-1 ${card.requiresAI && !isAIConfigured ? 'bg-gray-500' : `bg-gradient-to-r ${card.gradient}`} text-white text-xs font-bold rounded-full shadow-lg`}>
+                      {card.requiresAI && !isAIConfigured ? '需要AI配置' : '即将推出'}
                     </div>
                   </div>
                 )}
@@ -871,7 +947,8 @@ export function LogicReasoningPage() {
                   </motion.div>
                 </div>
               </motion.div>
-            ))}
+            );
+            })}
           </div>
         </div>
       </main>
