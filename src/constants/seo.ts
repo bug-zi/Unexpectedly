@@ -11,7 +11,7 @@ export interface PageSEO {
 export const SITE_NAME = '万万没想到';
 export const SITE_URL =
   import.meta.env.VITE_SITE_URL || 'https://unexpectedly.debugzi.com';
-export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`;
+export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg`;
 
 export const seoConfig: Record<string, PageSEO> = {
   '/': {
