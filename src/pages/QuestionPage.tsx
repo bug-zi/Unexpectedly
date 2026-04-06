@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Bookmark, Check, Clock, Download, Heart, Plus, Lightbulb } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Bookmark, Check, Clock, Download, Heart, Plus, Lightbulb, X, Sparkles } from 'lucide-react';
 import { Icon } from '@iconify/react';
 import { getQuestionById } from '@/constants/questions';
 import { useAppStore } from '@/stores/appStore';
@@ -18,6 +18,8 @@ import { CategoryIcon } from '@/components/ui/Icon';
 import { getCategoryConfig } from '@/constants/categories';
 import { ExportDialog } from '@/components/features/ExportDialog';
 import { useRoundtableStore } from '@/stores/roundtableStore';
+import { useLLMConfig } from '@/hooks/useLLMConfig';
+import { streamChat } from '@/services/llmService';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-toastify';
 import { usePageSEO } from '@/hooks/usePageSEO';
@@ -35,6 +37,7 @@ export function QuestionPage() {
   const { addFavorite, removeFavorite, isFavorited, markAsAnswered } = useFavorites();
   const { addToLater, removeFromLater, isLater } = useLater();
   const { sessions } = useRoundtableStore();
+  const { isConfigured: isLLMConfigured, llmConfig } = useLLMConfig();
 
   const { SEORender } = usePageSEO({ seo: getQuestionPageSEO(id || '', currentQuestion?.content) });
 
@@ -52,6 +55,10 @@ export function QuestionPage() {
   const [lastSavedTime, setLastSavedTime] = useState<Date | null>(null);
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [savedAnswer, setSavedAnswer] = useState<Answer | null>(null);
+  const [showAIReview, setShowAIReview] = useState(false);
+  const [aiReviewContent, setAiReviewContent] = useState('');
+  const [isAiReviewing, setIsAiReviewing] = useState(false);
+  const abortAiReviewRef = useRef(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout>();
@@ -203,6 +210,57 @@ export function QuestionPage() {
       setSyncing(false);
     }
   };
+
+  const handleAIReview = useCallback(async () => {
+    if (!question || !content.trim() || !llmConfig) return;
+
+    setIsAiReviewing(true);
+    setAiReviewContent('');
+    setShowAIReview(true);
+    abortAiReviewRef.current = false;
+
+    const systemPrompt = `你是一位兼具"思考家"和"点评家"双重身份的导师。你的任务是对用户关于某个思考问题的回答进行多维度点评。
+
+点评维度：
+1. **思维深度** - 回答是否深入思考了问题的本质，还是停留在表面？
+2. **逻辑严密性** - 论述是否有清晰的逻辑链条，是否存在逻辑漏洞？
+3. **创新性** - 是否提出了独特、新颖的观点或角度？
+4. **自省程度** - 是否体现了对自身想法的审视和反思？
+5. **可行动性** - 思考是否能够转化为具体的行动或改变？
+
+点评要求：
+- 先肯定回答中的亮点和优点
+- 再指出可以改进的方向
+- 最后给出进一步完善建议
+- 语言简洁有力，避免空话
+- 总体评价给出一个1-10的分数
+
+请用简洁、有启发性的语言进行点评。`;
+
+    const messages = [
+      { role: 'system' as const, content: systemPrompt },
+      {
+        role: 'user' as const,
+        content: `【思考问题】${question.content}\n\n【我的回答】${content}\n\n请从思考家和点评家的角度，对我的回答进行多维度点评。`,
+      },
+    ];
+
+    try {
+      let fullContent = '';
+      for await (const token of streamChat(messages, llmConfig)) {
+        if (abortAiReviewRef.current) break;
+        fullContent += token;
+        setAiReviewContent(fullContent);
+      }
+    } catch (error: unknown) {
+      if (!abortAiReviewRef.current) {
+        const msg = error instanceof Error ? error.message : 'AI点评失败，请稍后重试';
+        setAiReviewContent(`点评生成失败：${msg}`);
+      }
+    } finally {
+      setIsAiReviewing(false);
+    }
+  }, [question, content, llmConfig]);
 
   const handleExit = () => {
     if (content.trim() && !lastSavedTime) {
@@ -477,14 +535,25 @@ export function QuestionPage() {
                   快捷操作
                 </h3>
                 <div className="space-y-2">
-                  <Button
-                    variant="ghost"
-                    onClick={handleExit}
-                    fullWidth
-                    className="border border-gray-200 dark:border-gray-700"
-                  >
-                    放弃思考
-                  </Button>
+                  <div className="relative group">
+                    <Button
+                      variant="ghost"
+                      onClick={handleAIReview}
+                      disabled={!isLLMConfigured || !content.trim() || isAiReviewing}
+                      isLoading={isAiReviewing}
+                      fullWidth
+                      className="border border-gray-200 dark:border-gray-700"
+                    >
+                      <Sparkles className="w-4 h-4 mr-1.5" />
+                      AI点评
+                    </Button>
+                    {!isLLMConfigured && (
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-800 dark:bg-gray-700 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                        请配置AI大模型后体验
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800 dark:border-t-gray-700" />
+                      </div>
+                    )}
+                  </div>
                   <Button
                     variant="ghost"
                     onClick={handleSave}
@@ -501,6 +570,65 @@ export function QuestionPage() {
           </div>
         </div>
       </main>
+
+      {/* AI点评弹窗 */}
+      <AnimatePresence>
+        {showAIReview && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl max-w-2xl w-full max-h-[80vh] shadow-2xl flex flex-col"
+            >
+              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-amber-500" />
+                  AI 点评
+                </h3>
+                <button
+                  onClick={() => {
+                    abortAiReviewRef.current = true;
+                    setShowAIReview(false);
+                  }}
+                  className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4">
+                {aiReviewContent ? (
+                  <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap text-gray-700 dark:text-gray-300 leading-relaxed">
+                    {aiReviewContent}
+                    {isAiReviewing && (
+                      <span className="inline-block w-2 h-4 bg-amber-500 animate-pulse ml-0.5" />
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-32 text-gray-400">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      <span className="ml-2 text-sm">AI正在分析你的回答...</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+              {!isAiReviewing && aiReviewContent && (
+                <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                  <Button
+                    onClick={() => setShowAIReview(false)}
+                    fullWidth
+                  >
+                    继续完善回答
+                  </Button>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* 退出确认弹窗 */}
       {showExitConfirm && (

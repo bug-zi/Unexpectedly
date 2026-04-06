@@ -74,7 +74,7 @@ export function CategoryListPage() {
             <motion.button
               whileHover={{ scale: 1.05, x: -3 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate('/questions')}
+              onClick={() => navigate('/questions/explore')}
               className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
             >
               <ArrowLeft size={20} />
