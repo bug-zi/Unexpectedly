@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, PenTool, RotateCw, Save, Eye, EyeOff } from 'lucide-react';
 import { setUserData, getUserData, getUserDataSync } from '@/utils/userStorage';
 import { updateDailyTaskProgress } from '@/utils/taskManager';
+import { usePageSEO } from '@/hooks/usePageSEO';
 
 // 自定义动画
 const customEasing = {

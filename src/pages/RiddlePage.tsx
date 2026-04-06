@@ -27,9 +27,11 @@ import {
 } from '@/constants/riddles';
 import { saveRiddleRecord } from '@/utils/storage';
 import { updateDailyTaskProgress } from '@/utils/taskManager';
+import { usePageSEO } from '@/hooks/usePageSEO';
 
 export function RiddlePage() {
   const navigate = useNavigate();
+  const { SEORender } = usePageSEO({ seo: '/logic-reasoning/riddle' });
   const [currentRiddle, setCurrentRiddle] = useState<Riddle>(getRandomRiddle());
   const [showAnswer, setShowAnswer] = useState(false);
   const [showHint, setShowHint] = useState(false);

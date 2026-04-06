@@ -14,9 +14,13 @@ import { answerTurtleSoupQuestion, isValidYesNoQuestion, getSuggestedQuestions, 
 import { saveTurtleSoupRecord } from '@/utils/storage';
 import { updateDailyTaskProgress } from '@/utils/taskManager';
 import { useTurtleSoupAI } from '@/hooks/useTurtleSoupAI';
+import { usePageSEO } from '@/hooks/usePageSEO';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { getGameSchema } from '@/constants/structuredData';
 
 export function TurtleSoupPage() {
   const navigate = useNavigate();
+  const { SEORender } = usePageSEO({ seo: '/turtle-soup' });
   const [currentPuzzle, setCurrentPuzzle] = useState<TurtleSoupPuzzle>(getRandomPuzzle());
   const [showTruth, setShowTruth] = useState(false);
   const [showHint, setShowHint] = useState(false);
@@ -185,6 +189,8 @@ export function TurtleSoupPage() {
         backgroundAttachment: 'fixed',
       }}
     >
+      {SEORender}
+      <JsonLd schema={getGameSchema('海龟汤', '通过是/否提问揭开谜题真相，锻炼逆向推理能力', '/turtle-soup')} />
       {/* 背景遮罩层 - 保证内容可读性 */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-rose-50/80 to-orange-50/85 dark:from-gray-900/90 dark:via-red-900/85 dark:to-rose-900/90 z-0" />
 

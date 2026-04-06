@@ -20,6 +20,10 @@ import { ExportDialog } from '@/components/features/ExportDialog';
 import { useRoundtableStore } from '@/stores/roundtableStore';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-toastify';
+import { usePageSEO } from '@/hooks/usePageSEO';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { getQAPageSchema } from '@/constants/structuredData';
+import { getQuestionPageSEO } from '@/constants/seo';
 
 export function QuestionPage() {
   const { id } = useParams<{ id: string }>();
@@ -31,6 +35,8 @@ export function QuestionPage() {
   const { addFavorite, removeFavorite, isFavorited, markAsAnswered } = useFavorites();
   const { addToLater, removeFromLater, isLater } = useLater();
   const { sessions } = useRoundtableStore();
+
+  const { SEORender } = usePageSEO({ seo: getQuestionPageSEO(id || '', currentQuestion?.content) });
 
   // 获取关联的圆桌会话
   const roundtableSession = roundtableSessionId
@@ -236,6 +242,11 @@ export function QuestionPage() {
         backgroundAttachment: 'fixed',
       }}
     >
+      {SEORender}
+      <JsonLd schema={getQAPageSchema(
+        currentQuestion?.content || '思考问题',
+        answers.filter(a => a.questionId === id).map(a => a.content)
+      )} />
       {/* 背景遮罩层 - 暖色主题融合 */}
       <div className="absolute inset-0 z-0" style={{ background: 'linear-gradient(135deg, rgba(255,251,235,0.82) 0%, rgba(254,243,199,0.75) 40%, rgba(255,237,213,0.78) 100%)' }} />
       <div className="hidden dark:block absolute inset-0 z-0" style={{ background: 'linear-gradient(135deg, rgba(17,24,39,0.88) 0%, rgba(30,20,10,0.85) 40%, rgba(17,24,39,0.88) 100%)' }} />
@@ -257,9 +268,9 @@ export function QuestionPage() {
 
             {/* 中间显示问题内容 - 绝对定位居中 */}
             <div className="absolute inset-x-0 flex items-center justify-center pointer-events-none px-12 sm:px-32">
-              <h2 className="text-lg font-medium text-gray-800 dark:text-gray-200 truncate max-w-md text-center">
+              <h1 className="text-lg font-medium text-gray-800 dark:text-gray-200 truncate max-w-md text-center">
                 {question.content}
-              </h2>
+              </h1>
             </div>
 
             {/* 右侧操作 */}

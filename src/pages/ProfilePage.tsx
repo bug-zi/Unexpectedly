@@ -53,6 +53,7 @@ import { getProviderConfig, validateApiKey } from '@/services/llmService';
 import { useRoundtableStore } from '@/stores/roundtableStore';
 import type { LLMProvider } from '@/types';
 import { submitFeedback, checkRateLimit } from '@/services/feedbackService';
+import { usePageSEO } from '@/hooks/usePageSEO';
 
 interface CheckInRecord {
   date: string;

@@ -31,9 +31,11 @@ import { zhCN } from 'date-fns/locale';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 import { getQuestionById } from '@/constants/questions';
+import { usePageSEO } from '@/hooks/usePageSEO';
 
 export function GrowthTrackerPage() {
   const navigate = useNavigate();
+  const { SEORender } = usePageSEO({ seo: '/growth' });
   const { isAuthenticated, user } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState<'7days' | '30days' | 'all'>('30days');
   const [showComparison, setShowComparison] = useState<{ oldAnswer: Answer; newAnswer: Answer } | null>(null);

@@ -10,6 +10,7 @@ import { matchThinkers } from '@/utils/thinkerMatcher';
 import { getClassicLineups } from '@/utils/thinkerMatcher';
 import { ThinkerGrid } from '@/components/roundtable/ThinkerGrid';
 import { Button } from '@/components/ui/Button';
+import { usePageSEO } from '@/hooks/usePageSEO';
 
 const customEasing = {
   elastic: [0.68, -0.55, 0.265, 1.55],

@@ -11,6 +11,7 @@ import { DebateTopicCard } from '@/components/debate/DebateTopicCard';
 import { DebateChat } from '@/components/debate/DebateChat';
 import { DebateInputBar } from '@/components/debate/DebateInputBar';
 import { DebateJudgeResult } from '@/components/debate/DebateJudgeResult';
+import { usePageSEO } from '@/hooks/usePageSEO';
 
 // 自定义缓动曲线
 const customEasing = {

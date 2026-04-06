@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /auth/callback
+Disallow: /notifications
+Disallow: /login
+Disallow: /check
+Disallow: /data-recovery.html
+
+Sitemap: https://unexpectedly.debugzi.com/sitemap.xml

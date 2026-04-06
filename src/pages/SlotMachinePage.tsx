@@ -4,6 +4,9 @@ import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 import { SlotMachine } from '@/components/features/SlotMachine';
 import { EasterEgg } from '@/types';
+import { usePageSEO } from '@/hooks/usePageSEO';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { getGameSchema } from '@/constants/structuredData';
 
 // 自定义动画
 const customEasing = {
@@ -13,6 +16,7 @@ const customEasing = {
 
 export function SlotMachinePage() {
   const navigate = useNavigate();
+  const { SEORender } = usePageSEO({ seo: '/slot-machine' });
 
   const handleSpinComplete = (
     spinWords: [string, string, string],
@@ -37,6 +41,8 @@ export function SlotMachinePage() {
         backgroundAttachment: 'fixed',
       }}
     >
+      {SEORender}
+      <JsonLd schema={getGameSchema('灵感老虎机', '三个随机词语碰撞，激发无限创意灵感', '/slot-machine')} />
       {/* 导航栏 */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/50 dark:border-gray-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -55,9 +61,9 @@ export function SlotMachinePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ ease: customEasing.unexpected }}
             >
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                 灵感老虎机
-              </h1>
+              </span>
             </motion.div>
             <div className="w-16" />
           </div>
@@ -74,9 +80,9 @@ export function SlotMachinePage() {
             transition={{ duration: 0.6, ease: customEasing.elastic }}
             className="text-center mb-8"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-3">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-3">
               灵感老虎机
-            </h2>
+            </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               三个随机词语碰撞出你意想不到的创意火花
             </p>

@@ -21,6 +21,7 @@ import { getRandomWord, analyzeYesNoQuestion, isValidYesOrNoQuestion } from '@/c
 import { saveYesOrNoRecord, getYesOrNoRecords } from '@/utils/storage';
 import { updateDailyTaskProgress } from '@/utils/taskManager';
 import { useYesNoAI } from '@/hooks/useYesNoAI';
+import { usePageSEO } from '@/hooks/usePageSEO';
 
 interface QAPair {
   question: string;

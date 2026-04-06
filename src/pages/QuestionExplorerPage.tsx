@@ -11,6 +11,10 @@ import { ArrowLeft, Brain, Globe, Star, BookOpen, Sparkles, FileText } from 'luc
 import { getRandomQuestion } from '@/constants/questions';
 import { useAppStore } from '@/stores/appStore';
 import { Icon } from '@/components/ui/Icon';
+import { usePageSEO } from '@/hooks/usePageSEO';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { getFAQPageSchema } from '@/constants/structuredData';
+import { QUESTIONS } from '@/constants/questions';
 
 // 自定义缓动曲线
 const customEasing = {
@@ -22,6 +26,7 @@ export function QuestionExplorerPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { setCurrentQuestion } = useAppStore();
+  const { SEORender } = usePageSEO({ seo: '/questions/explore' });
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [currentQuestion, setQuestion] = useState(() => getRandomQuestion());
 
@@ -62,6 +67,10 @@ export function QuestionExplorerPage() {
         backgroundAttachment: 'fixed',
       }}
     >
+      {SEORender}
+      <JsonLd schema={getFAQPageSchema(
+        QUESTIONS.slice(0, 5).map(q => ({ questionText: q.content }))
+      )} />
       {/* 背景遮罩层 - 暖色主题融合 */}
       <div className="absolute inset-0 z-0" style={{ background: 'linear-gradient(135deg, rgba(255,251,235,0.82) 0%, rgba(254,243,199,0.75) 40%, rgba(255,237,213,0.78) 100%)' }} />
       <div className="hidden dark:block absolute inset-0 z-0" style={{ background: 'linear-gradient(135deg, rgba(17,24,39,0.88) 0%, rgba(30,20,10,0.85) 40%, rgba(17,24,39,0.88) 100%)' }} />
@@ -92,9 +101,9 @@ export function QuestionExplorerPage() {
                 className="flex items-center gap-2 px-2 pointer-events-auto"
               >
                 <Icon name="Brain" size={20} className="text-amber-500 shrink-0" />
-                <h1 className="text-base sm:text-xl font-bold text-amber-700 dark:text-amber-300 whitespace-nowrap">
+                <span className="text-base sm:text-xl font-bold text-amber-700 dark:text-amber-300 whitespace-nowrap">
                   问题探索
-                </h1>
+                </span>
               </motion.div>
             </div>
 
@@ -155,9 +164,9 @@ export function QuestionExplorerPage() {
             transition={{ duration: 0.6, ease: customEasing.elastic }}
             className="text-center mb-8"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3">
               开启思维之旅
-            </h2>
+            </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400">
               选择探索方式，每天进步一点点
             </p>

@@ -10,6 +10,10 @@ import { PuzzlePiece, Brain as BrainIcon, Notebook, BookOpen as BookOpenIcon, Sp
 import { getRandomQuestion } from '@/constants/questions';
 import { useAppStore } from '@/stores/appStore';
 import { Icon } from '@/components/ui/Icon';
+import { usePageSEO } from '@/hooks/usePageSEO';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { GeoContent } from '@/components/seo/GeoContent';
+import { getWebApplicationSchema, getItemListSchema } from '@/constants/structuredData';
 
 // 自定义缓动曲线
 const customEasing = {
@@ -116,6 +120,7 @@ const thinkingQuotes = [
 export function HomePage() {
   const navigate = useNavigate();
   const { setCurrentQuestion } = useAppStore();
+  const { SEORender } = usePageSEO({ seo: '/' });
   const [currentThinkingQuote, setCurrentThinkingQuote] = useState('');
   const [quoteIndex, setQuoteIndex] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -181,6 +186,17 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
+      {SEORender}
+      <JsonLd schema={[
+        getWebApplicationSchema(),
+        getItemListSchema([
+          { name: '逻辑推理', url: '/logic-reasoning', description: '推理悬疑游戏，锻炼逻辑思维' },
+          { name: '问题思考', url: '/questions', description: '精选深度思考问题' },
+          { name: '写作创造', url: '/writing', description: '灵感老虎机和文笔挑战' },
+          { name: '知识科普', url: '/knowledge-popularize', description: '心理学、哲学、科学趣味知识' },
+        ]),
+      ]} />
+      <GeoContent />
       {/* 背景图片 */}
       <div
         className="fixed inset-0 bg-cover bg-center bg-no-repeat"
@@ -222,9 +238,9 @@ export function HomePage() {
                 <img src="/favicon.png" alt="Logo" className="w-full h-full object-cover" />
               </motion.div>
               <div className="flex flex-col">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-red-500 via-amber-400 to-blue-500 bg-clip-text text-transparent">
+                <span className="text-xl font-bold bg-gradient-to-r from-red-500 via-amber-400 to-blue-500 bg-clip-text text-transparent">
                   万万没想到
-                </h1>
+                </span>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   每日思维提升工具
                 </p>
@@ -296,9 +312,9 @@ export function HomePage() {
             transition={{ duration: 0.8, ease: customEasing.elastic }}
             className="text-center mb-12"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight mb-4">
               今天你想探索什么？
-            </h2>
+            </h1>
             <p className="text-xl text-gray-600 dark:text-gray-400">
               选择一个入口，开启你的思维之旅
             </p>
@@ -367,9 +383,9 @@ export function HomePage() {
                       <PuzzlePiece size={48} weight="duotone" className="text-white" />
                     </motion.div>
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">
+                  <h2 className="text-2xl font-bold text-white mb-3">
                     逻辑推理
-                  </h3>
+                  </h2>
                   <p className="text-red-100 mb-4 text-base">
                     推理思考，锻炼逻辑思维
                   </p>
@@ -432,9 +448,9 @@ export function HomePage() {
                       <BrainIcon size={48} weight="duotone" className="text-white" />
                     </motion.div>
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">
+                  <h2 className="text-2xl font-bold text-white mb-3">
                     问题思考
-                  </h3>
+                  </h2>
                   <p className="text-amber-100 mb-4 text-base">
                     精选问题，引导深度思考
                   </p>
@@ -497,9 +513,9 @@ export function HomePage() {
                       <Notebook size={48} weight="duotone" className="text-white" />
                     </motion.div>
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">
+                  <h2 className="text-2xl font-bold text-white mb-3">
                     写作创造
-                  </h3>
+                  </h2>
                   <p className="text-blue-100 mb-4 text-base">
                     激发创意，创造精彩内容
                   </p>
@@ -562,9 +578,9 @@ export function HomePage() {
                       <BookOpenIcon size={48} weight="duotone" className="text-white" />
                     </motion.div>
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">
+                  <h2 className="text-2xl font-bold text-white mb-3">
                     知识科普
-                  </h3>
+                  </h2>
                   <p className="text-green-100 mb-4 text-base">
                     科学知识，拓展认知边界
                   </p>

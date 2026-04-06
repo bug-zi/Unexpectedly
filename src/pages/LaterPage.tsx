@@ -23,6 +23,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { supabase } from '@/lib/supabase';
 import { clsx } from 'clsx';
+import { usePageSEO } from '@/hooks/usePageSEO';
 
 // 自定义动画
 const customEasing = {

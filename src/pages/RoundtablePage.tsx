@@ -16,9 +16,11 @@ import { RoundtableChat } from '@/components/roundtable/RoundtableChat';
 import { RoundtableBar } from '@/components/roundtable/RoundtableBar';
 import { RoundtableSummary } from '@/components/roundtable/RoundtableSummary';
 import { Button } from '@/components/ui/Button';
+import { usePageSEO } from '@/hooks/usePageSEO';
 
 export function RoundtablePage() {
   const navigate = useNavigate();
+  const { SEORender } = usePageSEO({ seo: '/roundtable/discuss' });
   const [searchParams] = useSearchParams();
   const questionId = searchParams.get('q') || '';
   const thinkerIdsStr = searchParams.get('thinkers') || '';

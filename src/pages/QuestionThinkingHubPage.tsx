@@ -19,6 +19,9 @@ import {
 import { getAnswers } from '@/utils/storage';
 import { useDebateStore } from '@/stores/debateStore';
 import { useLLMConfig } from '@/hooks/useLLMConfig';
+import { usePageSEO } from '@/hooks/usePageSEO';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { getItemListSchema } from '@/constants/structuredData';
 
 // 自定义动画
 const customEasing = {
@@ -29,6 +32,7 @@ const customEasing = {
 export function QuestionThinkingHubPage() {
   const navigate = useNavigate();
   const { isConfigured: isAIConfigured } = useLLMConfig();
+  const { SEORender } = usePageSEO({ seo: '/questions' });
   const [showInstructions, setShowInstructions] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showAIRequiredTip, setShowAIRequiredTip] = useState(false);
@@ -74,6 +78,11 @@ export function QuestionThinkingHubPage() {
         backgroundAttachment: 'fixed',
       }}
     >
+      {SEORender}
+      <JsonLd schema={getItemListSchema([
+        { name: '问题卡片', url: '/questions/explore', description: '精选问题，引导深度思考探索' },
+        { name: '辩论堂', url: '/debate', description: '与AI辩手辩论，锻炼思辨能力' },
+      ])} />
       {/* 背景遮罩层 - 黄色主题 */}
       <div className="absolute inset-0 bg-gradient-to-br from-yellow-50/85 via-amber-50/80 to-orange-50/85 dark:from-gray-900/90 dark:via-yellow-900/85 dark:to-gray-800/90 z-0" />
 
@@ -109,9 +118,9 @@ export function QuestionThinkingHubPage() {
                 >
                   <Brain size={20} className="text-yellow-500 dark:text-yellow-400" />
                 </motion.div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent">
+                <span className="text-xl font-bold bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent">
                   问题思考
-                </h1>
+                </span>
               </motion.div>
             </div>
 
@@ -365,9 +374,9 @@ export function QuestionThinkingHubPage() {
             transition={{ duration: 0.6, ease: customEasing.elastic }}
             className="text-center mb-12"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-3">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-3">
               选择思考方式
-            </h2>
+            </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               两种不同的思考模式，激发你的深度思维
             </p>

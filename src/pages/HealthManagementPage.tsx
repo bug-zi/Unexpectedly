@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, HeartPulse, Activity, Apple, Moon, Droplets } from 'lucide-react';
 import { healthKnowledgeData } from '@/constants/knowledgePopularize';
+import { usePageSEO } from '@/hooks/usePageSEO';
 
 // Fisher-Yates 洗牌算法
 function shuffleArray<T>(array: T[]): T[] {

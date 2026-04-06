@@ -8,6 +8,10 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Sparkles, PenTool, BookOpen, BarChart3, Shuffle, X, History, Clock, Edit, Trash2, Save } from 'lucide-react';
 import { getSlotMachineResults } from '@/utils/storage';
 import { setUserData, getUserData, getUserDataSync } from '@/utils/userStorage';
+import { usePageSEO } from '@/hooks/usePageSEO';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { GeoContent } from '@/components/seo/GeoContent';
+import { getItemListSchema } from '@/constants/structuredData';
 
 // 自定义动画
 const customEasing = {
@@ -17,6 +21,7 @@ const customEasing = {
 
 export function WritingPage() {
   const navigate = useNavigate();
+  const { SEORender } = usePageSEO({ seo: '/writing' });
   const [showInstructions, setShowInstructions] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -199,6 +204,12 @@ export function WritingPage() {
         backgroundAttachment: 'fixed',
       }}
     >
+      {SEORender}
+      <JsonLd schema={getItemListSchema([
+        { name: '灵感老虎机', url: '/slot-machine', description: '随机词语碰撞激发创意' },
+        { name: '文笔挑战', url: '/writing-challenge', description: '精炼文字表达能力' },
+      ])} />
+      <GeoContent />
       {/* 背景图上叠加渐变遮罩，保证内容可读性 */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-100/70 via-cyan-100/50 to-sky-100/60 dark:from-gray-900/80 dark:via-blue-900/70 dark:to-gray-800/80 pointer-events-none" />
 

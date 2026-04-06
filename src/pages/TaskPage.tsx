@@ -36,9 +36,11 @@ import { getAnswers } from '@/utils/storage';
 import { getQuestionById } from '@/constants/questions';
 import { getCategoryConfig } from '@/constants/categories';
 import { Answer } from '@/types';
+import { usePageSEO } from '@/hooks/usePageSEO';
 
 export function TaskPage() {
   const navigate = useNavigate();
+  const { SEORender } = usePageSEO({ seo: '/tasks' });
   const [activeTab, setActiveTab] = useState<'daily' | 'weekly' | 'calendar'>('daily');
   const [dailyTasks, setDailyTasks] = useState<ReturnType<typeof getDailyTasks>>([]);
   const [weeklyTasks, setWeeklyTasks] = useState<ReturnType<typeof getWeeklyTasks>>([]);

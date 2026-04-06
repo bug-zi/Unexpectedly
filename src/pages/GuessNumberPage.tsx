@@ -27,9 +27,11 @@ import {
 } from '@/utils/guessNumber';
 import { saveGuessNumberRecord, getGuessNumberRecords } from '@/utils/storage';
 import { updateDailyTaskProgress } from '@/utils/taskManager';
+import { usePageSEO } from '@/hooks/usePageSEO';
 
 export function GuessNumberPage() {
   const navigate = useNavigate();
+  const { SEORender } = usePageSEO({ seo: '/logic-reasoning/guess-number' });
   const [secretNumber, setSecretNumber] = useState(generateSecretNumber());
   const [guessHistory, setGuessHistory] = useState<GuessResult[]>([]);
   const [currentGuess, setCurrentGuess] = useState('');

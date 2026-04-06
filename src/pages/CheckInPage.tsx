@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Heart, Flame, Droplets, Leaf, X } from 'lucide-react';
 import { getUserDataSync, setUserData } from '@/utils/userStorage';
+import { usePageSEO } from '@/hooks/usePageSEO';
 
 // ---------- 类型 ----------
 

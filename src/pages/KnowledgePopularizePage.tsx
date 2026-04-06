@@ -9,10 +9,14 @@ import { ArrowLeft, BookOpen, BarChart3, Trophy, Network, HeartPulse, X, Message
 import { knowledgeModules } from '@/constants/knowledgePopularize';
 import { GiWorld } from 'react-icons/gi';
 import { useLLMConfig } from '@/hooks/useLLMConfig';
+import { usePageSEO } from '@/hooks/usePageSEO';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { getItemListSchema } from '@/constants/structuredData';
 
 export function KnowledgePopularizePage() {
   const navigate = useNavigate();
   const { isConfigured: isAIConfigured } = useLLMConfig();
+  const { SEORender } = usePageSEO({ seo: '/knowledge-popularize' });
   const [showInstructions, setShowInstructions] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [knowledgeStats, setKnowledgeStats] = useState({
@@ -70,6 +74,12 @@ export function KnowledgePopularizePage() {
 
   return (
     <div className="min-h-screen relative">
+      {SEORender}
+      <JsonLd schema={getItemListSchema([
+        { name: '世界之最', url: '/knowledge-popularize/world-records', description: '探索世界极限与奇迹' },
+        { name: '系统思维', url: '/knowledge-popularize/systems-thinking', description: '看透事物之间的联系' },
+        { name: '健康管理', url: '/knowledge-popularize/health-management', description: '科学管理身心健康' },
+      ])} />
       {/* 背景图片 */}
       <div
         className="fixed inset-0 bg-cover bg-center bg-no-repeat"

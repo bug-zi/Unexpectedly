@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { signInWithEmail, signUpWithEmail, signInWithGitHub } from '@/services/authService';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { usePageSEO } from '@/hooks/usePageSEO';
 
 // 自定义动画
 const customEasing = {

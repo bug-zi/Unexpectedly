@@ -15,6 +15,9 @@ import {
   getGuessNumberRecords
 } from '@/utils/storage';
 import { useLLMConfig } from '@/hooks/useLLMConfig';
+import { usePageSEO } from '@/hooks/usePageSEO';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { getItemListSchema } from '@/constants/structuredData';
 
 interface GameCard {
   id: string;
@@ -35,6 +38,7 @@ interface GameCard {
 export function LogicReasoningPage() {
   const navigate = useNavigate();
   const { isConfigured: isAIConfigured } = useLLMConfig();
+  const { SEORender } = usePageSEO({ seo: '/logic-reasoning' });
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [showInstructions, setShowInstructions] = useState(false);
   const [showStats, setShowStats] = useState(false);
@@ -191,6 +195,13 @@ export function LogicReasoningPage() {
         backgroundAttachment: 'fixed',
       }}
     >
+      {SEORender}
+      <JsonLd schema={getItemListSchema([
+        { name: '海龟汤', url: '/turtle-soup', description: '通过是/否提问揭开真相' },
+        { name: '谜语人', url: '/logic-reasoning/riddle', description: '破解趣味谜题' },
+        { name: '是非题', url: '/logic-reasoning/yes-or-no', description: '二选一思维博弈' },
+        { name: '猜数字', url: '/logic-reasoning/guess-number', description: '逻辑缩小范围' },
+      ])} />
       {/* 背景遮罩层 - 保证内容可读性 */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-rose-50/80 to-orange-50/85 dark:from-gray-900/90 dark:via-red-900/85 dark:to-rose-900/90 z-0" />
 

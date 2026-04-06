@@ -1,0 +1,17 @@
+{
+  "name": "万万没想到 - 每日思维提升工具",
+  "short_name": "万万没想到",
+  "description": "每天5分钟深度思考，锻炼你的思维能力，追踪成长轨迹。",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#f97316",
+  "background_color": "#ffffff",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
