@@ -13,6 +13,31 @@ interface UseTurtleSoupAIOptions {
   onStreaming?: (text: string) => void;
 }
 
+/**
+ * 四层降级解析AI回答
+ */
+function parseAIResponse(text: string): QuestionAnswer {
+  const trimmed = text.trim();
+  if (!trimmed) return 'wrong';
+
+  // 第一层：结构化格式（对，... 或 错，...）
+  const firstChar = trimmed[0];
+  if (firstChar === '对' || firstChar === '正') return 'correct';
+  if (firstChar === '错' || firstChar === '否') return 'wrong';
+
+  // 第二层：前5字符扫描
+  const prefix = trimmed.substring(0, 5);
+  if (/对|正确|是的|没错/.test(prefix)) return 'correct';
+  if (/错|不正确|不是|没有|错误/.test(prefix)) return 'wrong';
+
+  // 第三层：全文关键词扫描
+  if (/^(是的|没错|正确|对，|对的)/.test(trimmed)) return 'correct';
+  if (/^(不是|没有|错误|错|不相关|无关)/.test(trimmed)) return 'wrong';
+
+  // 第四层：安全降级
+  return 'wrong';
+}
+
 export function useTurtleSoupAI(options?: UseTurtleSoupAIOptions) {
   const llmConfig = useRoundtableStore((state) => state.llmConfig);
   const abortRef = useRef(false);
@@ -22,7 +47,8 @@ export function useTurtleSoupAI(options?: UseTurtleSoupAIOptions) {
       question: string,
       scenario: string,
       truth: string,
-      qaHistory: Array<{ question: string; answer: string; answerText: string }>
+      qaHistory: Array<{ question: string; answer: string; answerText: string }>,
+      hints?: string[]
     ): Promise<QAPair | null> => {
       if (!llmConfig) return null;
 
@@ -34,7 +60,8 @@ export function useTurtleSoupAI(options?: UseTurtleSoupAIOptions) {
           scenario,
           truth,
           question,
-          qaHistory
+          qaHistory,
+          hints
         );
 
         let fullText = '';
@@ -47,23 +74,12 @@ export function useTurtleSoupAI(options?: UseTurtleSoupAIOptions) {
 
         if (!fullText.trim()) return null;
 
-        // 解析回答类型
-        const trimmed = fullText.trim();
-        let answer: QuestionAnswer;
-        const firstChar = trimmed[0];
-
-        if (firstChar === '是') {
-          answer = 'yes';
-        } else if (firstChar === '否') {
-          answer = 'no';
-        } else {
-          answer = 'irrelevant';
-        }
+        const answer = parseAIResponse(fullText.trim());
 
         return {
           question,
           answer,
-          answerText: trimmed,
+          answerText: fullText.trim(),
           timestamp: new Date(),
         };
       } catch (err) {

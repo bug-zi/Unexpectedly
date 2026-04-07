@@ -122,6 +122,11 @@ export function getHint(result: GuessResult): string {
     return '提示：这次猜测中的数字都不在答案中，试试其他数字吧！';
   }
 
+  if (result.a > 0 && result.b > 0) {
+    const total = result.a + result.b;
+    return `提示：你有 ${total} 个数字是对的，其中有 ${result.b} 个数字的位置需要调整`;
+  }
+
   if (result.a > 0) {
     return `提示：你有 ${result.a} 个数字的位置完全正确！`;
   }
@@ -202,6 +207,8 @@ export function analyzeGuessHistory(history: GuessResult[]): string {
 
   if (latest.a === 0 && latest.b === 0) {
     advice = '这个猜测中没有任何数字是对的，尝试完全不同的数字组合。';
+  } else if (latest.a > 0 && latest.b > 0) {
+    advice = `有 ${latest.a} 个数字位置完全正确，另外 ${latest.b} 个数字对但位置需要调整。`;
   } else if (latest.a > 0) {
     advice = `有 ${latest.a} 个数字位置完全正确，保持这些数字，调整其他数字的位置。`;
   } else if (latest.b > 0) {

@@ -1,16 +1,16 @@
 /**
  * 海龟汤游戏页面
  * 玩家通过提问是/否问题来推理出故事的真相
+ * 每局有8次提问机会，4次后可查看汤底
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Lightbulb, Eye, EyeOff, Shuffle, CheckCircle2, AlertCircle, CircleDashed, Send, MessageSquare, Sparkles, HelpCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Send, MessageSquare, Sparkles, HelpCircle, Shuffle, Eye } from 'lucide-react';
 import { getRandomPuzzle, turtleSoupPuzzles, type TurtleSoupPuzzle } from '@/constants/turtleSoup';
-import { Button } from '@/components/ui/Button';
-import { Icon } from '@/components/ui/Icon';
 import { answerTurtleSoupQuestion, isValidYesNoQuestion, getSuggestedQuestions, type QAPair } from '@/utils/turtleSoupAI';
+import { Icon } from '@/components/ui/Icon';
 import { saveTurtleSoupRecord } from '@/utils/storage';
 import { updateDailyTaskProgress } from '@/utils/taskManager';
 import { useTurtleSoupAI } from '@/hooks/useTurtleSoupAI';
@@ -18,13 +18,14 @@ import { usePageSEO } from '@/hooks/usePageSEO';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getGameSchema } from '@/constants/structuredData';
 
+const MAX_QUESTIONS = 8;
+const REVEAL_THRESHOLD = 4; // 提问4次后出现"直接查看汤底"
+
 export function TurtleSoupPage() {
   const navigate = useNavigate();
   const { SEORender } = usePageSEO({ seo: '/turtle-soup' });
   const [currentPuzzle, setCurrentPuzzle] = useState<TurtleSoupPuzzle>(getRandomPuzzle());
   const [showTruth, setShowTruth] = useState(false);
-  const [showHint, setShowHint] = useState(false);
-  const [currentHintIndex, setCurrentHintIndex] = useState(0);
   const [solvedCount, setSolvedCount] = useState(0);
   const [qaHistory, setQaHistory] = useState<QAPair[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState('');
@@ -32,6 +33,9 @@ export function TurtleSoupPage() {
   const [showInstructions, setShowInstructions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const qaListRef = useRef<HTMLDivElement>(null);
+
+  const remainingQuestions = MAX_QUESTIONS - qaHistory.length;
+  const showRevealOption = qaHistory.length >= REVEAL_THRESHOLD && !showTruth;
 
   // AI Hook - 流式回调实时更新最后一条 QA
   const onStreaming = useCallback((text: string) => {
@@ -49,60 +53,70 @@ export function TurtleSoupPage() {
 
   const handleNewGame = () => {
     let newPuzzle = getRandomPuzzle();
-    // 确保不会随机到同一个谜题
     while (newPuzzle.id === currentPuzzle.id && turtleSoupPuzzles.length > 1) {
       newPuzzle = getRandomPuzzle();
     }
     setCurrentPuzzle(newPuzzle);
     setShowTruth(false);
-    setShowHint(false);
-    setCurrentHintIndex(0);
     setQaHistory([]);
     setCurrentQuestion('');
   };
 
+  const handleRevealTruth = () => {
+    if (showTruth) return;
+
+    // 保存游戏记录
+    const record = {
+      id: `soup-${Date.now()}`,
+      puzzleId: currentPuzzle.id,
+      puzzleTitle: currentPuzzle.title,
+      difficulty: currentPuzzle.difficulty,
+      category: currentPuzzle.category,
+      questionsAsked: qaHistory.length,
+      hintsUsed: 0,
+      solved: true,
+      completedAt: new Date(),
+    };
+
+    saveTurtleSoupRecord(record);
+    updateDailyTaskProgress('daily-reasoning', 1);
+
+    setShowTruth(true);
+    setSolvedCount(prev => prev + 1);
+  };
+
   const handleSubmitQuestion = async () => {
     const question = currentQuestion.trim();
-    if (!question) return;
+    if (!question || isSubmitting || remainingQuestions <= 0 || showTruth) return;
 
     setIsSubmitting(true);
-
-    // 检查是否是有效的yes/no问题
-    if (!isValidYesNoQuestion(question)) {
-      const irrelevantAnswer: QAPair = {
-        question,
-        answer: 'irrelevant',
-        answerText: '请用"是/否"的形式提问，例如："这个人是盲人吗？"',
-        timestamp: new Date()
-      };
-      setQaHistory(prev => [...prev, irrelevantAnswer]);
-      setCurrentQuestion('');
-      setIsSubmitting(false);
-      return;
-    }
 
     if (hasAI) {
       // AI 模式：先添加占位条目，流式更新
       const placeholder: QAPair = {
         question,
-        answer: 'irrelevant',
+        answer: 'correct',
         answerText: '',
         timestamp: new Date(),
       };
       setQaHistory(prev => [...prev, placeholder]);
       setCurrentQuestion('');
 
-      const result = await askLLM(question, currentPuzzle.scenario, currentPuzzle.truth, qaHistory);
+      const result = await askLLM(
+        question,
+        currentPuzzle.scenario,
+        currentPuzzle.truth,
+        qaHistory,
+        currentPuzzle.hints
+      );
 
       if (result) {
-        // AI 成功，用最终结果替换占位条目
         setQaHistory(prev => {
           const updated = [...prev];
           updated[updated.length - 1] = result;
           return updated;
         });
       } else {
-        // AI 失败，回退到规则引擎
         const fallback = answerTurtleSoupQuestion(question, currentPuzzle.scenario, currentPuzzle.truth);
         setQaHistory(prev => {
           const updated = [...prev];
@@ -111,7 +125,19 @@ export function TurtleSoupPage() {
         });
       }
     } else {
-      // 无 AI 配置，使用规则引擎
+      // 无 AI 配置，使用规则引擎（先做本地验证）
+      if (!isValidYesNoQuestion(question)) {
+        const invalidResponse: QAPair = {
+          question,
+          answer: 'wrong',
+          answerText: '请用能回答"是/否"的方式提问，例如："这个人是盲人吗？"',
+          timestamp: new Date()
+        };
+        setQaHistory(prev => [...prev, invalidResponse]);
+        setCurrentQuestion('');
+        setIsSubmitting(false);
+        return;
+      }
       const answer = answerTurtleSoupQuestion(question, currentPuzzle.scenario, currentPuzzle.truth);
       setQaHistory(prev => [...prev, answer]);
       setCurrentQuestion('');
@@ -138,35 +164,6 @@ export function TurtleSoupPage() {
     }
   }, [qaHistory]);
 
-  const handleRevealTruth = () => {
-    // 保存游戏记录
-    const record = {
-      id: `soup-${Date.now()}`,
-      puzzleId: currentPuzzle.id,
-      puzzleTitle: currentPuzzle.title,
-      difficulty: currentPuzzle.difficulty,
-      category: currentPuzzle.category,
-      questionsAsked: qaHistory.length,
-      hintsUsed: currentHintIndex + (showHint ? 1 : 0),
-      solved: true,
-      completedAt: new Date(),
-    };
-
-    saveTurtleSoupRecord(record);
-
-    // 更新逻辑推理任务进度（完成一次海龟汤游戏）
-    updateDailyTaskProgress('daily-reasoning', 1);
-
-    setShowTruth(true);
-    setSolvedCount(prev => prev + 1);
-  };
-
-  const handleNextHint = () => {
-    if (currentHintIndex < currentPuzzle.hints.length - 1) {
-      setCurrentHintIndex(prev => prev + 1);
-    }
-  };
-
   const getDifficultyColor = (difficulty: TurtleSoupPuzzle['difficulty']) => {
     switch (difficulty) {
       case '简单':
@@ -191,7 +188,7 @@ export function TurtleSoupPage() {
     >
       {SEORender}
       <JsonLd schema={getGameSchema('海龟汤', '通过是/否提问揭开谜题真相，锻炼逆向推理能力', '/turtle-soup')} />
-      {/* 背景遮罩层 - 保证内容可读性 */}
+      {/* 背景遮罩层 */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-rose-50/80 to-orange-50/85 dark:from-gray-900/90 dark:via-red-900/85 dark:to-rose-900/90 z-0" />
 
       {/* 内容层 */}
@@ -251,7 +248,7 @@ export function TurtleSoupPage() {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8 flex items-center justify-between"
+            className="mb-8 flex items-center justify-between flex-wrap gap-3"
           >
             <div className="flex items-center gap-4">
               <div className="px-4 py-2 bg-white dark:bg-gray-800 rounded-xl shadow-md">
@@ -261,6 +258,32 @@ export function TurtleSoupPage() {
               </div>
               <div className={`px-4 py-2 rounded-xl shadow-md ${getDifficultyColor(currentPuzzle.difficulty)}`}>
                 <span className="text-sm font-medium">{currentPuzzle.difficulty}</span>
+              </div>
+              {/* 剩余提问次数 - 粉红色进度条 */}
+              <div className="px-4 py-2 rounded-xl shadow-md bg-white dark:bg-gray-800 flex items-center gap-3">
+                <span className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">提问机会</span>
+                <div className="flex gap-1">
+                  {Array.from({ length: MAX_QUESTIONS }).map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className={`h-4 w-5 rounded-sm transition-colors duration-300 ${
+                        i < remainingQuestions
+                          ? 'bg-pink-400 dark:bg-pink-500'
+                          : 'bg-gray-200 dark:bg-gray-700'
+                      }`}
+                      initial={false}
+                      animate={{
+                        scaleX: i < remainingQuestions ? 1 : 0.85,
+                      }}
+                      transition={{ duration: 0.3, delay: i * 0.03 }}
+                    />
+                  ))}
+                </div>
+                <span className={`text-sm font-bold ${
+                  remainingQuestions <= 2
+                    ? 'text-orange-500 dark:text-orange-400'
+                    : 'text-pink-500 dark:text-pink-400'
+                }`}>{remainingQuestions}/{MAX_QUESTIONS}</span>
               </div>
             </div>
             <div className="px-4 py-2 bg-red-50 dark:bg-red-900/20 rounded-xl shadow-md border border-red-200 dark:border-red-800">
@@ -290,19 +313,19 @@ export function TurtleSoupPage() {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-red-500 mt-1">•</span>
-                      <span><strong>提问</strong>：通过"是/否"问题来获取线索，逐步推理真相</span>
+                      <span><strong>提问</strong>：你有{MAX_QUESTIONS}次提问机会，用"是/否"形式提问</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-red-500 mt-1">•</span>
-                      <span><strong>推理</strong>：根据回答线索，思考故事背后的真相</span>
+                      <span><strong>判断</strong>：AI会判断你的推理方向是"对"还是"错"</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-red-500 mt-1">•</span>
-                      <span><strong>提示</strong>：遇到困难可以查看提示，循序渐进</span>
+                      <span><strong>提示</strong>：回答"错"时，AI会给出提示帮助调整方向</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-red-500 mt-1">•</span>
-                      <span><strong>汤底</strong>：当你想确认或放弃时，查看真相</span>
+                      <span><strong>汤底</strong>：提问{REVEAL_THRESHOLD}次后可查看汤底，揭晓真相</span>
                     </li>
                   </ul>
                 </div>
@@ -367,7 +390,7 @@ export function TurtleSoupPage() {
                   <MessageSquare size={24} className="text-red-500" />
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white">提问推理</h3>
                   <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
-                    ({qaHistory.length} 个问题)
+                    ({qaHistory.length}/{MAX_QUESTIONS})
                   </span>
                 </div>
 
@@ -403,11 +426,9 @@ export function TurtleSoupPage() {
                               <Sparkles size={16} className="text-white" />
                             </div>
                             <div className={`flex-1 p-3 rounded-2xl rounded-tl-none ${
-                              qa.answer === 'yes'
+                              qa.answer === 'correct'
                                 ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
-                                : qa.answer === 'no'
-                                ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
-                                : 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800'
+                                : 'bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800'
                             }`}>
                               <p className="text-gray-800 dark:text-gray-200 font-medium">
                                 {qa.answerText}
@@ -423,6 +444,41 @@ export function TurtleSoupPage() {
                   </div>
                 )}
 
+                {/* 问题已用完提示 */}
+                {remainingQuestions <= 0 && !showTruth && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-4 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-2xl border border-orange-200 dark:border-orange-700 text-center"
+                  >
+                    <p className="text-orange-700 dark:text-orange-300 font-medium">
+                      提问机会已用完，请查看汤底揭晓真相
+                    </p>
+                  </motion.div>
+                )}
+
+                {/* "汤面太难？直接查看汤底" 组件 */}
+                {showRevealOption && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-4"
+                  >
+                    <button
+                      onClick={handleRevealTruth}
+                      className="w-full p-4 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-2xl border-2 border-dashed border-red-300 dark:border-red-700 hover:border-red-500 dark:hover:border-red-500 hover:shadow-md transition-all group"
+                    >
+                      <div className="flex items-center justify-center gap-3">
+                        <Eye size={20} className="text-red-400 group-hover:text-red-600 dark:text-red-400 dark:group-hover:text-red-300 transition-colors" />
+                        <div className="text-left">
+                          <p className="text-red-600 dark:text-red-300 font-bold">汤面太难？直接查看汤底</p>
+                          <p className="text-sm text-red-400 dark:text-red-500">点击揭晓故事真相</p>
+                        </div>
+                      </div>
+                    </button>
+                  </motion.div>
+                )}
+
                 {/* 提问输入框 */}
                 <div className="flex gap-3">
                   <input
@@ -431,15 +487,15 @@ export function TurtleSoupPage() {
                     value={currentQuestion}
                     onChange={(e) => setCurrentQuestion(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder='用是/否形式的句子提问'
-                    className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-red-500 dark:focus:border-red-400 focus:outline-none transition-colors text-gray-900 dark:text-gray-100"
-                    disabled={isSubmitting || showTruth}
+                    placeholder={remainingQuestions <= 0 ? '提问机会已用完' : '用是/否形式的句子提问'}
+                    className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-red-500 dark:focus:border-red-400 focus:outline-none transition-colors text-gray-900 dark:text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={isSubmitting || showTruth || remainingQuestions <= 0}
                   />
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleSubmitQuestion}
-                    disabled={!currentQuestion.trim() || isSubmitting || showTruth}
+                    disabled={!currentQuestion.trim() || isSubmitting || showTruth || remainingQuestions <= 0}
                     className="px-6 py-3 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 relative overflow-hidden"
                     style={{
                       backgroundImage: 'url(/UI-picture/UI-turtle-soup.jpg)',
@@ -484,40 +540,6 @@ export function TurtleSoupPage() {
                 )}
               </motion.div>
 
-              {/* 提示区域 */}
-              <AnimatePresence>
-                {showHint && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="mb-8 overflow-hidden"
-                  >
-                    <div className="flex items-center gap-2 mb-4">
-                      <Lightbulb size={24} className="text-red-500" />
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">提示</h3>
-                      <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
-                        ({currentHintIndex + 1}/{currentPuzzle.hints.length})
-                      </span>
-                    </div>
-                    <div className="p-6 bg-red-50 dark:bg-red-900/20 rounded-2xl border-l-4 border-red-500">
-                      <p className="text-lg text-gray-800 dark:text-gray-200 leading-relaxed">
-                        {currentPuzzle.hints[currentHintIndex]}
-                      </p>
-                      {currentHintIndex < currentPuzzle.hints.length - 1 && (
-                        <Button
-                          onClick={handleNextHint}
-                          className="mt-4"
-                          variant="outline"
-                        >
-                          下一个提示
-                        </Button>
-                      )}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
               {/* 汤底 - 真相 */}
               <AnimatePresence>
                 {showTruth && (
@@ -542,56 +564,22 @@ export function TurtleSoupPage() {
               </AnimatePresence>
             </div>
 
-            {/* 操作按钮 */}
-            <div className="px-8 pb-8">
-              <div className="flex flex-wrap gap-4">
-                {!showTruth ? (
-                  <>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setShowHint(!showHint)}
-                      className="flex items-center gap-2 px-6 py-3 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium relative overflow-hidden"
-                      style={{
-                        backgroundImage: 'url(/UI-picture/UI-turtle-soup.jpg)',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                      }}
-                    >
-                      {showHint ? <EyeOff size={20} /> : <Lightbulb size={20} />}
-                      <span>{showHint ? '隐藏提示' : '显示提示'}</span>
-                    </motion.button>
-
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleRevealTruth}
-                      className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium relative overflow-hidden"
-                      style={{
-                        backgroundImage: 'url(/UI-picture/UI-turtle-soup.jpg)',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                      }}
-                    >
-                      <Eye size={20} />
-                      <span>查看真相</span>
-                    </motion.button>
-                  </>
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="w-full p-6 bg-red-50 dark:bg-red-900/20 rounded-2xl border-2 border-red-500 flex items-center justify-center gap-3"
-                  >
-                    <CheckCircle2 size={32} className="text-red-500" />
-                    <div>
-                      <p className="text-lg font-bold text-red-700 dark:text-red-300">真相已揭晓</p>
-                      <p className="text-sm text-red-600 dark:text-red-400">点击右上角"换个题目"继续探索</p>
-                    </div>
-                  </motion.div>
-                )}
+            {/* 真相已揭晓 */}
+            {showTruth && (
+              <div className="px-8 pb-8">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="w-full p-6 bg-red-50 dark:bg-red-900/20 rounded-2xl border-2 border-red-500 flex items-center justify-center gap-3"
+                >
+                  <CheckCircle2 size={32} className="text-red-500" />
+                  <div>
+                    <p className="text-lg font-bold text-red-700 dark:text-red-300">真相已揭晓</p>
+                    <p className="text-sm text-red-600 dark:text-red-400">点击右上角"换个题目"继续探索</p>
+                  </div>
+                </motion.div>
               </div>
-            </div>
+            )}
           </motion.div>
         </div>
       </main>

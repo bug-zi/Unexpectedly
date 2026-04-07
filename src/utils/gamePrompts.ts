@@ -7,21 +7,36 @@ import { ChatMessage } from '@/types';
 
 // ==================== 海龟汤提示词 ====================
 
-const TURTLE_SOUP_SYSTEM_PROMPT = `你是海龟汤游戏的主持人。你掌握着故事背后的真相（汤底），需要根据真相回答玩家的问题。
+const TURTLE_SOUP_SYSTEM_PROMPT = `你是海龟汤游戏的主持人。你掌握着故事背后的真相（汤底），需要根据真相判断玩家的推理方向是否正确。
 
-规则：
-1. 玩家只能问"是/否"问题
-2. 你必须严格根据汤底真相来回答，不能凭空创造信息
-3. 回答格式：第一个词必须是"是"、"否"或"无关"
-4. 回答"是"或"否"后，可以附加简短解释（一句话以内），帮助玩家推理
-5. 如果问题不是"是/否"问题，以"无关"开头并提示玩家用"是/否"形式提问
-6. 不要直接透露汤底内容，只能引导玩家推理
-7. 保持神秘感和趣味性
+核心规则：
+1. 玩家会提出问题来表达自己的推理假设，问题形式不限
+2. 你必须严格根据汤底真相来判断玩家的假设方向是否正确
+3. 回答只有两种：对 或 错
+4. 如果玩家的假设方向正确，回答"对"并给予简短肯定或补充线索
+5. 如果玩家的假设方向错误，回答"错"并给出一个简短提示帮助玩家调整方向
+6. 绝对不要直接透露汤底内容，只能引导玩家推理
+7. 保持神秘感和趣味性，逐步引导玩家接近真相
+8. 绝大多数问题都可以用"对"或"错"来回答，请灵活判断
+
+回答格式（严格遵守）：
+- 方向正确：对，[一句话简短肯定或补充线索]
+- 方向错误：错，[一句话简短提示，引导玩家换个方向思考]
+
+判断逻辑：
+- 如果玩家的假设与汤底事实一致 → 对
+- 如果玩家的假设与汤底事实矛盾 → 错
+- 如果玩家问了开放性问题（如"为什么""怎么做到的"），简要提示并引导用封闭式问题提问
 
 回答示例：
-- 是的，你的方向对了。
-- 否，情况并非如此。
-- 无关，请用"是/否"形式提问，比如"这个人是盲人吗？"
+- 对，你抓住了关键线索，继续深入。
+- 对，方向正确，但还有更深层的原因。
+- 错，这个方向不太对，注意汤面中的细节矛盾。
+- 错，别被表面现象迷惑了，想想更深层的原因。
+- 错，请试着用能回答"对/错"的方式提问，比如"这件事发生在白天吗？"
+
+可用的提示方向（在回答"错"时可参考）：
+{hints}
 
 以下是当前游戏的背景信息：`;
 
@@ -32,33 +47,33 @@ export function buildTurtleSoupMessages(
   scenario: string,
   truth: string,
   question: string,
-  qaHistory: Array<{ question: string; answer: string; answerText: string }>
+  qaHistory: Array<{ question: string; answer: string; answerText: string }>,
+  hints?: string[]
 ): ChatMessage[] {
+  const hintText = hints && hints.length > 0
+    ? hints.map((h, i) => `${i + 1}. ${h}`).join('\n')
+    : '无预设提示';
+
   const systemMessage: ChatMessage = {
     role: 'system',
-    content: `${TURTLE_SOUP_SYSTEM_PROMPT}\n\n汤面（情境）：${scenario}\n汤底（真相）：${truth}`,
+    content: `${TURTLE_SOUP_SYSTEM_PROMPT.replace('{hints}', hintText)}\n\n汤面（情境）：${scenario}\n汤底（真相）：${truth}`,
   };
 
   const messages: ChatMessage[] = [systemMessage];
 
-  // 注入历史问答上下文
+  // 注入历史问答上下文（逐条交替注入，保留最近15轮）
   if (qaHistory.length > 0) {
-    const historyText = qaHistory
-      .map(
-        (qa) =>
-          `玩家问：${qa.question}\n主持人答：${qa.answerText}`
-      )
-      .join('\n\n');
-
-    messages.push({
-      role: 'user',
-      content: `以下是之前的问答记录：\n\n${historyText}`,
-    });
-
-    messages.push({
-      role: 'assistant',
-      content: '好的，我已了解之前的问答记录，请继续提问。',
-    });
+    const recentHistory = qaHistory.slice(-15);
+    for (const qa of recentHistory) {
+      messages.push({
+        role: 'user',
+        content: qa.question,
+      });
+      messages.push({
+        role: 'assistant',
+        content: qa.answerText,
+      });
+    }
   }
 
   // 当前问题
