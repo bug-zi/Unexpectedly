@@ -2,7 +2,7 @@
  * 首页 - 三个主要功能入口
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { Gamepad2, CircleDashed, Brain, Sparkles, Star, Clock, Bell, TrendingUp, ArrowRight, Lightbulb, Puzzle, Zap, Copy, RefreshCw, BookOpen, Calendar, User, Target } from 'lucide-react';
@@ -183,6 +183,36 @@ export function HomePage() {
       console.error('复制失败:', err);
     }
   };
+
+  // 滚轮切换金句
+  const quoteWheelRef = useRef(false);
+  const handleQuoteWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    if (quoteWheelRef.current) return; // 节流：防止连续触发
+    quoteWheelRef.current = true;
+    setTimeout(() => { quoteWheelRef.current = false; }, 300);
+
+    const direction = e.deltaY > 0 ? 1 : -1;
+    setQuoteIndex((prev) => {
+      let nextIndex = prev + direction;
+      if (nextIndex >= thinkingQuotes.length) nextIndex = 0;
+      if (nextIndex < 0) nextIndex = thinkingQuotes.length - 1;
+      setCurrentThinkingQuote(thinkingQuotes[nextIndex]);
+      return nextIndex;
+    });
+
+    // 重置自动切换定时器
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    intervalRef.current = setInterval(() => {
+      setQuoteIndex((prev) => {
+        const nextIndex = (prev + 1) % thinkingQuotes.length;
+        setCurrentThinkingQuote(thinkingQuotes[nextIndex]);
+        return nextIndex;
+      });
+    }, 10000);
+  }, []);
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -606,7 +636,8 @@ export function HomePage() {
             <div className="max-w-6xl mx-auto">
               <motion.div
                 whileHover={{ scale: 1.01 }}
-                className="relative rounded-2xl overflow-hidden"
+                onWheel={handleQuoteWheel}
+                className="relative rounded-2xl overflow-hidden cursor-default"
               >
                 {/* 背景图片 */}
                 <div

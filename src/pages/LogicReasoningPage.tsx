@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, PuzzlePiece, Lightbulb, Question, Hash, BookOpen, ChartBar, Shuffle, X, ClockCounterClockwise, Trophy, CalendarBlank } from '@phosphor-icons/react';
+import { ArrowLeft, PuzzlePiece, Lightbulb, Question, Hash, BookOpen, ChartBar, Shuffle, X, ClockCounterClockwise, Trophy, CalendarBlank, Seal, Medal, Crown } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
 import {
   getTurtleSoupRecords,
@@ -18,6 +18,7 @@ import { useLLMConfig } from '@/hooks/useLLMConfig';
 import { usePageSEO } from '@/hooks/usePageSEO';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getItemListSchema } from '@/constants/structuredData';
+import { GUESS_NUMBER_MODES, type GuessNumberMode } from '@/utils/guessNumber';
 
 interface GameCard {
   id: string;
@@ -45,6 +46,7 @@ export function LogicReasoningPage() {
   const [showRecords, setShowRecords] = useState(false);
   const [showComingSoon, setShowComingSoon] = useState(false);
   const [showAIRequiredTip, setShowAIRequiredTip] = useState(false);
+  const [showGuessModeSelect, setShowGuessModeSelect] = useState(false);
   const [gameStats, setGameStats] = useState({
     totalGames: 0,
     turtleSoupWins: 0,
@@ -606,6 +608,117 @@ export function LogicReasoningPage() {
         )}
       </AnimatePresence>
 
+      {/* 猜数字模式选择弹窗 */}
+      <AnimatePresence>
+        {showGuessModeSelect && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowGuessModeSelect(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 20, stiffness: 300 }}
+              className="relative rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border-2 border-red-200 dark:border-red-800"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* 背景图 */}
+              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/icon-picture/icon-logic1.jpg')" }} />
+              <div className="absolute inset-0 bg-white/30 dark:bg-gray-900/30 backdrop-blur-[2px]" />
+
+              {/* 头部 */}
+              <div className="relative overflow-hidden px-6 py-4 rounded-t-3xl flex items-center justify-between">
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/icon-picture/icon-logic1.jpg')" }} />
+                <div className="absolute inset-0 bg-gradient-to-r from-red-900/80 to-rose-900/70" />
+                <div className="relative flex items-center gap-3">
+                  <Hash size={24} weight="duotone" className="text-white" />
+                  <h3 className="text-xl font-bold text-white">选择难度模式</h3>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowGuessModeSelect(false)}
+                  className="relative p-2 text-white hover:bg-white/20 rounded-lg transition-colors"
+                >
+                  <X size={24} weight="duotone" />
+                </motion.button>
+              </div>
+
+              {/* 模式选择 */}
+              <div className="relative p-6 space-y-3">
+                {([
+                  {
+                    mode: 'easy' as GuessNumberMode,
+                    icon: <Seal size={26} weight="duotone" />,
+                    title: '简单模式',
+                    desc: '4位数字，各位互不相同',
+                    gradient: 'from-rose-300 to-rose-400',
+                    borderColor: 'border-rose-200 dark:border-rose-800/60',
+                    hoverBg: 'hover:bg-rose-50/50 dark:hover:bg-rose-900/10',
+                    tagColor: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-300',
+                    iconBg: 'bg-gradient-to-br from-rose-200 to-rose-300 dark:from-rose-700 dark:to-rose-800',
+                    iconColor: 'text-rose-600 dark:text-rose-200',
+                  },
+                  {
+                    mode: 'medium' as GuessNumberMode,
+                    icon: <Medal size={26} weight="duotone" />,
+                    title: '中等模式',
+                    desc: '4位数字，不同位置数字可相同',
+                    gradient: 'from-red-400 to-red-500',
+                    borderColor: 'border-red-200 dark:border-red-800/60',
+                    hoverBg: 'hover:bg-red-50/50 dark:hover:bg-red-900/10',
+                    tagColor: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-300',
+                    iconBg: 'bg-gradient-to-br from-red-300 to-red-400 dark:from-red-700 dark:to-red-800',
+                    iconColor: 'text-red-600 dark:text-red-200',
+                  },
+                  {
+                    mode: 'hard' as GuessNumberMode,
+                    icon: <Crown size={26} weight="duotone" />,
+                    title: '困难模式',
+                    desc: '5位数字，各位互不相同',
+                    gradient: 'from-red-600 to-rose-700',
+                    borderColor: 'border-red-300 dark:border-red-700/60',
+                    hoverBg: 'hover:bg-red-50/50 dark:hover:bg-red-900/10',
+                    tagColor: 'bg-red-200 text-red-700 dark:bg-red-900/40 dark:text-red-200',
+                    iconBg: 'bg-gradient-to-br from-red-500 to-red-600 dark:from-red-600 dark:to-red-800',
+                    iconColor: 'text-white dark:text-red-100',
+                  },
+                ]).map((item) => (
+                  <motion.button
+                    key={item.mode}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      setShowGuessModeSelect(false);
+                      navigate('/logic-reasoning/guess-number', { state: { mode: item.mode } });
+                    }}
+                    className={`w-full p-4 rounded-2xl border-2 ${item.borderColor} ${item.hoverBg} bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm transition-all flex items-center gap-4 text-left`}
+                  >
+                    <div className={`p-3 rounded-xl ${item.iconBg} flex items-center justify-center flex-shrink-0 shadow-md`}>
+                      <div className={item.iconColor}>{item.icon}</div>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="text-lg font-bold text-gray-900 dark:text-white">{item.title}</h4>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${item.tagColor}`}>
+                          {GUESS_NUMBER_MODES[item.mode].difficulty}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{item.desc}</p>
+                    </div>
+                    <span className="text-gray-400 text-lg">→</span>
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* 推理记录弹窗 */}
       <AnimatePresence>
         {showRecords && (
@@ -870,6 +983,8 @@ export function LogicReasoningPage() {
                     setShowComingSoon(true);
                   } else if (card.requiresAI && !isAIConfigured) {
                     setShowAIRequiredTip(true);
+                  } else if (card.id === 'guess-number') {
+                    setShowGuessModeSelect(true);
                   } else {
                     navigate(card.path);
                   }

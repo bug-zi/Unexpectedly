@@ -1,6 +1,44 @@
 /**
  * 猜数字游戏逻辑
+ * 支持三种难度模式：
+ * - easy（简单）：4位数字，各位不同
+ * - medium（中等）：4位数字，允许重复
+ * - hard（困难）：5位数字，各位不同
  */
+
+export type GuessNumberMode = 'easy' | 'medium' | 'hard';
+
+export interface GuessNumberModeConfig {
+  mode: GuessNumberMode;
+  digits: number;
+  allowRepeat: boolean;
+  label: string;
+  difficulty: string;
+}
+
+export const GUESS_NUMBER_MODES: Record<GuessNumberMode, GuessNumberModeConfig> = {
+  easy: {
+    mode: 'easy',
+    digits: 4,
+    allowRepeat: false,
+    label: '4位不重复数字',
+    difficulty: '简单',
+  },
+  medium: {
+    mode: 'medium',
+    digits: 4,
+    allowRepeat: true,
+    label: '4位可重复数字',
+    difficulty: '中等',
+  },
+  hard: {
+    mode: 'hard',
+    digits: 5,
+    allowRepeat: false,
+    label: '5位不重复数字',
+    difficulty: '困难',
+  },
+};
 
 export interface GuessResult {
   guess: string;
@@ -10,35 +48,48 @@ export interface GuessResult {
 }
 
 /**
- * 生成一个不重复数字的四位数字字符串
+ * 根据模式生成神秘数字
  */
-export function generateSecretNumber(): string {
+export function generateSecretNumber(mode: GuessNumberMode = 'easy'): string {
+  const config = GUESS_NUMBER_MODES[mode];
   const digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
   const secret: string[] = [];
 
-  // 第一位不能是0
-  const firstDigitIndex = Math.floor(Math.random() * 9) + 1;
-  secret.push(digits[firstDigitIndex]);
+  if (config.allowRepeat) {
+    // 允许重复：每位随机选择，第一位不能是0
+    const nonZeroDigits = digits.filter(d => d !== '0');
+    secret.push(nonZeroDigits[Math.floor(Math.random() * nonZeroDigits.length)]);
+    for (let i = 1; i < config.digits; i++) {
+      secret.push(digits[Math.floor(Math.random() * digits.length)]);
+    }
+  } else {
+    // 不允许重复
+    // 第一位不能是0
+    const nonZeroDigits = digits.filter(d => d !== '0');
+    const firstIndex = Math.floor(Math.random() * nonZeroDigits.length);
+    secret.push(nonZeroDigits[firstIndex]);
 
-  // 从剩余数字中选择三位
-  const remainingDigits = digits.filter((_, index) => index !== firstDigitIndex);
+    // 从剩余数字中选择
+    const remainingDigits = digits.filter(d => d !== nonZeroDigits[firstIndex]);
 
-  for (let i = 0; i < 3; i++) {
-    const randomIndex = Math.floor(Math.random() * remainingDigits.length);
-    secret.push(remainingDigits[randomIndex]);
-    remainingDigits.splice(randomIndex, 1);
+    for (let i = 1; i < config.digits; i++) {
+      const randomIndex = Math.floor(Math.random() * remainingDigits.length);
+      secret.push(remainingDigits[randomIndex]);
+      remainingDigits.splice(randomIndex, 1);
+    }
   }
 
   return secret.join('');
 }
 
 /**
- * 验证猜测是否有效
- * 必须是四位数字，且数字不能重复
+ * 根据模式验证猜测是否有效
  */
-export function isValidGuess(guess: string): boolean {
+export function isValidGuess(guess: string, mode: GuessNumberMode = 'easy'): boolean {
+  const config = GUESS_NUMBER_MODES[mode];
+
   // 检查长度
-  if (guess.length !== 4) {
+  if (guess.length !== config.digits) {
     return false;
   }
 
@@ -47,10 +98,12 @@ export function isValidGuess(guess: string): boolean {
     return false;
   }
 
-  // 检查是否有重复数字
-  const uniqueDigits = new Set(guess.split(''));
-  if (uniqueDigits.size !== 4) {
-    return false;
+  // 如果不允许重复，检查是否有重复数字
+  if (!config.allowRepeat) {
+    const uniqueDigits = new Set(guess.split(''));
+    if (uniqueDigits.size !== config.digits) {
+      return false;
+    }
   }
 
   return true;
@@ -61,8 +114,10 @@ export function isValidGuess(guess: string): boolean {
  * A: 数字和位置都对
  * B: 数字对但位置不对
  */
-export function compareGuess(guess: string, secret: string): GuessResult {
-  if (!isValidGuess(guess)) {
+export function compareGuess(guess: string, secret: string, mode: GuessNumberMode = 'easy'): GuessResult {
+  const config = GUESS_NUMBER_MODES[mode];
+
+  if (!isValidGuess(guess, mode)) {
     return {
       guess,
       a: 0,
@@ -74,15 +129,13 @@ export function compareGuess(guess: string, secret: string): GuessResult {
   let a = 0;
   let b = 0;
 
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < config.digits; i++) {
     const guessDigit = guess[i];
     const secretDigit = secret[i];
 
     if (guessDigit === secretDigit) {
-      // 数字和位置都对
       a++;
     } else if (secret.includes(guessDigit)) {
-      // 数字对但位置不对
       b++;
     }
   }
@@ -91,16 +144,18 @@ export function compareGuess(guess: string, secret: string): GuessResult {
     guess,
     a,
     b,
-    isCorrect: a === 4
+    isCorrect: a === config.digits
   };
 }
 
 /**
  * 格式化结果字符串
  */
-export function formatGuessResult(result: GuessResult): string {
+export function formatGuessResult(result: GuessResult, mode: GuessNumberMode = 'easy'): string {
+  const config = GUESS_NUMBER_MODES[mode];
+
   if (result.isCorrect) {
-    return '4A0B - 恭喜你猜对了！';
+    return `${config.digits}A0B - 恭喜你猜对了！`;
   }
 
   if (result.a === 0 && result.b === 0) {
@@ -142,20 +197,22 @@ export function getHint(result: GuessResult): string {
  * 生成建议的猜测（用于AI辅助）
  */
 export function generateSuggestedGuess(
-  history: GuessResult[]
+  history: GuessResult[],
+  mode: GuessNumberMode = 'easy'
 ): string {
-  // 这里可以添加更复杂的逻辑来生成建议
-  // 目前返回一个随机的有效猜测
+  const config = GUESS_NUMBER_MODES[mode];
   let guess: string;
   do {
     const digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
     guess = '';
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < config.digits; i++) {
       const randomIndex = Math.floor(Math.random() * digits.length);
       guess += digits[randomIndex];
-      digits.splice(randomIndex, 1);
+      if (!config.allowRepeat) {
+        digits.splice(randomIndex, 1);
+      }
     }
-  } while (history.some(h => h.guess === guess) || !isValidGuess(guess));
+  } while (history.some(h => h.guess === guess) || !isValidGuess(guess, mode));
 
   return guess;
 }
@@ -163,9 +220,13 @@ export function generateSuggestedGuess(
 /**
  * 分析猜测历史，提供策略建议
  */
-export function analyzeGuessHistory(history: GuessResult[]): string {
+export function analyzeGuessHistory(history: GuessResult[], mode: GuessNumberMode = 'easy'): string {
+  const config = GUESS_NUMBER_MODES[mode];
+
   if (history.length === 0) {
-    return '开始猜测吧！记得数字不能重复。';
+    return config.allowRepeat
+      ? '开始猜测吧！注意数字可以重复。'
+      : '开始猜测吧！记得数字不能重复。';
   }
 
   const latest = history[history.length - 1];
@@ -180,24 +241,21 @@ export function analyzeGuessHistory(history: GuessResult[]): string {
   const wrongPositionDigits = new Set<string>();
 
   history.forEach(result => {
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < config.digits; i++) {
       allDigits.add(result.guess[i]);
     }
   });
 
-  // 找出在正确位置上的数字
   history.forEach(result => {
     if (result.a > 0) {
-      // 这些数字可能对
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < config.digits; i++) {
         if (!wrongPositionDigits.has(result.guess[i])) {
           correctDigits.add(result.guess[i]);
         }
       }
     }
     if (result.b > 0) {
-      // 这些数字对但位置不对
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < config.digits; i++) {
         wrongPositionDigits.add(result.guess[i]);
       }
     }

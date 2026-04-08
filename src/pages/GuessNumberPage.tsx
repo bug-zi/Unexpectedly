@@ -1,10 +1,13 @@
 /**
  * 猜数字游戏页面
- * 玩家需要猜出四位不重复数字的答案，根据xAxB提示进行推理
+ * 支持三种难度模式：
+ * - easy（简单）：4位不重复数字
+ * - medium（中等）：4位可重复数字
+ * - hard（困难）：5位不重复数字
  */
 
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
@@ -23,6 +26,8 @@ import {
   formatGuessResult,
   getHint,
   analyzeGuessHistory,
+  GUESS_NUMBER_MODES,
+  type GuessNumberMode,
   type GuessResult
 } from '@/utils/guessNumber';
 import { saveGuessNumberRecord, getGuessNumberRecords } from '@/utils/storage';
@@ -31,8 +36,11 @@ import { usePageSEO } from '@/hooks/usePageSEO';
 
 export function GuessNumberPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const mode: GuessNumberMode = (location.state as any)?.mode || 'easy';
+  const config = GUESS_NUMBER_MODES[mode];
   const { SEORender } = usePageSEO({ seo: '/logic-reasoning/guess-number' });
-  const [secretNumber, setSecretNumber] = useState(generateSecretNumber());
+  const [secretNumber, setSecretNumber] = useState(generateSecretNumber(mode));
   const [guessHistory, setGuessHistory] = useState<GuessResult[]>([]);
   const [currentGuess, setCurrentGuess] = useState('');
   const [isGameOver, setIsGameOver] = useState(false);
@@ -44,8 +52,10 @@ export function GuessNumberPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const historyRef = useRef<HTMLDivElement>(null);
 
+  const bestScoreKey = `guessNumberBestScore_${mode}`;
+
   const startNewGame = () => {
-    const newSecret = generateSecretNumber();
+    const newSecret = generateSecretNumber(mode);
     setSecretNumber(newSecret);
     setGuessHistory([]);
     setCurrentGuess('');
@@ -56,33 +66,37 @@ export function GuessNumberPage() {
 
   useEffect(() => {
     // 加载历史最佳成绩和总挑战局数
-    const savedBest = localStorage.getItem('guessNumberBestScore');
+    const savedBest = localStorage.getItem(bestScoreKey);
     if (savedBest) {
       setBestScore(parseInt(savedBest));
     }
     // 从 storage 加载总游戏记录数
     const records = getGuessNumberRecords();
     setTotalGames(records.length);
-  }, []);
+  }, [bestScoreKey]);
 
   const handleSubmitGuess = () => {
     const guess = currentGuess.trim();
 
     // 验证输入
     if (!guess) {
-      setErrorMessage('请输入四位数字');
+      setErrorMessage(`请输入${config.digits}位数字`);
       return;
     }
 
-    if (!isValidGuess(guess)) {
-      setErrorMessage('请输入四位不重复的数字');
+    if (!isValidGuess(guess, mode)) {
+      if (config.allowRepeat) {
+        setErrorMessage(`请输入${config.digits}位数字`);
+      } else {
+        setErrorMessage(`请输入${config.digits}位不重复的数字`);
+      }
       return;
     }
 
     setErrorMessage('');
 
     // 比较猜测
-    const result = compareGuess(guess, secretNumber);
+    const result = compareGuess(guess, secretNumber, mode);
     setGuessHistory(prev => [...prev, result]);
     setAttempts(prev => prev + 1);
     setCurrentGuess('');
@@ -98,7 +112,8 @@ export function GuessNumberPage() {
         secretNumber,
         attempts: attempts + 1,
         solved: true,
-        completedAt: new Date()
+        completedAt: new Date(),
+        mode
       };
       saveGuessNumberRecord(record);
 
@@ -106,9 +121,9 @@ export function GuessNumberPage() {
       updateDailyTaskProgress('daily-reasoning', 1);
 
       // 更新最佳成绩
-      const currentBest = localStorage.getItem('guessNumberBestScore');
+      const currentBest = localStorage.getItem(bestScoreKey);
       if (!currentBest || (attempts + 1) < parseInt(currentBest)) {
-        localStorage.setItem('guessNumberBestScore', (attempts + 1).toString());
+        localStorage.setItem(bestScoreKey, (attempts + 1).toString());
         setBestScore(attempts + 1);
       }
     }
@@ -129,7 +144,8 @@ export function GuessNumberPage() {
       secretNumber,
       attempts,
       solved: false,
-      completedAt: new Date()
+      completedAt: new Date(),
+      mode
     };
     saveGuessNumberRecord(record);
   };
@@ -145,6 +161,22 @@ export function GuessNumberPage() {
     if (score <= 10) return 'text-yellow-600 dark:text-yellow-400';
     return 'text-red-600 dark:text-red-400';
   };
+
+  const getDifficultyBadgeColor = () => {
+    if (mode === 'easy') return 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800';
+    if (mode === 'medium') return 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700';
+    return 'bg-red-100 dark:bg-red-900/30 border-red-400 dark:border-red-600';
+  };
+
+  const getDifficultyTextColor = () => {
+    if (mode === 'easy') return 'text-rose-600 dark:text-rose-300';
+    if (mode === 'medium') return 'text-red-600 dark:text-red-300';
+    return 'text-red-700 dark:text-red-200';
+  };
+
+  const inputPlaceholder = config.allowRepeat
+    ? `输入${config.digits}位数字`
+    : `输入${config.digits}位数字（不重复）`;
 
   return (
     <div
@@ -238,8 +270,10 @@ export function GuessNumberPage() {
                 </div>
               )}
             </div>
-            <div className="px-4 py-2 bg-red-50 dark:bg-red-900/20 rounded-xl shadow-md border border-red-200 dark:border-red-800">
-              <span className="text-sm text-red-700 dark:text-red-300 font-medium">4位不重复数字</span>
+            <div className={`px-4 py-2 rounded-xl shadow-md border ${getDifficultyBadgeColor()}`}>
+              <span className={`text-sm font-medium ${getDifficultyTextColor()}`}>
+                {config.difficulty} · {config.label}
+              </span>
             </div>
           </motion.div>
 
@@ -261,7 +295,7 @@ export function GuessNumberPage() {
                   <ul className="space-y-2 text-gray-700 dark:text-gray-300">
                     <li className="flex items-start gap-2">
                       <span className="text-red-500 mt-1">•</span>
-                      <span><strong>目标</strong>：猜出一个四位不重复数字的神秘答案</span>
+                      <span><strong>目标</strong>：猜出一个{config.digits}位{config.allowRepeat ? '' : '不重复'}数字的神秘答案</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-red-500 mt-1">•</span>
@@ -307,7 +341,9 @@ export function GuessNumberPage() {
               >
                 猜数字挑战
               </motion.h2>
-              <p className="relative z-10 text-orange-100 text-sm">根据xAxB提示，猜出四位不重复数字</p>
+              <p className="relative z-10 text-orange-100 text-sm">
+                根据xAxB提示，猜出{config.digits}位{config.allowRepeat ? '' : '不重复'}数字
+              </p>
             </div>
 
             {/* 游戏区域 */}
@@ -331,22 +367,22 @@ export function GuessNumberPage() {
                       type="text"
                       value={currentGuess}
                       onChange={(e) => {
-                        // 只允许输入数字，最多4位
-                        const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                        // 只允许输入数字，最多对应位数
+                        const value = e.target.value.replace(/\D/g, '').slice(0, config.digits);
                         setCurrentGuess(value);
                         setErrorMessage('');
                       }}
                       onKeyPress={handleKeyPress}
-                      placeholder="输入四位数字（不重复）"
+                      placeholder={inputPlaceholder}
                       className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-red-500 dark:focus:border-red-400 focus:outline-none transition-colors text-gray-900 dark:text-gray-100 text-center text-2xl tracking-widest font-mono"
-                      maxLength={4}
+                      maxLength={config.digits}
                       disabled={isGameOver}
                     />
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={handleSubmitGuess}
-                      disabled={currentGuess.length !== 4 || isGameOver}
+                      disabled={currentGuess.length !== config.digits || isGameOver}
                       className="px-6 py-3 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 relative overflow-hidden"
                       style={{
                         backgroundImage: 'url(/UI-picture/UI-logic2.jpg)',
@@ -460,7 +496,7 @@ export function GuessNumberPage() {
                         <div>
                           <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">策略建议</p>
                           <p className="text-sm text-blue-700 dark:text-blue-300">
-                            {analyzeGuessHistory(guessHistory)}
+                            {analyzeGuessHistory(guessHistory, mode)}
                           </p>
                         </div>
                       </div>
