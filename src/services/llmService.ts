@@ -54,9 +54,15 @@ export function getProviderConfig(provider: string): ProviderConfig {
 /**
  * 流式聊天 - 返回 AsyncGenerator 逐 token 输出
  */
+export interface StreamChatOptions {
+  temperature?: number;
+  max_tokens?: number;
+}
+
 export async function* streamChat(
   messages: ChatMessage[],
-  config: LLMConfig
+  config: LLMConfig,
+  options?: StreamChatOptions
 ): AsyncGenerator<string, void, unknown> {
   const providerConfig = getProviderConfig(config.provider);
   const baseUrl = config.baseUrl || providerConfig.baseUrl;
@@ -72,8 +78,8 @@ export async function* streamChat(
       model,
       messages,
       stream: true,
-      temperature: 0.8,
-      max_tokens: 1024,
+      temperature: options?.temperature ?? 0.8,
+      max_tokens: options?.max_tokens ?? 1024,
     }),
   });
 

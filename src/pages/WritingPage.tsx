@@ -686,7 +686,7 @@ export function WritingPage() {
             className="text-center mb-12"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-3">
-              选择创作方式
+              选择<span className="text-blue-500">创作方式</span>
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               两种不同的创作模式，激发你的无限创意

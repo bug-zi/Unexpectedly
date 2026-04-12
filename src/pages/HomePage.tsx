@@ -223,7 +223,7 @@ export function HomePage() {
           { name: '逻辑推理', url: '/logic-reasoning', description: '推理悬疑游戏，锻炼逻辑思维' },
           { name: '问题思考', url: '/questions', description: '精选深度思考问题' },
           { name: '写作创造', url: '/writing', description: '灵感老虎机和文笔挑战' },
-          { name: '知识科普', url: '/knowledge-popularize', description: '心理学、哲学、科学趣味知识' },
+          { name: '灵感源泉', url: '/inspiration', description: 'AI灵感生成，每次不重样' },
         ]),
       ]} />
       <GeoContent />
@@ -560,7 +560,7 @@ export function HomePage() {
               </motion.button>
             </motion.div>
 
-            {/* 知识科普入口 */}
+            {/* 灵感源泉入口 */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -573,7 +573,7 @@ export function HomePage() {
                   boxShadow: '0 25px 50px -12px rgba(34, 197, 94, 0.25)',
                 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => navigate('/knowledge-popularize')}
+                onClick={() => navigate('/inspiration')}
                 className="group relative w-full backdrop-blur-xl rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-green-200/80 dark:border-green-800/60 hover:border-emerald-400 dark:hover:border-emerald-600 p-8 text-left overflow-hidden cursor-pointer"
                 style={{
                   backgroundImage: 'url(/UI-picture/UI-knowledge2.jpg)',
@@ -593,7 +593,7 @@ export function HomePage() {
                         transition={{ duration: 2, repeat: Infinity }}
                         className="absolute inset-0 bg-white/20 rounded-full"
                       />
-                      <BookOpenIcon size={20} weight="duotone" className="text-white" />
+                      <Sparkles size={20} className="text-white" />
                     </div>
                   </div>
                 </div>
@@ -605,20 +605,20 @@ export function HomePage() {
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       transition={{ type: 'spring', stiffness: 300 }}
                     >
-                      <BookOpenIcon size={48} weight="duotone" className="text-white" />
+                      <Sparkles size={48} className="text-white" />
                     </motion.div>
                   </div>
                   <h2 className="text-2xl font-bold text-white mb-3">
-                    知识科普
+                    灵感源泉
                   </h2>
                   <p className="text-green-100 mb-4 text-base">
-                    科学知识，拓展认知边界
+                    AI灵感生成，每次都不重样
                   </p>
                   <motion.div
                     className="flex items-center text-white font-medium"
                     whileHover={{ x: 5 }}
                   >
-                    探索知识
+                    探索灵感
                     <ArrowRight size={20} className="ml-2" />
                   </motion.div>
                 </div>
@@ -755,7 +755,7 @@ export function HomePage() {
                       关于项目
                     </h3>
                     <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                      <strong>万万没想到</strong>是一款精心设计的每日思维提升工具。通过精心挑选的问题、创意游戏和知识科普，帮助你每天进行深度思考，拓展认知边界，提升创造力。
+                      <strong>万万没想到</strong>是一款精心设计的每日思维提升工具。通过精心挑选的问题、创意游戏和AI灵感生成，帮助你每天进行深度思考，拓展认知边界，提升创造力。
                     </p>
                   </div>
 
@@ -789,10 +789,10 @@ export function HomePage() {
                       </div>
                       <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
                         <div className="flex items-center gap-2 mb-2">
-                          <BookOpen size={18} className="text-green-500" />
-                          <h4 className="font-bold text-gray-900 dark:text-white">知识科普</h4>
+                          <Sparkles size={18} className="text-green-500" />
+                          <h4 className="font-bold text-gray-900 dark:text-white">灵感源泉</h4>
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">科学知识，拓展认知</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">AI灵感，每次不重样</p>
                       </div>
                     </div>
                   </div>

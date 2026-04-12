@@ -375,7 +375,7 @@ export function QuestionThinkingHubPage() {
             className="text-center mb-12"
           >
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-3">
-              选择思考方式
+              选择<span className="text-yellow-500">思考模式</span>
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               两种不同的思考模式，激发你的深度思维

@@ -13,11 +13,8 @@ import { NotificationSettingsPage } from '@/pages/NotificationSettingsPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { AuthCallbackPage } from '@/pages/AuthCallbackPage';
 import { FavoritesPage } from '@/pages/FavoritesPage';
-import { KnowledgePopularizePage } from '@/pages/KnowledgePopularizePage';
-import { WorldRecordsPage } from '@/pages/WorldRecordsPage';
-import { SystemsThinkingPage } from '@/pages/SystemsThinkingPage';
-import { HealthManagementPage } from '@/pages/HealthManagementPage';
-import { KnowledgeAIAskPage } from '@/pages/KnowledgeAIAskPage';
+import { InspirationPage } from '@/pages/InspirationPage';
+import { InspirationDomainPage } from '@/pages/InspirationDomainPage';
 import { CollectionDetailPage } from '@/pages/CollectionDetailPage';
 import { LaterPage } from '@/pages/LaterPage';
 import { TurtleSoupPage } from '@/pages/TurtleSoupPage';
@@ -121,11 +118,8 @@ function App() {
         <Route path="/roundtable/setup" element={<RoundtableSetupPage />} />
         <Route path="/roundtable/discuss" element={<RoundtablePage />} />
         <Route path="/debate" element={<DebateHallPage />} />
-        <Route path="/knowledge-popularize" element={<KnowledgePopularizePage />} />
-        <Route path="/knowledge-popularize/world-records" element={<WorldRecordsPage />} />
-        <Route path="/knowledge-popularize/systems-thinking" element={<SystemsThinkingPage />} />
-        <Route path="/knowledge-popularize/health-management" element={<HealthManagementPage />} />
-        <Route path="/knowledge-popularize/ai-ask" element={<KnowledgeAIAskPage />} />
+        <Route path="/inspiration" element={<InspirationPage />} />
+        <Route path="/inspiration/:domainId" element={<InspirationDomainPage />} />
         <Route path="/notifications" element={<NotificationSettingsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
