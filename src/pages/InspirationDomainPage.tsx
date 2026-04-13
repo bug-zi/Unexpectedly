@@ -5,7 +5,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, RefreshCw, Copy, Bookmark, BookmarkCheck, ChevronRight, Zap, Anchor, Shuffle, Sparkles, AlertTriangle, Expand, Loader2 } from 'lucide-react';
+import { ArrowLeft, Copy, Bookmark, BookmarkCheck, ChevronRight, Zap, Anchor, Shuffle, Sparkles, AlertTriangle, Expand, Loader2, Save, Check, Pencil, Trash2, X, CheckCircle, MessageCircle, Send } from 'lucide-react';
 import { getDomainById, DEPTH_CONFIG } from '@/constants/inspirationDomains';
 import type { DepthLevel } from '@/constants/inspirationDomains';
 import { useInspirationAI } from '@/hooks/useInspirationAI';
@@ -25,6 +25,8 @@ export function InspirationDomainPage() {
 
   const addToHistory = useInspirationStore((state) => state.addToHistory);
   const toggleFavorite = useInspirationStore((state) => state.toggleFavorite);
+  const removeFromHistory = useInspirationStore((state) => state.removeFromHistory);
+  const updateHistoryItem = useInspirationStore((state) => state.updateHistoryItem);
   const historyForDomain = useInspirationStore((state) => state.getHistoryForDomain(domainId || ''));
 
   const [selectedSubcategory, setSelectedSubcategory] = useState(domain?.subcategories[0]?.id || '');
@@ -33,11 +35,19 @@ export function InspirationDomainPage() {
   const [currentItemId, setCurrentItemId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isExpanding, setIsExpanding] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState('');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showQuestionInput, setShowQuestionInput] = useState(false);
+  const [questionInput, setQuestionInput] = useState('');
+  const [isAsking, setIsAsking] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
+  const questionInputRef = useRef<HTMLInputElement>(null);
 
-  const { generate, expand, isConfigured } = useInspirationAI({
+  const { generate, expand, askQuestion, isConfigured } = useInspirationAI({
     onStreaming: (text) => {
       setGeneratedContent(text);
     },
@@ -67,18 +77,11 @@ export function InspirationDomainPage() {
     setIsGenerating(true);
     setGeneratedContent('');
     setCurrentItemId(null);
+    setIsSaved(false);
 
     const result = await generate(domain.id, selectedSubcategory, depth);
 
     if (result) {
-      const itemId = addToHistory({
-        domainId: domain.id,
-        subcategoryId: selectedSubcategory,
-        depth,
-        content: result,
-        isFavorite: false,
-      });
-      setCurrentItemId(itemId);
       setGeneratedContent(result);
 
       // 滚动到结果
@@ -88,7 +91,7 @@ export function InspirationDomainPage() {
     }
 
     setIsGenerating(false);
-  }, [domain, selectedSubcategory, depth, isGenerating, generate, addToHistory]);
+  }, [domain, selectedSubcategory, depth, isGenerating, generate]);
 
   const handleExpand = useCallback(async () => {
     if (!domain || !generatedContent || isExpanding) return;
@@ -97,20 +100,27 @@ export function InspirationDomainPage() {
     const result = await expand(generatedContent, domain.id);
 
     if (result) {
-      // 更新历史记录中的内容
-      const itemId = addToHistory({
-        domainId: domain.id,
-        subcategoryId: selectedSubcategory,
-        depth,
-        content: result,
-        isFavorite: false,
-      });
-      setCurrentItemId(itemId);
+      setCurrentItemId(null);
       setGeneratedContent(result);
+      setIsSaved(false);
     }
 
     setIsExpanding(false);
-  }, [domain, generatedContent, isExpanding, expand, addToHistory, selectedSubcategory, depth]);
+  }, [domain, generatedContent, isExpanding, expand]);
+
+  const handleSave = useCallback(() => {
+    if (!domain || !generatedContent || isSaved) return;
+
+    const itemId = addToHistory({
+      domainId: domain.id,
+      subcategoryId: selectedSubcategory,
+      depth,
+      content: generatedContent,
+      isFavorite: false,
+    });
+    setCurrentItemId(itemId);
+    setIsSaved(true);
+  }, [domain, generatedContent, isSaved, selectedSubcategory, depth, addToHistory]);
 
   const handleCopy = useCallback(async () => {
     if (!generatedContent) return;
@@ -128,6 +138,56 @@ export function InspirationDomainPage() {
       toggleFavorite(currentItemId);
     }
   }, [currentItemId, toggleFavorite]);
+
+  const handleAskQuestion = useCallback(async () => {
+    if (!domain || !generatedContent || !questionInput.trim() || isAsking) return;
+
+    setIsAsking(true);
+    const result = await askQuestion(generatedContent, questionInput.trim(), domain.id);
+
+    if (result) {
+      setGeneratedContent(result);
+      setCurrentItemId(null);
+      setIsSaved(false);
+      setQuestionInput('');
+      setShowQuestionInput(false);
+    }
+
+    setIsAsking(false);
+  }, [domain, generatedContent, questionInput, isAsking, askQuestion]);
+
+  const handleStartEdit = useCallback((id: string, content: string) => {
+    setEditingId(id);
+    setEditingContent(content);
+    setDeletingId(null);
+  }, []);
+
+  const handleSaveEdit = useCallback(() => {
+    if (editingId && editingContent.trim()) {
+      updateHistoryItem(editingId, editingContent.trim());
+      // 如果正在编辑的是当前查看的灵感，同步更新显示
+      if (editingId === currentItemId) {
+        setGeneratedContent(editingContent.trim());
+      }
+      setEditingId(null);
+      setEditingContent('');
+    }
+  }, [editingId, editingContent, currentItemId, updateHistoryItem]);
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingId(null);
+    setEditingContent('');
+  }, []);
+
+  const handleDelete = useCallback((id: string) => {
+    removeFromHistory(id);
+    if (id === currentItemId) {
+      setCurrentItemId(null);
+      setGeneratedContent('');
+      setIsSaved(false);
+    }
+    setDeletingId(null);
+  }, [currentItemId, removeFromHistory]);
 
   // 无效域名
   if (!domain) {
@@ -338,6 +398,13 @@ export function InspirationDomainPage() {
                         {DEPTH_CONFIG[depth].name}
                       </span>
                     </div>
+                    {/* 保存状态提示 */}
+                    {!isGenerating && generatedContent && (
+                      <span className={`text-xs flex items-center gap-1 ${isSaved ? 'text-green-500' : 'text-gray-400'}`}>
+                        {isSaved ? <Check size={12} /> : <Save size={12} />}
+                        {isSaved ? '已保存' : '未保存'}
+                      </span>
+                    )}
                   </div>
 
                   {/* 结果内容 */}
@@ -362,14 +429,23 @@ export function InspirationDomainPage() {
                       transition={{ delay: 0.3 }}
                       className="px-5 py-3 border-t border-gray-100 dark:border-gray-700 flex items-center gap-2 flex-wrap"
                     >
-                      <button
-                        onClick={handleGenerate}
-                        disabled={isGenerating}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-lg text-sm hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
-                      >
-                        <RefreshCw size={14} />
-                        重新生成
-                      </button>
+                      {/* 保存按钮 - 未保存时突出显示 */}
+                      {!isSaved ? (
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={handleSave}
+                          className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg text-sm font-medium shadow-md shadow-green-300/30 hover:shadow-lg hover:shadow-green-400/40 transition-all"
+                        >
+                          <Save size={14} />
+                          保存灵感
+                        </motion.button>
+                      ) : (
+                        <span className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg text-sm">
+                          <Check size={14} />
+                          已保存
+                        </span>
+                      )}
                       <button
                         onClick={handleExpand}
                         disabled={isExpanding}
@@ -379,21 +455,85 @@ export function InspirationDomainPage() {
                         展开深入
                       </button>
                       <button
+                        onClick={() => {
+                          setShowQuestionInput(!showQuestionInput);
+                          setTimeout(() => questionInputRef.current?.focus(), 100);
+                        }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 rounded-lg text-sm hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
+                      >
+                        <MessageCircle size={14} />
+                        提问交互
+                      </button>
+                      <button
                         onClick={handleCopy}
                         className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-gray-900/20 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-900/30 transition-colors"
                       >
                         <Copy size={14} />
                         {showCopied ? '已复制' : '复制'}
                       </button>
-                      <button
-                        onClick={handleToggleFavorite}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 rounded-lg text-sm hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
-                      >
-                        {isFavorited ? <BookmarkCheck size={14} /> : <Bookmark size={14} />}
-                        {isFavorited ? '已收藏' : '收藏'}
-                      </button>
+                      {isSaved && (
+                        <button
+                          onClick={handleToggleFavorite}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 rounded-lg text-sm hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+                        >
+                          {isFavorited ? <BookmarkCheck size={14} /> : <Bookmark size={14} />}
+                          {isFavorited ? '已收藏' : '收藏'}
+                        </button>
+                      )}
                     </motion.div>
                   )}
+
+                  {/* 提问交互输入区 */}
+                  <AnimatePresence>
+                    {showQuestionInput && !isGenerating && generatedContent && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="px-5 py-3 border-t border-gray-100 dark:border-gray-700"
+                      >
+                        <div className="flex items-center gap-2">
+                          <input
+                            ref={questionInputRef}
+                            type="text"
+                            value={questionInput}
+                            onChange={(e) => setQuestionInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey && questionInput.trim()) {
+                                e.preventDefault();
+                                handleAskQuestion();
+                              }
+                            }}
+                            placeholder="输入你对这条灵感的问题..."
+                            disabled={isAsking}
+                            className="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:border-purple-300 dark:focus:border-purple-500 transition-all"
+                          />
+                          <button
+                            onClick={handleAskQuestion}
+                            disabled={isAsking || !questionInput.trim()}
+                            className="flex items-center justify-center w-9 h-9 bg-gradient-to-r from-purple-500 to-violet-500 text-white rounded-lg hover:from-purple-600 hover:to-violet-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-purple-300/30"
+                          >
+                            {isAsking ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowQuestionInput(false);
+                              setQuestionInput('');
+                            }}
+                            className="flex items-center justify-center w-9 h-9 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                        {isAsking && (
+                          <p className="mt-2 text-xs text-purple-500 dark:text-purple-400 flex items-center gap-1">
+                            <Loader2 size={12} className="animate-spin" />
+                            AI 正在思考你的问题...
+                          </p>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </motion.div>
             )}
@@ -430,6 +570,8 @@ export function InspirationDomainPage() {
                       .filter((item) => item.id !== currentItemId)
                       .map((item) => {
                         const sub = domain.subcategories.find((s) => s.id === item.subcategoryId);
+                        const isEditing = editingId === item.id;
+                        const isDeleting = deletingId === item.id;
                         return (
                           <div
                             key={item.id}
@@ -447,20 +589,98 @@ export function InspirationDomainPage() {
                               {item.isFavorite && (
                                 <BookmarkCheck size={12} className="text-amber-500" />
                               )}
+                              <div className="ml-auto flex items-center gap-1">
+                                <button
+                                  onClick={() => handleStartEdit(item.id, item.content)}
+                                  className="p-1 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+                                  title="编辑"
+                                >
+                                  <Pencil size={13} />
+                                </button>
+                                <button
+                                  onClick={() => setDeletingId(item.id)}
+                                  className="p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                                  title="删除"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
                             </div>
-                            <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
-                              {item.content}
-                            </p>
-                            <button
-                              onClick={() => {
-                                setGeneratedContent(item.content);
-                                setCurrentItemId(item.id);
-                                resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                              }}
-                              className="mt-2 text-xs text-green-600 dark:text-green-400 hover:underline"
-                            >
-                              查看完整内容
-                            </button>
+
+                            {/* 编辑模式 */}
+                            {isEditing ? (
+                              <div className="space-y-2">
+                                <textarea
+                                  value={editingContent}
+                                  onChange={(e) => setEditingContent(e.target.value)}
+                                  className="w-full p-3 text-sm bg-white dark:bg-gray-700 border border-green-300 dark:border-green-600 rounded-lg text-gray-800 dark:text-gray-200 resize-none focus:outline-none focus:ring-2 focus:ring-green-400/50"
+                                  rows={4}
+                                  autoFocus
+                                />
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={handleSaveEdit}
+                                    disabled={!editingContent.trim()}
+                                    className="flex items-center gap-1 px-3 py-1 bg-green-500 text-white rounded-lg text-xs font-medium hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                  >
+                                    <CheckCircle size={12} />
+                                    保存
+                                  </button>
+                                  <button
+                                    onClick={handleCancelEdit}
+                                    className="flex items-center gap-1 px-3 py-1 bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-lg text-xs hover:bg-gray-200 dark:hover:bg-gray-500 transition-colors"
+                                  >
+                                    <X size={12} />
+                                    取消
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
+                                  {item.content}
+                                </p>
+                                <button
+                                  onClick={() => {
+                                    setGeneratedContent(item.content);
+                                    setCurrentItemId(item.id);
+                                    setIsSaved(true);
+                                    resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                  }}
+                                  className="mt-2 text-xs text-green-600 dark:text-green-400 hover:underline"
+                                >
+                                  查看完整内容
+                                </button>
+                              </>
+                            )}
+
+                            {/* 删除确认 */}
+                            <AnimatePresence>
+                              {isDeleting && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: 'auto' }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                  className="mt-2 p-2.5 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800"
+                                >
+                                  <p className="text-xs text-red-600 dark:text-red-400 mb-2">确定删除这条灵感吗？</p>
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={() => handleDelete(item.id)}
+                                      className="px-3 py-1 bg-red-500 text-white rounded-lg text-xs font-medium hover:bg-red-600 transition-colors"
+                                    >
+                                      确认删除
+                                    </button>
+                                    <button
+                                      onClick={() => setDeletingId(null)}
+                                      className="px-3 py-1 bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-lg text-xs hover:bg-gray-200 dark:hover:bg-gray-500 transition-colors"
+                                    >
+                                      取消
+                                    </button>
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
                           </div>
                         );
                       })}

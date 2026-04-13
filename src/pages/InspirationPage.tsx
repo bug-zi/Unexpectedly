@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Sparkles, Dice5, PenTool, Rocket, Palette, GraduationCap, Coffee, Scale, AlertTriangle, Info, BarChart3, Zap, Anchor, Shuffle, X, Heart, Clock, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Sparkles, Dice5, PenTool, Rocket, Palette, GraduationCap, Coffee, Scale, AlertTriangle, Info, BarChart3, Zap, Anchor, Shuffle, X, Heart, Clock, TrendingUp, Pencil, Trash2, CheckCircle } from 'lucide-react';
 import { INSPIRATION_DOMAINS, DEPTH_CONFIG } from '@/constants/inspirationDomains';
 import type { InspirationDomain } from '@/constants/inspirationDomains';
 import { useRoundtableStore } from '@/stores/roundtableStore';
@@ -42,11 +42,16 @@ export function InspirationPage() {
   const llmConfig = useRoundtableStore((state) => state.llmConfig);
   const recentItems = useInspirationStore((state) => state.getRecentItems(5));
   const history = useInspirationStore((state) => state.history);
+  const removeFromHistory = useInspirationStore((state) => state.removeFromHistory);
+  const updateHistoryItem = useInspirationStore((state) => state.updateHistoryItem);
   const { SEORender } = usePageSEO({ seo: '/inspiration' });
 
   const [showModeInfo, setShowModeInfo] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState('');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDomainClick = (domain: InspirationDomain) => {
     navigate(`/inspiration/${domain.id}`);
@@ -503,13 +508,11 @@ export function InspirationPage() {
                         const domain = INSPIRATION_DOMAINS.find((d) => d.id === item.domainId);
                         const subcategory = domain?.subcategories.find((s) => s.id === item.subcategoryId);
                         const depthConfig = DEPTH_CONFIG[item.depth];
+                        const isEditing = editingId === item.id;
+                        const isDeleting = deletingId === item.id;
                         return (
-                          <motion.button
+                          <div
                             key={item.id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            whileHover={{ x: 4 }}
-                            onClick={() => { setShowHistory(false); navigate(`/inspiration/${item.domainId}`); }}
                             className="w-full text-left p-4 bg-white dark:bg-gray-800/60 rounded-xl border border-gray-200/50 dark:border-gray-700/50 hover:border-green-300 dark:hover:border-green-600 transition-colors"
                           >
                             <div className="flex items-center gap-2 mb-2">
@@ -529,16 +532,98 @@ export function InspirationPage() {
                                 </span>
                               )}
                               {item.isFavorite && (
-                                <Heart size={12} className="text-amber-500 fill-amber-500 ml-auto" />
+                                <Heart size={12} className="text-amber-500 fill-amber-500" />
                               )}
+                              <div className="ml-auto flex items-center gap-1">
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setEditingId(item.id); setEditingContent(item.content); setDeletingId(null); }}
+                                  className="p-1 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+                                  title="编辑"
+                                >
+                                  <Pencil size={13} />
+                                </button>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setDeletingId(item.id); setEditingId(null); }}
+                                  className="p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                                  title="删除"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
                             </div>
-                            <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
-                              {item.content}
-                            </p>
+
+                            {/* 编辑模式 */}
+                            {isEditing ? (
+                              <div className="space-y-2">
+                                <textarea
+                                  value={editingContent}
+                                  onChange={(e) => setEditingContent(e.target.value)}
+                                  className="w-full p-3 text-sm bg-white dark:bg-gray-700 border border-green-300 dark:border-green-600 rounded-lg text-gray-800 dark:text-gray-200 resize-none focus:outline-none focus:ring-2 focus:ring-green-400/50"
+                                  rows={4}
+                                  autoFocus
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); if (editingContent.trim()) { updateHistoryItem(item.id, editingContent.trim()); setEditingId(null); } }}
+                                    disabled={!editingContent.trim()}
+                                    className="flex items-center gap-1 px-3 py-1 bg-green-500 text-white rounded-lg text-xs font-medium hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                  >
+                                    <CheckCircle size={12} />
+                                    保存
+                                  </button>
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); setEditingId(null); }}
+                                    className="flex items-center gap-1 px-3 py-1 bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-lg text-xs hover:bg-gray-200 dark:hover:bg-gray-500 transition-colors"
+                                  >
+                                    <X size={12} />
+                                    取消
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div
+                                onClick={() => { setShowHistory(false); navigate(`/inspiration/${item.domainId}`); }}
+                                className="cursor-pointer"
+                              >
+                                <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
+                                  {item.content}
+                                </p>
+                              </div>
+                            )}
+
                             <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
                               {new Date(item.createdAt).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
                             </p>
-                          </motion.button>
+
+                            {/* 删除确认 */}
+                            <AnimatePresence>
+                              {isDeleting && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: 'auto' }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                  className="mt-2 p-2.5 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800"
+                                >
+                                  <p className="text-xs text-red-600 dark:text-red-400 mb-2">确定删除这条灵感吗？</p>
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); removeFromHistory(item.id); setDeletingId(null); }}
+                                      className="px-3 py-1 bg-red-500 text-white rounded-lg text-xs font-medium hover:bg-red-600 transition-colors"
+                                    >
+                                      确认删除
+                                    </button>
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); setDeletingId(null); }}
+                                      className="px-3 py-1 bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-lg text-xs hover:bg-gray-200 dark:hover:bg-gray-500 transition-colors"
+                                    >
+                                      取消
+                                    </button>
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
                         );
                       })}
                     </div>

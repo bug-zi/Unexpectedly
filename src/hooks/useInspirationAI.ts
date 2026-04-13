@@ -11,6 +11,7 @@ import type { DepthLevel } from '@/constants/inspirationDomains';
 import {
   buildInspirationPrompt,
   buildExpandPrompt,
+  buildAskPrompt,
   generateRandomSeed,
 } from '@/utils/inspirationPrompts';
 
@@ -63,6 +64,44 @@ export function useInspirationAI(options?: UseInspirationAIOptions) {
     [llmConfig, options]
   );
 
+  const askQuestion = useCallback(
+    async (
+      previousContent: string,
+      question: string,
+      domainId: string
+    ): Promise<string | null> => {
+      if (!llmConfig) return null;
+
+      const domain = getDomainById(domainId);
+      if (!domain) return null;
+
+      abortRef.current = false;
+      const configSnapshot = { ...llmConfig };
+
+      try {
+        const messages = buildAskPrompt(previousContent, question, domain);
+
+        let fullText = '';
+
+        for await (const token of streamChat(messages, configSnapshot, {
+          temperature: 0.85,
+          max_tokens: 2048,
+        })) {
+          if (abortRef.current) break;
+          fullText += token;
+          options?.onStreaming?.(fullText);
+        }
+
+        if (!fullText.trim()) return null;
+        return fullText.trim();
+      } catch (err) {
+        console.error('提问回答失败:', err);
+        return null;
+      }
+    },
+    [llmConfig, options]
+  );
+
   const expand = useCallback(
     async (
       previousContent: string,
@@ -104,5 +143,5 @@ export function useInspirationAI(options?: UseInspirationAIOptions) {
     abortRef.current = true;
   }, []);
 
-  return { generate, expand, abort, isConfigured: !!llmConfig };
+  return { generate, expand, askQuestion, abort, isConfigured: !!llmConfig };
 }

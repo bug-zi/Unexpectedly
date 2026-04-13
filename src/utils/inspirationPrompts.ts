@@ -171,6 +171,33 @@ function getDepthInstruction(depth: DepthLevel, domain: InspirationDomain): stri
 }
 
 /**
+ * 构建提问交互的消息列表
+ */
+export function buildAskPrompt(
+  previousContent: string,
+  question: string,
+  domain: InspirationDomain
+): ChatMessage[] {
+  return [
+    {
+      role: 'system',
+      content: `你是一位「${domain.name}」领域的资深创意顾问。用户之前获得了一个灵感，现在对这个灵感提出了一个后续问题。
+
+要求：
+1. 用中文回答
+2. 紧密围绕用户的灵感和问题进行回答，不要泛泛而谈
+3. 回答要具体、有深度，最好能给出可操作的建议或新的视角
+4. 如果用户的问题是在质疑或挑战灵感中的观点，要正面回应，给出有说服力的论证
+5. 语言精练，不要重复灵感中已有的内容`,
+    },
+    {
+      role: 'user',
+      content: `这是我在「${domain.name}」领域获得的一个灵感：\n\n${previousContent}\n\n我的问题是：${question}`,
+    },
+  ];
+}
+
+/**
  * 构建展开深入的消息列表
  */
 export function buildExpandPrompt(

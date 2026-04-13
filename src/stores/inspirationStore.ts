@@ -24,6 +24,7 @@ interface InspirationState {
   addToHistory: (item: Omit<InspirationItem, 'id' | 'createdAt'>) => string;
   toggleFavorite: (id: string) => void;
   removeFromHistory: (id: string) => void;
+  updateHistoryItem: (id: string, content: string) => void;
   clearHistory: () => void;
   getHistoryForDomain: (domainId: string) => InspirationItem[];
   getFavorites: () => InspirationItem[];
@@ -62,6 +63,14 @@ export const useInspirationStore = create<InspirationState>()(
       removeFromHistory: (id) => {
         set((state) => ({
           history: state.history.filter((item) => item.id !== id),
+        }));
+      },
+
+      updateHistoryItem: (id, content) => {
+        set((state) => ({
+          history: state.history.map((item) =>
+            item.id === id ? { ...item, content } : item
+          ),
         }));
       },
 
