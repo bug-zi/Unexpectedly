@@ -129,14 +129,25 @@ export function compareGuess(guess: string, secret: string, mode: GuessNumberMod
   let a = 0;
   let b = 0;
 
-  for (let i = 0; i < config.digits; i++) {
-    const guessDigit = guess[i];
-    const secretDigit = secret[i];
+  // First pass: count bulls (A) and collect unmatched digits
+  const guessUnmatched: string[] = [];
+  const secretUnmatched: string[] = [];
 
-    if (guessDigit === secretDigit) {
+  for (let i = 0; i < config.digits; i++) {
+    if (guess[i] === secret[i]) {
       a++;
-    } else if (secret.includes(guessDigit)) {
+    } else {
+      guessUnmatched.push(guess[i]);
+      secretUnmatched.push(secret[i]);
+    }
+  }
+
+  // Second pass: count cows (B) from unmatched positions only
+  for (const digit of guessUnmatched) {
+    const idx = secretUnmatched.indexOf(digit);
+    if (idx !== -1) {
       b++;
+      secretUnmatched.splice(idx, 1); // Remove to avoid double counting
     }
   }
 
