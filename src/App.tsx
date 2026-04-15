@@ -27,7 +27,6 @@ import { GuessNumberPage } from '@/pages/GuessNumberPage';
 import { CheckInPage } from '@/pages/CheckInPage';
 import { ProfilePage } from '@/pages/ProfilePage';
 import { TaskPage } from '@/pages/TaskPage';
-import { RoundtableSetupPage } from '@/pages/RoundtableSetupPage';
 import { RoundtablePage } from '@/pages/RoundtablePage';
 import { QuestionThinkingHubPage } from '@/pages/QuestionThinkingHubPage';
 import { DebateHallPage } from '@/pages/DebateHallPage';
@@ -115,7 +114,6 @@ function App() {
         <Route path="/checkin" element={<CheckInPage />} />
         <Route path="/tasks" element={<TaskPage />} />
         <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/roundtable/setup" element={<RoundtableSetupPage />} />
         <Route path="/roundtable/discuss" element={<RoundtablePage />} />
         <Route path="/debate" element={<DebateHallPage />} />
         <Route path="/inspiration" element={<InspirationPage />} />

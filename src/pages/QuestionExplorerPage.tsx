@@ -37,7 +37,7 @@ export function QuestionExplorerPage() {
 
   const handleRoundtable = () => {
     setCurrentQuestion(currentQuestion);
-    navigate(`/roundtable/setup?q=${currentQuestion.id}`);
+    navigate(`/roundtable/discuss?q=${currentQuestion.id}`);
   };
 
   const handleSkipQuestion = () => {

@@ -39,6 +39,7 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    host: '127.0.0.1',  // 使用 IPv4 避免 IPv6 权限问题
     open: true,
   },
 });

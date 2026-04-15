@@ -946,6 +946,7 @@ export function ProfilePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
             className="bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg p-6 border-2 border-indigo-200 mb-8"
+            id="ai-config"
           >
             <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
               <Bot size={20} className="text-indigo-500" />

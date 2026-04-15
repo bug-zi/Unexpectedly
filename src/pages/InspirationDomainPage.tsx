@@ -266,7 +266,7 @@ export function InspirationDomainPage() {
                 <p className="text-amber-700 dark:text-amber-300 font-medium text-sm">请先配置 AI 模型</p>
               </div>
               <button
-                onClick={() => navigate('/roundtable/setup')}
+                onClick={() => navigate('/profile#ai-config')}
                 className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm font-medium transition-colors"
               >
                 去配置

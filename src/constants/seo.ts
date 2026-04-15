@@ -69,8 +69,8 @@ export const seoConfig: Record<string, PageSEO> = {
   '/inspiration': {
     title: '万万没想到 - 灵感源泉，AI生成不重样的创意灵感',
     description:
-      '6大灵感领域，AI为你生成文学创作、项目开发、视觉设计、学术探索、生活创意、哲学思辨的独特灵感，每次都不重样。',
-    keywords: ['灵感生成', 'AI创意', '文学灵感', '项目灵感', '创意工具', '思维激发'],
+      '6大灵感领域，AI为你生成文学创作、项目开发、沟通表达、学术探索、生活创意、人际关系的独特灵感，每次都不重样。',
+    keywords: ['灵感生成', 'AI创意', '文学灵感', '项目灵感', '沟通表达', '人际关系', '创意工具', '思维激发'],
   },
   '/inspiration/:domainId': {
     title: '万万没想到 - 灵感源泉，探索创意灵感',
@@ -132,12 +132,6 @@ export const seoConfig: Record<string, PageSEO> = {
     description:
       '选择你的立场，从多角度深入思考争议话题。锻炼批判性思维和辩证思考能力。',
     keywords: ['辩论', '批判性思维', '辩证思考', '争议话题'],
-  },
-  '/roundtable/setup': {
-    title: '万万没想到 - 圆桌派，组建思维碰撞讨论',
-    description:
-      '设置讨论话题和参与者，开启一场思维碰撞的圆桌讨论。多视角、多维度地深入探讨。',
-    keywords: ['圆桌讨论', '思维碰撞', '多角度讨论', '话题设置'],
   },
   '/roundtable/discuss': {
     title: '万万没想到 - 圆桌讨论进行中',

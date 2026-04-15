@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Sparkles, Dice5, PenTool, Rocket, Palette, GraduationCap, Coffee, Scale, AlertTriangle, Info, BarChart3, Zap, Anchor, Shuffle, X, Heart, Clock, TrendingUp, Pencil, Trash2, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Sparkles, Dice5, PenTool, Rocket, MessageCircle, GraduationCap, Coffee, Users, AlertTriangle, Info, BarChart3, Zap, Anchor, Shuffle, X, Heart, Clock, TrendingUp, Pencil, Trash2, CheckCircle } from 'lucide-react';
 import { INSPIRATION_DOMAINS, DEPTH_CONFIG } from '@/constants/inspirationDomains';
 import type { InspirationDomain } from '@/constants/inspirationDomains';
 import { useRoundtableStore } from '@/stores/roundtableStore';
@@ -15,10 +15,10 @@ import { usePageSEO } from '@/hooks/usePageSEO';
 const ICON_MAP: Record<string, React.ReactNode> = {
   PenTool: <PenTool size={48} />,
   Rocket: <Rocket size={48} />,
-  Palette: <Palette size={48} />,
+  MessageCircle: <MessageCircle size={48} />,
   GraduationCap: <GraduationCap size={48} />,
   Coffee: <Coffee size={48} />,
-  Scale: <Scale size={48} />,
+  Users: <Users size={48} />,
 };
 
 const DEPTH_ICONS: Record<string, React.ReactNode> = {
@@ -31,10 +31,10 @@ const DEPTH_ICONS: Record<string, React.ReactNode> = {
 const DOMAIN_BG_IMAGES: Record<string, string> = {
   literary: '/UI-picture/UI-knowledge1.jpg',
   project: '/UI-picture/UI-knowledge2.jpg',
-  design: '/UI-picture/UI-knowledge3.jpg',
+  communication: '/UI-picture/UI-knowledge3.jpg',
   academic: '/UI-picture/UI-knowledge1.jpg',
   life: '/UI-picture/UI-knowledge2.jpg',
-  philosophy: '/UI-picture/UI-knowledge3.jpg',
+  relationship: '/UI-picture/UI-knowledge3.jpg',
 };
 
 export function InspirationPage() {
@@ -193,7 +193,7 @@ export function InspirationPage() {
                 <p className="text-amber-600 dark:text-amber-400 text-sm">灵感源泉需要 AI 大模型支持</p>
               </div>
               <button
-                onClick={() => navigate('/roundtable/setup')}
+                onClick={() => navigate('/profile#ai-config')}
                 className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-medium transition-colors"
               >
                 去配置
