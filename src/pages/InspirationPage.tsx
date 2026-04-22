@@ -5,12 +5,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Sparkles, Dice5, PenTool, Rocket, MessageCircle, GraduationCap, Coffee, Users, AlertTriangle, Info, BarChart3, Zap, Anchor, Shuffle, X, Heart, Clock, TrendingUp, Pencil, Trash2, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Sparkles, PenTool, Rocket, MessageCircle, GraduationCap, Coffee, Users, AlertTriangle, Info, BarChart3, Zap, Anchor, Shuffle, X, Heart, Clock, TrendingUp, Pencil, Trash2, CheckCircle, Waves } from 'lucide-react';
 import { INSPIRATION_DOMAINS, DEPTH_CONFIG } from '@/constants/inspirationDomains';
 import type { InspirationDomain } from '@/constants/inspirationDomains';
 import { useRoundtableStore } from '@/stores/roundtableStore';
 import { useInspirationStore } from '@/stores/inspirationStore';
 import { usePageSEO } from '@/hooks/usePageSEO';
+import { InspirationRipple } from '@/components/features/InspirationRipple';
 
 const ICON_MAP: Record<string, React.ReactNode> = {
   PenTool: <PenTool size={48} />,
@@ -52,14 +53,10 @@ export function InspirationPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showRipple, setShowRipple] = useState(false);
 
   const handleDomainClick = (domain: InspirationDomain) => {
     navigate(`/inspiration/${domain.id}`);
-  };
-
-  const handleRandomStart = () => {
-    const randomDomain = INSPIRATION_DOMAINS[Math.floor(Math.random() * INSPIRATION_DOMAINS.length)];
-    navigate(`/inspiration/${randomDomain.id}`);
   };
 
   // 统计数据
@@ -131,11 +128,17 @@ export function InspirationPage() {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={handleRandomStart}
-                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-all"
+                    onClick={() => setShowRipple(true)}
+                    disabled={!llmConfig}
+                    className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
+                      llmConfig
+                        ? 'text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20'
+                        : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
+                    }`}
+                    title={!llmConfig ? '请先配置 AI 模型' : '灵感涟漪'}
                   >
-                    <Dice5 size={18} />
-                    <span className="hidden md:inline">随机开始</span>
+                    <Waves size={18} />
+                    <span className="hidden md:inline">灵感涟漪</span>
                   </motion.button>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -642,6 +645,9 @@ export function InspirationPage() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* ==================== 灵感涟漪弹窗 ==================== */}
+        <InspirationRipple isOpen={showRipple} onClose={() => setShowRipple(false)} />
       </div>
       </div>
     </>
