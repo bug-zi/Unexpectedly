@@ -1,39 +1,73 @@
 /**
  * 灵感涟漪组件
  * 用户输入自己的点子，AI 用多种创意思维方法帮助拓展思路
+ * 支持多轮对话，持续深化灵感
  */
 
 import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Loader2, Waves, AlertTriangle } from 'lucide-react';
+import { X, Send, Loader2, Waves, AlertTriangle, User, Sparkles, RotateCcw } from 'lucide-react';
 import { useRoundtableStore } from '@/stores/roundtableStore';
 import { streamChat } from '@/services/llmService';
 import { buildRipplePrompt } from '@/utils/brainstormPrompt';
+import type { ChatMessage } from '@/types';
 
 interface InspirationRippleProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+interface DisplayMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export function InspirationRipple({ isOpen, onClose }: InspirationRippleProps) {
   const llmConfig = useRoundtableStore((state) => state.llmConfig);
-  const [userIdea, setUserIdea] = useState('');
-  const [response, setResponse] = useState('');
+  const [input, setInput] = useState('');
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [displayMessages, setDisplayMessages] = useState<DisplayMessage[]>([]);
+  const [streamingText, setStreamingText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef(false);
-  const responseRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleGenerate = useCallback(async () => {
-    if (!llmConfig || !userIdea.trim() || isLoading) return;
+  const scrollToBottom = useCallback(() => {
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    });
+  }, []);
+
+  const handleSend = useCallback(async () => {
+    if (!llmConfig || !input.trim() || isLoading) return;
 
     abortRef.current = false;
-    setIsLoading(true);
+    const userContent = input.trim();
+    setInput('');
     setError(null);
-    setResponse('');
 
     const configSnapshot = { ...llmConfig };
-    const messages = buildRipplePrompt(userIdea.trim());
+    let messages: ChatMessage[];
+
+    if (chatHistory.length === 0) {
+      // 首次输入：使用头脑风暴 prompt
+      messages = buildRipplePrompt(userContent);
+    } else {
+      // 后续追问：追加到对话历史
+      messages = [...chatHistory, { role: 'user' as const, content: userContent }];
+    }
+
+    // 立即显示用户消息
+    setDisplayMessages((prev) => [...prev, { role: 'user', content: userContent }]);
+    setChatHistory(messages);
+    setIsLoading(true);
+    setStreamingText('');
+    scrollToBottom();
 
     try {
       let fullText = '';
@@ -44,47 +78,83 @@ export function InspirationRipple({ isOpen, onClose }: InspirationRippleProps) {
       })) {
         if (abortRef.current) break;
         fullText += token;
-        setResponse(fullText);
-        // 自动滚动到底部
-        responseRef.current?.scrollTo({
-          top: responseRef.current.scrollHeight,
-          behavior: 'smooth',
-        });
+        setStreamingText(fullText);
+        scrollToBottom();
+      }
+
+      if (fullText.trim()) {
+        // 更新对话历史（加入 AI 回复）和显示消息
+        const assistantMsg: ChatMessage = { role: 'assistant', content: fullText.trim() };
+        setChatHistory((prev) => [...prev, assistantMsg]);
+        setDisplayMessages((prev) => [...prev, { role: 'assistant', content: fullText.trim() }]);
       }
     } catch (err) {
       if (!abortRef.current) {
         const msg = err instanceof Error ? err.message : '生成失败，请重试';
         setError(msg);
+        // 移除刚才添加的用户消息（因为失败了）
+        setDisplayMessages((prev) => prev.slice(0, -1));
+        setChatHistory(messages.slice(0, -1));
+        setInput(userContent); // 恢复输入
       }
     } finally {
       setIsLoading(false);
+      setStreamingText('');
+      inputRef.current?.focus();
     }
-  }, [llmConfig, userIdea, isLoading]);
+  }, [llmConfig, input, isLoading, chatHistory, scrollToBottom]);
 
   const handleStop = useCallback(() => {
     abortRef.current = true;
+    // 保留已流式输出的部分作为回复
+    setStreamingText((prev) => {
+      if (prev.trim()) {
+        const assistantMsg: ChatMessage = { role: 'assistant', content: prev.trim() };
+        setChatHistory((history) => [...history, assistantMsg]);
+        setDisplayMessages((msgs) => [...msgs, { role: 'assistant', content: prev.trim() }]);
+      }
+      return '';
+    });
     setIsLoading(false);
   }, []);
 
+  const handleReset = useCallback(() => {
+    if (isLoading) {
+      abortRef.current = true;
+    }
+    setChatHistory([]);
+    setDisplayMessages([]);
+    setStreamingText('');
+    setInput('');
+    setError(null);
+    setIsLoading(false);
+    inputRef.current?.focus();
+  }, [isLoading]);
+
   const handleClose = useCallback(() => {
     if (isLoading) {
-      handleStop();
+      abortRef.current = true;
     }
-    setUserIdea('');
-    setResponse('');
+    setChatHistory([]);
+    setDisplayMessages([]);
+    setStreamingText('');
+    setInput('');
     setError(null);
+    setIsLoading(false);
     onClose();
-  }, [isLoading, handleStop, onClose]);
+  }, [isLoading, onClose]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
         e.preventDefault();
-        handleGenerate();
+        handleSend();
       }
     },
-    [handleGenerate]
+    [handleSend]
   );
+
+  const hasConversation = displayMessages.length > 0;
 
   return (
     <AnimatePresence>
@@ -104,19 +174,30 @@ export function InspirationRipple({ isOpen, onClose }: InspirationRippleProps) {
             onClick={(e) => e.stopPropagation()}
           >
             {/* 头部 */}
-            <div className="sticky top-0 bg-white dark:bg-gray-800 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between flex-shrink-0 rounded-t-2xl">
+            <div className="bg-white dark:bg-gray-800 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between flex-shrink-0 rounded-t-2xl">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center bg-gradient-to-br from-green-400 to-teal-500">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-400 to-teal-500 flex items-center justify-center">
                   <Waves size={18} className="text-white" />
                 </div>
                 灵感涟漪
               </h2>
-              <button
-                onClick={handleClose}
-                className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              >
-                <X size={18} className="text-gray-500" />
-              </button>
+              <div className="flex items-center gap-1">
+                {hasConversation && (
+                  <button
+                    onClick={handleReset}
+                    className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    title="重新开始"
+                  >
+                    <RotateCcw size={16} className="text-gray-500" />
+                  </button>
+                )}
+                <button
+                  onClick={handleClose}
+                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  <X size={18} className="text-gray-500" />
+                </button>
+              </div>
             </div>
 
             {/* AI 未配置提示 */}
@@ -129,74 +210,12 @@ export function InspirationRipple({ isOpen, onClose }: InspirationRippleProps) {
               </div>
             )}
 
-            {/* 输入区域 */}
-            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
-              <div className="flex gap-2">
-                <textarea
-                  value={userIdea}
-                  onChange={(e) => setUserIdea(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="分享你的点子或灵感，让 AI 帮你拓展思路..."
-                  disabled={!llmConfig || isLoading}
-                  rows={2}
-                  className="flex-1 p-3 text-sm bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-200 resize-none focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:border-green-300 dark:focus:border-green-600 placeholder-gray-400 dark:placeholder-gray-500 disabled:opacity-50"
-                />
-                <button
-                  onClick={isLoading ? handleStop : handleGenerate}
-                  disabled={!llmConfig || (!userIdea.trim() && !isLoading)}
-                  className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-all ${
-                    isLoading
-                      ? 'bg-red-500 hover:bg-red-600 text-white'
-                      : 'bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white disabled:opacity-50 disabled:cursor-not-allowed'
-                  }`}
-                >
-                  {isLoading ? <X size={18} /> : <Send size={18} />}
-                </button>
-              </div>
-              <p className="mt-1.5 text-xs text-gray-400 dark:text-gray-500">
-                Enter 发送 · Shift+Enter 换行
-              </p>
-            </div>
-
-            {/* 回答展示区域 */}
+            {/* 对话展示区域 */}
             <div
-              ref={responseRef}
+              ref={scrollRef}
               className="flex-1 overflow-y-auto px-6 py-4 min-h-0"
             >
-              {isLoading && !response && (
-                <div className="flex items-center justify-center py-12 gap-3">
-                  <Loader2 size={20} className="text-green-500 animate-spin" />
-                  <span className="text-gray-500 dark:text-gray-400 text-sm">
-                    思维涟漪正在扩散中...
-                  </span>
-                </div>
-              )}
-
-              {error && (
-                <div className="py-8 text-center">
-                  <p className="text-red-500 text-sm">{error}</p>
-                  <button
-                    onClick={handleGenerate}
-                    className="mt-2 text-sm text-green-500 hover:text-green-600 transition-colors"
-                  >
-                    重试
-                  </button>
-                </div>
-              )}
-
-              {response && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="prose prose-sm dark:prose-invert max-w-none"
-                >
-                  <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                    {response}
-                  </div>
-                </motion.div>
-              )}
-
-              {!response && !isLoading && !error && (
+              {!hasConversation && !isLoading && (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <Waves size={40} className="text-gray-200 dark:text-gray-600 mb-3" />
                   <p className="text-gray-400 dark:text-gray-500 text-sm mb-1">
@@ -207,23 +226,110 @@ export function InspirationRipple({ isOpen, onClose }: InspirationRippleProps) {
                   </p>
                 </div>
               )}
+
+              {/* 对话消息列表 */}
+              {displayMessages.map((msg, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className={`mb-4 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[90%] rounded-2xl px-4 py-3 ${
+                      msg.role === 'user'
+                        ? 'bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-tr-sm'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-tl-sm'
+                    }`}
+                  >
+                    {msg.role === 'assistant' && (
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <Sparkles size={12} className="text-green-500" />
+                        <span className="text-xs font-medium text-green-600 dark:text-green-400">灵感拓展</span>
+                      </div>
+                    )}
+                    <div className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</div>
+                  </div>
+                </motion.div>
+              ))}
+
+              {/* 流式输出中的 AI 回复 */}
+              {isLoading && streamingText && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-4 flex justify-start"
+                >
+                  <div className="max-w-[90%] rounded-2xl rounded-tl-sm px-4 py-3 bg-gray-100 dark:bg-gray-700">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Sparkles size={12} className="text-green-500" />
+                      <span className="text-xs font-medium text-green-600 dark:text-green-400">灵感拓展</span>
+                    </div>
+                    <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                      {streamingText}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* 加载中占位 */}
+              {isLoading && !streamingText && (
+                <div className="mb-4 flex justify-start">
+                  <div className="rounded-2xl rounded-tl-sm px-4 py-3 bg-gray-100 dark:bg-gray-700">
+                    <div className="flex items-center gap-3">
+                      <Loader2 size={16} className="text-green-500 animate-spin" />
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        思维涟漪正在扩散中...
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 错误提示 */}
+              {error && (
+                <div className="mb-4 text-center">
+                  <p className="text-red-500 text-sm">{error}</p>
+                </div>
+              )}
             </div>
 
-            {/* 底部状态 */}
-            {isLoading && response && (
-              <div className="px-6 py-2 bg-gray-50/80 dark:bg-gray-900/80 border-t border-gray-100 dark:border-gray-700 flex-shrink-0">
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1">
-                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </div>
-                  <span className="text-xs text-gray-400 dark:text-gray-500">
-                    正在生成中...
-                  </span>
+            {/* 底部输入区域 */}
+            <div className="px-6 py-3 border-t border-gray-100 dark:border-gray-700 flex-shrink-0 bg-white dark:bg-gray-800">
+              <div className="flex gap-2">
+                <textarea
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder={
+                    hasConversation
+                      ? '继续追问，深入拓展你的灵感...'
+                      : '分享你的点子或灵感，让 AI 帮你拓展思路...'
+                  }
+                  disabled={!llmConfig || isLoading}
+                  rows={2}
+                  className="flex-1 p-3 text-sm bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-200 resize-none focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:border-green-300 dark:focus:border-green-600 placeholder-gray-400 dark:placeholder-gray-500 disabled:opacity-50"
+                />
+                <div className="flex flex-col gap-1.5">
+                  <button
+                    onClick={isLoading ? handleStop : handleSend}
+                    disabled={!llmConfig || (!input.trim() && !isLoading)}
+                    className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-all ${
+                      isLoading
+                        ? 'bg-red-500 hover:bg-red-600 text-white'
+                        : 'bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white disabled:opacity-50 disabled:cursor-not-allowed'
+                    }`}
+                  >
+                    {isLoading ? <X size={18} /> : <Send size={18} />}
+                  </button>
                 </div>
               </div>
-            )}
+              <p className="mt-1.5 text-xs text-gray-400 dark:text-gray-500">
+                Enter 发送 · Shift+Enter 换行
+              </p>
+            </div>
           </motion.div>
         </motion.div>
       )}
