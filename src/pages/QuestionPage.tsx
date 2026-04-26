@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Bookmark, Check, Clock, Download, Heart, Plus, Lightbulb, X, Sparkles } from 'lucide-react';
 import { Icon } from '@iconify/react';
+import { renderCompactContent } from '@/utils/formatContent';
 import { getQuestionById } from '@/constants/questions';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
@@ -448,9 +449,9 @@ export function QuestionPage() {
                     收起
                   </button>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap leading-relaxed">
-                  {roundtableSession.summary}
-                </p>
+                <div className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                  {renderCompactContent(roundtableSession.summary)}
+                </div>
               </div>
             </motion.div>
           )}
@@ -598,10 +599,14 @@ export function QuestionPage() {
               </div>
               <div className="flex-1 overflow-y-auto p-4">
                 {aiReviewContent ? (
-                  <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap text-gray-700 dark:text-gray-300 leading-relaxed">
-                    {aiReviewContent}
-                    {isAiReviewing && (
-                      <span className="inline-block w-2 h-4 bg-amber-500 animate-pulse ml-0.5" />
+                  <div className="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 leading-relaxed">
+                    {isAiReviewing ? (
+                      <>
+                        {aiReviewContent}
+                        <span className="inline-block w-2 h-4 bg-amber-500 animate-pulse ml-0.5" />
+                      </>
+                    ) : (
+                      renderCompactContent(aiReviewContent)
                     )}
                   </div>
                 ) : (

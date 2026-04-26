@@ -134,6 +134,42 @@ const EMOTION_TYPES = [
   '陌生人的温度（与陌生人产生了最深刻的情感连接）',
 ];
 
+// 项目开发 - 点子孵化 随机池
+const PROJECT_IDEA_TYPES = [
+  '独立app应用（iOS/Android）',
+  'Web网站/在线工具',
+  '浏览器插件/扩展',
+  '微信小程序',
+  '桌面端工具',
+  '互动网页（纯前端，无需后端）',
+  '命令行工具',
+  '硬件/物联网设备',
+];
+
+const PROJECT_CORE_MECHANICS = [
+  'AI生成/对话（让AI成为核心体验的一部分，不只是辅助功能）',
+  '游戏化机制（用游戏思维设计非游戏场景，让枯燥的事情变有趣）',
+  '数据可视化（把抽象数据变成可感知的图形或动画）',
+  '社交/连接（人与人的连接是核心价值，不是附属功能）',
+  '个性化/自适应（越用越懂用户，每次打开都不一样）',
+  '创意工具（帮助用户产出内容而非消费内容）',
+  '碎片化体验（每次使用只需1-5分钟，随时随地）',
+  '记忆/记录（用新颖的方式保存和回顾人生片段）',
+  '随机性/惊喜（核心体验依赖意外和发现，不可预测）',
+  '协作共创（多人共同参与创造一个东西）',
+];
+
+const PROJECT_ENTRY_ANGLES = [
+  '从你自己真实遇到的一个需求出发——你想要的这个东西，目前没有任何工具能做好',
+  '从一个你觉得很有趣但缺少好工具的爱好出发',
+  '从你观察到的身边人反复出现的一个烦恼出发',
+  '从一个你很喜欢但觉得可以做得更好的现有产品出发——说清楚哪里好，哪里可以更好',
+  '从两个你喜欢的、完全不相关的东西的组合出发——比如"播客×手帐"、"跑步×推理游戏"',
+  '从一个"如果...会怎样"的假设出发——比如"如果日记可以像RPG一样写会怎样"',
+  '从你一直在想但没人做的一个小众兴趣出发',
+  '从你讨厌的一个重复性任务出发——怎么让它变得不讨厌甚至有趣',
+];
+
 export interface RandomSeed {
   angle: string;
   method: string;
@@ -187,6 +223,19 @@ function getLiteraryStyleOverride(subcategoryId: string): string {
   return '';
 }
 
+// 项目开发子分类的强制类型指定 - 代码层随机
+function getProjectStyleOverride(subcategoryId: string): string {
+  if (subcategoryId !== 'idea-incubation') return '';
+
+  const pick = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+
+  const projectType = pick(PROJECT_IDEA_TYPES);
+  const coreMechanic = pick(PROJECT_CORE_MECHANICS);
+  const entryAngle = pick(PROJECT_ENTRY_ANGLES);
+
+  return `\n\n【强制指定项目形态（最高优先级）】本次生成的项目必须是：${projectType}。介绍中必须体现出这种产品形态的使用方式。\n\n【强制指定核心机制（最高优先级）】本次项目的核心体验必须围绕：${coreMechanic}。这是产品最独特的地方，必须在介绍中明确体现。\n\n【强制指定创意出发点（最高优先级）】本次创意必须：${entryAngle}。`;
+}
+
 /**
  * 构建灵感生成的消息列表
  */
@@ -210,6 +259,11 @@ export function buildInspirationPrompt(
     ? getLiteraryStyleOverride(subcategory.id)
     : '';
 
+  // 项目开发：代码层随机选项目类型和核心机制，直接注入prompt
+  const projectStyleOverride = domain.id === 'project'
+    ? getProjectStyleOverride(subcategory.id)
+    : '';
+
   const systemPrompt = `你是一位专注于「${domain.name}」领域的资深创意顾问。
 
 ## 你的角色
@@ -229,10 +283,10 @@ ${subcategory.promptFocus}
 2. 内容必须具有实际启发性，不要空洞的口号或鸡汤
 3. 要有具体的、可感知的细节，避免泛泛而谈
 4. 不要使用"我们可以"、"让我们"之类的套话开头
-5. 时间戳 ${timestamp} 确保每次输出不同${characterOverride}${literaryStyleOverride}`;
+5. 时间戳 ${timestamp} 确保每次输出不同${characterOverride}${literaryStyleOverride}${projectStyleOverride}`;
 
   const userPrompt = `请为「${domain.name}」领域的「${subcategory.name}」方向生成内容。
-${characterOverride}${literaryStyleOverride}
+${characterOverride}${literaryStyleOverride}${projectStyleOverride}
 【输出格式要求（最高优先级）】：${subcategory.promptFocus}
 
 创意触发点（作为思维启发的角度，但不可偏离上述输出格式）：${domainAngle}

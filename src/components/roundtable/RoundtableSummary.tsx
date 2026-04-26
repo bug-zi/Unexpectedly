@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Lightbulb } from 'lucide-react';
+import { renderCompactContent } from '@/utils/formatContent';
 
 interface RoundtableSummaryProps {
   summary: string;
@@ -27,8 +28,8 @@ export function RoundtableSummary({ summary, onClose }: RoundtableSummaryProps) 
           </button>
         )}
       </div>
-      <div className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
-        {summary}
+      <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+        {renderCompactContent(summary)}
       </div>
     </motion.div>
   );

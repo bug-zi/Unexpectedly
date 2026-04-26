@@ -4,6 +4,8 @@
  * 支持多轮对话，持续深化灵感
  */
 
+import { renderCompactContent } from '@/utils/formatContent';
+
 import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Loader2, Waves, AlertTriangle, User, Sparkles, RotateCcw } from 'lucide-react';
@@ -249,7 +251,7 @@ export function InspirationRipple({ isOpen, onClose }: InspirationRippleProps) {
                         <span className="text-xs font-medium text-green-600 dark:text-green-400">灵感拓展</span>
                       </div>
                     )}
-                    <div className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</div>
+                    <div className="text-sm leading-relaxed">{msg.role === 'assistant' ? renderCompactContent(msg.content) : msg.content}</div>
                   </div>
                 </motion.div>
               ))}

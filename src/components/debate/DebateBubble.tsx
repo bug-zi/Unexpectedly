@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { DebateMessage } from '@/types';
+import { renderCompactContent } from '@/utils/formatContent';
 
 interface DebateBubbleProps {
   message: DebateMessage;
@@ -62,12 +63,16 @@ export function DebateBubble({ message, isStreaming }: DebateBubbleProps) {
           <span className="text-xs text-gray-400">{stanceLabel(message.stance)}</span>
         </div>
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl rounded-tl-sm px-4 py-2.5 shadow-sm">
-          <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
-            {message.content}
-            {isStreaming && (
-              <span className="inline-block w-1.5 h-4 bg-amber-500 ml-0.5 animate-pulse align-text-bottom" />
+          <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+            {isStreaming ? (
+              <>
+                {message.content}
+                <span className="inline-block w-1.5 h-4 bg-amber-500 ml-0.5 animate-pulse align-text-bottom" />
+              </>
+            ) : (
+              renderCompactContent(message.content)
             )}
-          </p>
+          </div>
         </div>
       </div>
     </motion.div>

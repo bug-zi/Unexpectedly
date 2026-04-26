@@ -11,6 +11,7 @@ import type { DepthLevel } from '@/constants/inspirationDomains';
 import { useInspirationAI } from '@/hooks/useInspirationAI';
 import { useInspirationStore } from '@/stores/inspirationStore';
 import { usePageSEO } from '@/hooks/usePageSEO';
+import { renderFormattedContent } from '@/utils/formatContent';
 
 const DEPTH_ICONS: Record<string, React.ReactNode> = {
   Zap: <Zap size={16} />,
@@ -409,16 +410,20 @@ export function InspirationDomainPage() {
 
                   {/* 结果内容 */}
                   <div className="px-5 py-6">
-                    <div className="text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap text-[15px]">
-                      {generatedContent || '灵感正在涌现...'}
-                      {isGenerating && (
+                    {isGenerating ? (
+                      <div className="text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap text-[15px]">
+                        {generatedContent || '灵感正在涌现...'}
                         <motion.span
                           animate={{ opacity: [1, 0] }}
                           transition={{ duration: 0.8, repeat: Infinity }}
                           className="inline-block w-0.5 h-5 bg-green-500 ml-0.5 align-middle"
                         />
-                      )}
-                    </div>
+                      </div>
+                    ) : (
+                      <div className="text-[15px] leading-relaxed space-y-1">
+                        {renderFormattedContent(generatedContent)}
+                      </div>
+                    )}
                   </div>
 
                   {/* 操作按钮 */}
