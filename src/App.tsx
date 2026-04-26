@@ -35,9 +35,11 @@ import { useSync } from '@/hooks/useSync';
 import { useEffect, useRef } from 'react';
 import { syncOnLogin } from '@/services/syncService';
 import { autoMigrate } from '@/utils/dataMigration';
+import { useThemeInitializer } from '@/stores/themeStore';
 
 function App() {
   const syncTriggeredRef = useRef(false);
+  const { isDark } = useThemeInitializer();
 
   // 自动迁移旧数据
   useEffect(() => {
@@ -132,9 +134,9 @@ function App() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="light"
-        toastClassName="!bg-white/90 !backdrop-blur-md !text-gray-800 !shadow-xl !border !border-gray-200/50 !rounded-xl"
-        progressClassName="!bg-gradient-to-r !from-gray-400 !to-gray-500"
+        theme={isDark ? 'dark' : 'light'}
+        toastClassName={`${isDark ? '!bg-gray-800/90 !text-gray-200 !border-gray-700/50' : '!bg-white/90 !text-gray-800 !border-gray-200/50'} !backdrop-blur-md !shadow-xl !border !rounded-xl`}
+        progressClassName={isDark ? '!bg-gradient-to-r !from-gray-600 !to-gray-500' : '!bg-gradient-to-r !from-gray-400 !to-gray-500'}
         className="!font-medium"
         closeButton={false}
       />

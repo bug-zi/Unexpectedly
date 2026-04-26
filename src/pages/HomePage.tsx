@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { Gamepad2, CircleDashed, Brain, Sparkles, Star, Clock, Bell, TrendingUp, ArrowRight, Lightbulb, Puzzle, Zap, Copy, RefreshCw, BookOpen, Calendar, User, Target } from 'lucide-react';
 import { PuzzlePiece, Brain as BrainIcon, Notebook, BookOpen as BookOpenIcon, Sparkle, CalendarCheck, Crosshair, BellRinging, UserCircle, Quotes } from '@phosphor-icons/react';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { MoreMenu } from '@/components/ui/MoreMenu';
 import { getRandomQuestion } from '@/constants/questions';
 import { useAppStore } from '@/stores/appStore';
 import { Icon } from '@/components/ui/Icon';
@@ -252,7 +254,7 @@ export function HomePage() {
 
       {/* 导航栏 - 完全透明，背景图直接穿透 */}
       <nav className="fixed top-0 left-0 right-0 z-50 shadow-none">
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative pl-4 sm:pl-6 lg:pl-8 pr-0">
           <div className="flex items-center justify-between h-16">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -289,7 +291,7 @@ export function HomePage() {
                 className="flex items-center gap-2 px-2 sm:px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
               >
                 <Sparkle size={18} weight="duotone" />
-                <span className="hidden sm:inline">体验介绍</span>
+                <span className="hidden sm:inline">介绍</span>
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05, rotate: 1 }}
@@ -310,15 +312,6 @@ export function HomePage() {
                 <span className="hidden sm:inline">任务</span>
               </motion.button>
               <motion.button
-                whileHover={{ scale: 1.05, rotate: 3 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate('/notifications')}
-                className="flex items-center gap-2 px-2 sm:px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
-              >
-                <BellRinging size={18} weight="duotone" />
-                <span className="hidden sm:inline">提醒</span>
-              </motion.button>
-              <motion.button
                 whileHover={{ scale: 1.05, rotate: -3 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate('/profile')}
@@ -327,6 +320,7 @@ export function HomePage() {
                 <UserCircle size={18} weight="duotone" />
                 <span className="hidden sm:inline">我的</span>
               </motion.button>
+              <MoreMenu navigate={navigate} />
             </motion.div>
           </div>
         </div>
