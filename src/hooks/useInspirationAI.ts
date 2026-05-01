@@ -44,9 +44,10 @@ export function useInspirationAI(options?: UseInspirationAIOptions) {
         const maxTokens = depth === 'spark' ? 512 : 2048;
 
         let fullText = '';
+        const temperature = domainId === 'project' ? 0.78 : 0.95;
 
         for await (const token of streamChat(messages, configSnapshot, {
-          temperature: 0.95,
+          temperature,
           max_tokens: maxTokens,
         })) {
           if (abortRef.current) break;
@@ -119,9 +120,10 @@ export function useInspirationAI(options?: UseInspirationAIOptions) {
         const messages = buildExpandPrompt(previousContent, domain);
 
         let fullText = '';
+        const expandTemperature = domainId === 'project' ? 0.80 : 0.90;
 
         for await (const token of streamChat(messages, configSnapshot, {
-          temperature: 0.9,
+          temperature: expandTemperature,
           max_tokens: 2048,
         })) {
           if (abortRef.current) break;

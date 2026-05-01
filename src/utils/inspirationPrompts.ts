@@ -142,12 +142,12 @@ const PROJECT_IDEA_TYPES = [
   '微信小程序',
   '桌面端工具',
   '互动网页（纯前端，无需后端）',
-  '命令行工具',
-  '硬件/物联网设备',
+  '命令行工具/开发者工具',
+  'API服务（给其他开发者用的接口）',
 ];
 
 const PROJECT_CORE_MECHANICS = [
-  'AI生成/对话（让AI成为核心体验的一部分，不只是辅助功能）',
+  'AI辅助（AI作为增强功能而非产品本身，比如AI帮用户更快完成某个具体操作，而不是又一个AI对话机器人）',
   '游戏化机制（用游戏思维设计非游戏场景，让枯燥的事情变有趣）',
   '数据可视化（把抽象数据变成可感知的图形或动画）',
   '社交/连接（人与人的连接是核心价值，不是附属功能）',
@@ -158,6 +158,18 @@ const PROJECT_CORE_MECHANICS = [
   '随机性/惊喜（核心体验依赖意外和发现，不可预测）',
   '协作共创（多人共同参与创造一个东西）',
 ];
+
+// 项目类型与核心机制的兼容性矩阵 — 防止不现实的随机组合
+const PROJECT_TYPE_MECHANIC_COMPAT: Record<string, number[]> = {
+  '独立app应用（iOS/Android）': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+  'Web网站/在线工具': [0, 1, 2, 4, 5, 6, 7, 8, 9],
+  '浏览器插件/扩展': [0, 1, 2, 4, 5, 6, 8],
+  '微信小程序': [1, 3, 4, 5, 6, 7, 8],
+  '桌面端工具': [0, 1, 2, 5, 6, 8],
+  '互动网页（纯前端，无需后端）': [1, 2, 4, 5, 6, 7, 8],
+  '命令行工具/开发者工具': [0, 2, 5, 6, 8],
+  'API服务（给其他开发者用的接口）': [0, 2, 4, 5],
+};
 
 const PROJECT_ENTRY_ANGLES = [
   '从你自己真实遇到的一个需求出发——你想要的这个东西，目前没有任何工具能做好',
@@ -223,17 +235,143 @@ function getLiteraryStyleOverride(subcategoryId: string): string {
   return '';
 }
 
-// 项目开发子分类的强制类型指定 - 代码层随机
-function getProjectStyleOverride(subcategoryId: string): string {
-  if (subcategoryId !== 'idea-incubation') return '';
+// 项目开发子分类的强制类型指定 - 代码层随机 + 兼容性约束
+// 其他项目子分类的随机领域池
+const TECH_TREND_FIELDS = [
+  'AI/大模型应用层', '前端/Web技术', '移动端开发', '数据库/存储',
+  'DevOps/自动化', '安全/隐私', '音视频处理', '开发者体验',
+];
+const INNOVATION_FIELDS = [
+  '日常效率工具', '内容创作', '学习/教育', '健康/运动',
+  '个人财务', '社交/社区', '娱乐/游戏', '开发者工具',
+];
+const TECH_SCENARIOS = [
+  '个人博客/作品集', '小工具/SaaS', '数据仪表盘',
+  '实时协作应用', '内容管理/后台', 'API服务',
+];
+const BUSINESS_MODELS = [
+  '订阅制（月费/年费）', '一次性买断', '免费+增值功能',
+  '按使用量计费', '交易抽成/佣金', '内容付费/知识变现',
+];
 
+function getProjectStyleOverride(subcategoryId: string): string {
   const pick = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
-  const projectType = pick(PROJECT_IDEA_TYPES);
-  const coreMechanic = pick(PROJECT_CORE_MECHANICS);
-  const entryAngle = pick(PROJECT_ENTRY_ANGLES);
+  if (subcategoryId === 'idea-incubation') {
+    const projectType = pick(PROJECT_IDEA_TYPES);
+    // 从兼容的机制池中选取，防止不现实的组合
+    const compatibleIndices = PROJECT_TYPE_MECHANIC_COMPAT[projectType] ?? PROJECT_CORE_MECHANICS.map((_, i) => i);
+    const mechanicIndex = compatibleIndices[Math.floor(Math.random() * compatibleIndices.length)];
+    const coreMechanic = PROJECT_CORE_MECHANICS[mechanicIndex];
+    const entryAngle = pick(PROJECT_ENTRY_ANGLES);
 
-  return `\n\n【强制指定项目形态（最高优先级）】本次生成的项目必须是：${projectType}。介绍中必须体现出这种产品形态的使用方式。\n\n【强制指定核心机制（最高优先级）】本次项目的核心体验必须围绕：${coreMechanic}。这是产品最独特的地方，必须在介绍中明确体现。\n\n【强制指定创意出发点（最高优先级）】本次创意必须：${entryAngle}。`;
+    return `\n\n【强制指定项目形态（最高优先级）】本次生成的项目必须是：${projectType}。介绍中必须体现出这种产品形态的使用方式。\n\n【强制指定核心机制（最高优先级）】本次项目的核心体验必须围绕：${coreMechanic}。这是产品最独特的地方，必须在介绍中明确体现。\n\n【强制指定创意出发点（最高优先级）】本次创意必须：${entryAngle}。`;
+  }
+
+  if (subcategoryId === 'trends') {
+    const field = pick(TECH_TREND_FIELDS);
+    return `\n\n【强制指定技术领域（最高优先级）】本次趋势洞察必须围绕「${field}」领域的具体技术变化展开，不要泛泛而谈整个科技行业。`;
+  }
+
+  if (subcategoryId === 'innovation') {
+    const field = pick(INNOVATION_FIELDS);
+    return `\n\n【强制指定创新领域（最高优先级）】本次必须针对「${field}」领域中的一个旧问题进行逆向创新，不要脱离这个领域。`;
+  }
+
+  if (subcategoryId === 'tech-stack') {
+    const scenario = pick(TECH_SCENARIOS);
+    return `\n\n【强制指定开发场景（最高优先级）】本次技术选型必须针对「${scenario}」场景中的具体问题推荐方案。`;
+  }
+
+  if (subcategoryId === 'business-model') {
+    const model = pick(BUSINESS_MODELS);
+    return `\n\n【强制指定变现模式（最高优先级）】本次商业模式的核心收入来源必须是「${model}」，在此基础上设计具体的产品。`;
+  }
+
+  return '';
+}
+
+// 项目开发领域专用系统提示词 — 技术产品人视角
+function buildProjectSystemPrompt(
+  subcategory: InspirationSubcategory,
+  timestamp: string,
+  projectStyleOverride: string
+): string {
+  return `你是一位兼具技术背景和产品思维的独立开发者/产品经理。
+
+## 你的角色
+- 你既能写代码也做过产品，理解从想法到上线的完整路径
+- 你评判一个点子的标准是：1-3人小团队能否在1-4周内做出MVP
+- 你对"看着酷但做不出来"的PPT产品零兴趣，你追求的是真能跑的东西
+- 你了解常见技术栈的能力边界，不会提出超出工程现实的想法
+- 你见过太多烂产品和好产品的区别，知道什么让用户留下来
+
+## 当前任务
+- 方向：${subcategory.name}（${subcategory.description}）
+
+## 【最重要的输出格式约束 — 必须严格遵守】
+${subcategory.promptFocus}
+
+## 可行性判断标准（每次生成前必须自检）
+- 1-3人小团队是否能在1-4周内做出核心功能可用的MVP？
+- 核心功能是否可以用成熟技术栈实现？（不需要自研算法、不需要硬件供应链、不需要大量训练数据）
+- 用户获取成本是否可以很低？（不依赖大规模推广、不需要冷启动大量用户）
+- 是否有明确的付费意愿场景？（不是"先做大用户量再想怎么赚钱"）
+
+## 你必须避免的
+- 需要融资才能启动的项目（硬件制造、大规模数据采集、需要牌照的业务）
+- 纯概念性产品（没有具体的使用场景和操作流程）
+- 需要大量用户才能成立的产品（社交网络、平台型产品、交易市场）
+- 技术上不成熟的方案（需要自研核心AI模型、需要极低延迟的实时系统）
+- 任何包含以下词汇的表述：SaaS平台、综合解决方案、一站式服务、生态系统、赋能、助力、闭环、抓手、矩阵、中台
+
+## 好点子的特征（校准参考）
+- 「单词引力」：一个CLI工具，每次在终端输入命令时随机显示一个GRE单词及语境例句。核心极简，一个人一天能做出来，但确实有用。（技术栈：Rust CLI + 本地词库JSON，零后端）
+- 「Git Shamer」：浏览器插件，在GitHub PR页面自动标注每个文件最后修改人的"代码平均存活时间"，让技术债务可视化。实用、有趣、一个人能做。（技术栈：Chrome Extension + GitHub API）
+- 「三分钟日记」：微信小程序，每天只给3分钟写日记，时间到了自动保存并锁定，第二天才能看到自己写了什么。核心机制是时间压力+延迟反馈。（技术栈：微信小程序 + 云开发）
+
+## 差点子的特征（必须避免）
+- 「AI全能创作平台」：太宽泛、需要大团队、没有明确场景
+- 「智能健康管理生态系统」：PPT词汇堆砌、不具体、没有核心体验
+- 「基于区块链的去中心化社交网络」：技术不成熟、需要大量用户冷启动、一个人做不了
+
+## 输出标准
+1. 必须用中文，语言精练有力量
+2. 内容必须具有实际启发性，不要空洞的口号或鸡汤
+3. 要有具体的、可感知的细节，避免泛泛而谈
+4. 不要使用"我们可以"、"让我们"之类的套话开头
+5. 时间戳 ${timestamp} 确保每次输出不同${projectStyleOverride}`;
+}
+
+// 通用领域系统提示词（文学、沟通、学术、生活、人际关系）
+function buildGenericSystemPrompt(
+  domain: InspirationDomain,
+  subcategory: InspirationSubcategory,
+  timestamp: string,
+  characterOverride: string,
+  literaryStyleOverride: string,
+  projectStyleOverride: string
+): string {
+  return `你是一位专注于「${domain.name}」领域的资深创意顾问。
+
+## 你的角色
+- 你在${domain.name}领域有丰富的实战经验和深度思考
+- 你擅长将抽象创意转化为可落地的具体方案
+- 你了解这个领域的常见套路，刻意避免它们
+
+## 当前任务
+- 领域：${domain.name}（${domain.description}）
+- 方向：${subcategory.name}
+
+## 【最重要的输出格式约束 — 必须严格遵守】
+${subcategory.promptFocus}
+
+## 输出标准
+1. 必须用中文，语言精练有力量
+2. 内容必须具有实际启发性，不要空洞的口号或鸡汤
+3. 要有具体的、可感知的细节，避免泛泛而谈
+4. 不要使用"我们可以"、"让我们"之类的套话开头
+5. 时间戳 ${timestamp} 确保每次输出不同${characterOverride}${literaryStyleOverride}${projectStyleOverride}`;
 }
 
 /**
@@ -264,26 +402,9 @@ export function buildInspirationPrompt(
     ? getProjectStyleOverride(subcategory.id)
     : '';
 
-  const systemPrompt = `你是一位专注于「${domain.name}」领域的资深创意顾问。
-
-## 你的角色
-- 你在${domain.name}领域有丰富的实战经验和深度思考
-- 你擅长将抽象创意转化为可落地的具体方案
-- 你了解这个领域的常见套路，刻意避免它们
-
-## 当前任务
-- 领域：${domain.name}（${domain.description}）
-- 方向：${subcategory.name}
-
-## 【最重要的输出格式约束 — 必须严格遵守】
-${subcategory.promptFocus}
-
-## 输出标准
-1. 必须用中文，语言精练有力量
-2. 内容必须具有实际启发性，不要空洞的口号或鸡汤
-3. 要有具体的、可感知的细节，避免泛泛而谈
-4. 不要使用"我们可以"、"让我们"之类的套话开头
-5. 时间戳 ${timestamp} 确保每次输出不同${characterOverride}${literaryStyleOverride}${projectStyleOverride}`;
+  const systemPrompt = domain.id === 'project'
+    ? buildProjectSystemPrompt(subcategory, timestamp, projectStyleOverride)
+    : buildGenericSystemPrompt(domain, subcategory, timestamp, characterOverride, literaryStyleOverride, projectStyleOverride);
 
   const userPrompt = `请为「${domain.name}」领域的「${subcategory.name}」方向生成内容。
 ${characterOverride}${literaryStyleOverride}${projectStyleOverride}
