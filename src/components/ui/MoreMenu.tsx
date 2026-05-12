@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BellRinging, DotsThree } from '@phosphor-icons/react';
-import { Sun, Moon, Monitor, ChevronLeft, Palette } from 'lucide-react';
+import { Sun, Moon, Monitor, ChevronLeft, Palette, Dices } from 'lucide-react';
 import { useThemeStore, type ThemeMode } from '@/stores/themeStore';
 
 const themeOptions: { mode: ThemeMode; label: string; icon: typeof Sun }[] = [
@@ -95,6 +95,16 @@ export function MoreMenu({ navigate }: MoreMenuProps) {
                 >
                   <BellRinging size={16} />
                   <span>提醒</span>
+                </button>
+                <button
+                  onClick={() => {
+                    navigate('/random-quest');
+                    setIsOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-colors"
+                >
+                  <Dices size={16} />
+                  <span>随机小任务</span>
                 </button>
                 <button
                   onClick={() => setShowAppearance(true)}

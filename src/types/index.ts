@@ -278,3 +278,6 @@ export interface ChatMessage {
 
 // ===== 辩论堂相关类型 =====
 export * from './debate';
+
+// ===== 随机小任务扭蛋机相关类型 =====
+export * from './randomQuest';
