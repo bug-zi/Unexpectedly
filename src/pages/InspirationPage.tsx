@@ -101,7 +101,7 @@ export function InspirationPage() {
                 </motion.button>
 
                 {/* 中间：标题和图标 */}
-                <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
+                <div className="absolute left-1/2 -translate-x-[calc(50%+70px)] flex items-center gap-3">
                   <motion.div
                     whileHover={{ rotate: 360 }}
                     transition={{ duration: 0.6 }}
