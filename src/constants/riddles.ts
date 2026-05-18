@@ -437,7 +437,7 @@ export function getRiddlesByCategory(category: string): Riddle[] {
  */
 export function checkRiddleAnswer(userAnswer: string, correctAnswer: string): boolean {
   const normalize = (str: string) => {
-    return str.trim().toLowerCase().replace(/[，。！？、；：""''（）《》\s,\.!\?;:"'\(\)\[\]]/g, '');
+    return str.trim().toLowerCase().replace(/[，。！？、；：""''（）《》\s,.!?;:"'()[\]]/g, '');
   };
 
   const normalizedUserAnswer = normalize(userAnswer);
@@ -461,7 +461,7 @@ export function checkRiddleAnswer(userAnswer: string, correctAnswer: string): bo
  */
 export function getAnswerSimilarity(userAnswer: string, correctAnswer: string): number {
   const normalize = (str: string) => {
-    return str.trim().toLowerCase().replace(/[，。！？、；：""''（）《》\s,\.!\?;:"'\(\)\[\]]/g, '');
+    return str.trim().toLowerCase().replace(/[，。！？、；：""''（）《》\s,.!?;:"'()[\]]/g, '');
   };
 
   const normalizedUserAnswer = normalize(userAnswer);

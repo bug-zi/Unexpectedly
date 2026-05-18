@@ -16,7 +16,7 @@ export interface QAPair {
  * 从汤底中提取关键信息
  */
 function extractKeywordsFromTruth(truth: string): string[] {
-  const cleaned = truth.replace(/[，。！？、；：""''（）《》\s,\.!\?;:"'\(\)\[\]]/g, ' ');
+  const cleaned = truth.replace(/[，。！？、；：""''（）《》\s,.!?;:"'()[\]]/g, ' ');
   const words = cleaned.split(/\s+/).filter(word => word.length >= 2);
   return Array.from(new Set(words));
 }
@@ -34,13 +34,13 @@ function analyzeQuestion(question: string, truth: string, scenario: string): {
   const scenarioLower = scenario.toLowerCase();
 
   const keywords = extractKeywordsFromTruth(truth);
-  const questionWords = questionLower.replace(/[，。！？、；：""''（）《》\s,\.!\?;:"'\(\)\[\]]/g, ' ').split(/\s+/);
+  const questionWords = questionLower.replace(/[，。！？、；：""''（）《》\s,.!?;:"'()[\]]/g, ' ').split(/\s+/);
   const matchCount = questionWords.filter(word =>
     word.length >= 2 && keywords.some(kw => kw.includes(word) || word.includes(kw))
   ).length;
   const matchRatio = matchCount / Math.max(questionWords.length, 1);
 
-  const scenarioWords = scenarioLower.replace(/[，。！？、；：""''（）《》\s,\.!\?;:"'\(\)\[\]]/g, ' ').split(/\s+/);
+  const scenarioWords = scenarioLower.replace(/[，。！？、；：""''（）《》\s,.!?;:"'()[\]]/g, ' ').split(/\s+/);
   const scenarioMatchCount = questionWords.filter(word =>
     word.length >= 2 && scenarioWords.some(sw => sw.includes(word) || word.includes(sw))
   ).length;

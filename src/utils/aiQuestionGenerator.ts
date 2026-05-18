@@ -47,7 +47,7 @@ function buildPrompt(params: GenerateQuestionParams): string {
   const categoryName = CATEGORY_NAMES[category] || category;
   const difficultyLabel = DIFFICULTY_LABELS[difficulty];
 
-  let prompt = `你是一个专业的问题设计专家，擅长创作能激发深度思考的问题。
+  const prompt = `你是一个专业的问题设计专家，擅长创作能激发深度思考的问题。
 
 请根据以下要求生成${count}个问题：
 
@@ -153,7 +153,7 @@ export async function generateQuestionsWithAI(
     }
 
     // 解析JSON响应
-    let jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/\{[\s\S]*\}/);
+    const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/\{[\s\S]*\}/);
 
     if (!jsonMatch) {
       throw new Error('无法从AI响应中提取JSON');
@@ -185,8 +185,7 @@ export async function optimizeQuestionWithAI(questionContent: string): Promise<s
     throw new Error('未配置智谱AI API Key，请在.env文件中设置VITE_GLM_API_KEY');
   }
 
-  try {
-    const prompt = `请优化以下问题，使其更具启发性和思考深度，同时保持原意：
+  const prompt = `请优化以下问题，使其更具启发性和思考深度，同时保持原意：
 
 原问题：${questionContent}
 
@@ -196,38 +195,35 @@ export async function optimizeQuestionWithAI(questionContent: string): Promise<s
 3. 20-50字之间
 4. 只返回优化后的问题内容，不要其他解释`;
 
-    const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'glm-4-flash',
-        messages: [
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        temperature: 0.7,
-        max_tokens: 500,
-      }),
-    });
+  const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: 'glm-4-flash',
+      messages: [
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: 500,
+    }),
+  });
 
-    if (!response.ok) {
-      throw new Error(`API请求失败: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content?.trim();
-
-    if (!content) {
-      throw new Error('AI返回的内容为空');
-    }
-
-    return content;
-  } catch (error) {
-    throw error;
+  if (!response.ok) {
+    throw new Error(`API请求失败: ${response.status}`);
   }
+
+  const data = await response.json();
+  const content = data.choices?.[0]?.message?.content?.trim();
+
+  if (!content) {
+    throw new Error('AI返回的内容为空');
+  }
+
+  return content;
 }

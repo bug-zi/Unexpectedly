@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Sparkles, PenTool, Rocket, MessageCircle, GraduationCap, Coffee, Users, AlertTriangle, Info, BarChart3, Zap, Anchor, Shuffle, X, Heart, Clock, TrendingUp, Pencil, Trash2, CheckCircle, Waves } from 'lucide-react';
+import { ArrowLeft, Sparkles, PenTool, Rocket, MessageCircle, GraduationCap, Coffee, Users, AlertTriangle, Info, BarChart3, Zap, Anchor, Shuffle, X, Heart, Clock, TrendingUp, Pencil, Trash2, CheckCircle, Waves, CircleDot } from 'lucide-react';
 import { INSPIRATION_DOMAINS, DEPTH_CONFIG } from '@/constants/inspirationDomains';
 import type { InspirationDomain } from '@/constants/inspirationDomains';
 import { useRoundtableStore } from '@/stores/roundtableStore';
@@ -139,6 +139,15 @@ export function InspirationPage() {
                   >
                     <Waves size={18} />
                     <span className="hidden md:inline">灵感涟漪</span>
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate('/inspiration/diffuser')}
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-all"
+                  >
+                    <CircleDot size={18} />
+                    <span className="hidden md:inline">灵感扩散</span>
                   </motion.button>
                   <motion.button
                     whileHover={{ scale: 1.05 }}

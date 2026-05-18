@@ -56,6 +56,7 @@ function fallbackToRuleBasedJudgment(
   category: string
 ): AIJudgmentResult {
   // 这里使用原来的规则逻辑作为后备
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { analyzeYesNoQuestion } = require('@/constants/yesOrNoWords');
   return analyzeYesNoQuestion(question, targetWord, category);
 }
@@ -66,7 +67,7 @@ function fallbackToRuleBasedJudgment(
 export async function checkAIServiceAvailable(): Promise<boolean> {
   try {
     // 发送一个简单的测试请求
-    const { data, error } = await supabase.functions.invoke('yesorno-ai-judge', {
+    await supabase.functions.invoke('yesorno-ai-judge', {
       body: {
         question: '测试',
         targetWord: '测试',
@@ -75,7 +76,7 @@ export async function checkAIServiceAvailable(): Promise<boolean> {
       timeout: 5000 // 5秒超时
     });
 
-    return !error;
+    return true;
   } catch {
     return false;
   }

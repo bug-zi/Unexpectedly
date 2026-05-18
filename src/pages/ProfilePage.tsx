@@ -607,7 +607,7 @@ export function ProfilePage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors"
+              className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
             >
               <ArrowLeft size={20} />
               <span className="font-medium">返回</span>
@@ -621,21 +621,21 @@ export function ProfilePage() {
         <div className="max-w-4xl mx-auto">
           {/* 页面标题 */}
           <div className="flex items-center justify-center gap-3 mb-6">
-            <User size={28} className="text-gray-700" />
-            <h1 className="text-2xl font-bold text-gray-700">个人中心</h1>
+            <User size={28} className="text-gray-700 dark:text-gray-300" />
+            <h1 className="text-2xl font-bold text-gray-700 dark:text-gray-300">个人中心</h1>
           </div>
           {/* 用户信息卡片 */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/20 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden border-2 border-blue-200 mb-8"
+            className="bg-white/20 dark:bg-gray-800/20 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden border-2 border-blue-200 dark:border-blue-800 mb-8"
           >
-            <div className="bg-gradient-to-br from-white/15 to-white/25 backdrop-blur-xl p-8 border-b border-white/20 shadow-inner">
+            <div className="bg-gradient-to-br from-white/15 dark:from-gray-700/15 to-white/25 dark:to-gray-700/25 backdrop-blur-xl p-8 border-b border-white/20 dark:border-gray-600/20 shadow-inner">
               <div className="flex items-start gap-4">
                 <div className="relative">
                   <motion.div
                     whileHover={{ scale: 1.05, rotate: 5 }}
-                    className="w-20 h-20 rounded-2xl bg-gray-100/60 backdrop-blur-md flex items-center justify-center overflow-hidden shadow-lg border border-gray-200/50"
+                    className="w-20 h-20 rounded-2xl bg-gray-100/60 dark:bg-gray-700/60 backdrop-blur-md flex items-center justify-center overflow-hidden shadow-lg border border-gray-200/50 dark:border-gray-600/50"
                   >
                     {profile?.avatar_url ? (
                       <img
@@ -644,11 +644,11 @@ export function ProfilePage() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <User size={40} className="text-gray-500" />
+                      <User size={40} className="text-gray-500 dark:text-gray-400" />
                     )}
                   </motion.div>
                   {isAuthenticated && (
-                    <label className="absolute -bottom-2 -right-2 bg-gray-100 rounded-full p-1.5 shadow-lg cursor-pointer hover:bg-gray-100 transition-colors border border-gray-200">
+                    <label className="absolute -bottom-2 -right-2 bg-gray-100 dark:bg-gray-700 rounded-full p-1.5 shadow-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors border border-gray-200 dark:border-gray-600">
                       <Camera size={14} className="text-blue-500" />
                       <input
                         type="file"
@@ -678,7 +678,7 @@ export function ProfilePage() {
                           onChange={(e) =>
                             setEditData({ ...editData, username: e.target.value })
                           }
-                          className="w-full px-3 py-2 bg-gray-100/80 text-gray-800 placeholder-gray-400 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 backdrop-blur-sm"
+                          className="w-full px-3 py-2 bg-gray-100/80 dark:bg-gray-700/80 text-gray-800 dark:text-gray-200 placeholder-gray-400 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-300 backdrop-blur-sm"
                         />
                         <div className="flex gap-2">
                           <select
@@ -686,7 +686,7 @@ export function ProfilePage() {
                             onChange={(e) =>
                               setEditData({ ...editData, gender: e.target.value })
                             }
-                            className="px-3 py-2 bg-gray-100/80 text-gray-800 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 backdrop-blur-sm"
+                            className="px-3 py-2 bg-gray-100/80 dark:bg-gray-700/80 text-gray-800 dark:text-gray-200 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-300 backdrop-blur-sm"
                           >
                             <option value="">选择性别</option>
                             <option value="男">男</option>
@@ -700,7 +700,7 @@ export function ProfilePage() {
                             onChange={(e) =>
                               setEditData({ ...editData, age: e.target.value })
                             }
-                            className="px-3 py-2 bg-gray-100/80 text-gray-800 placeholder-gray-400 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 backdrop-blur-sm"
+                            className="px-3 py-2 bg-gray-100/80 dark:bg-gray-700/80 text-gray-800 dark:text-gray-200 placeholder-gray-400 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-300 backdrop-blur-sm"
                           />
                         </div>
                         <textarea
@@ -710,7 +710,7 @@ export function ProfilePage() {
                             setEditData({ ...editData, bio: e.target.value })
                           }
                           rows={2}
-                          className="w-full px-3 py-2 bg-gray-100/80 text-gray-800 placeholder-gray-400 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 backdrop-blur-sm resize-none"
+                          className="w-full px-3 py-2 bg-gray-100/80 dark:bg-gray-700/80 text-gray-800 dark:text-gray-200 placeholder-gray-400 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-300 backdrop-blur-sm resize-none"
                         />
                         <div className="flex gap-2">
                           <motion.button
@@ -726,7 +726,7 @@ export function ProfilePage() {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => setIsEditing(false)}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-all"
+                            className="flex items-center gap-1 px-3 py-1.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-all"
                           >
                             <X size={16} />
                             取消
@@ -740,19 +740,19 @@ export function ProfilePage() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                       >
-                        <h2 className="text-2xl font-bold text-gray-900 mb-1">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
                           {profile?.username || user?.email || '游客用户'}
                         </h2>
                         {(profile?.gender || profile?.age || profile?.bio) && (
-                          <div className="flex flex-wrap gap-x-3 gap-y-1 text-gray-600 text-sm mb-1">
+                          <div className="flex flex-wrap gap-x-3 gap-y-1 text-gray-600 dark:text-gray-400 text-sm mb-1">
                             {profile?.gender && <span>性别: {profile.gender}</span>}
                             {profile?.age && <span>年龄: {profile.age}岁</span>}
                           </div>
                         )}
                         {profile?.bio && (
-                          <p className="text-gray-600 text-sm mb-2">{profile.bio}</p>
+                          <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{profile.bio}</p>
                         )}
-                        <p className="text-gray-500 text-sm">
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">
                           {isAuthenticated ? '已登录' : '游客模式'}
                         </p>
                       </motion.div>
@@ -777,7 +777,7 @@ export function ProfilePage() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={handleLogout}
-                      className="flex items-center gap-1 px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-all"
+                      className="flex items-center gap-1 px-3 py-1.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-all"
                     >
                       退出登录
                     </motion.button>
@@ -799,7 +799,7 @@ export function ProfilePage() {
             {/* 用户统计 */}
             <div className="p-8">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                   <TrendingUp size={20} className="text-blue-500" />
                   学习统计
                 </h3>
@@ -840,15 +840,15 @@ export function ProfilePage() {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-5 mb-8 shadow-md"
+                className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-300 dark:border-amber-700 rounded-2xl p-5 mb-8 shadow-md"
               >
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-amber-100 rounded-lg flex-shrink-0">
-                    <Lightbulb size={20} className="text-amber-600" />
+                  <div className="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-lg flex-shrink-0">
+                    <Lightbulb size={20} className="text-amber-600 dark:text-amber-400" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-bold text-amber-800 mb-1">发现未同步的数据</h3>
-                    <p className="text-sm text-amber-700 mb-3">
+                    <h3 className="font-bold text-amber-800 dark:text-amber-200 mb-1">发现未同步的数据</h3>
+                    <p className="text-sm text-amber-700 dark:text-amber-300 mb-3">
                       检测到本地有 {orphanDataInfo.dataCount} 项之前登录时产生的数据。
                       登录后这些数据会自动同步到云端，方便你在不同设备间访问。
                     </p>
@@ -871,9 +871,9 @@ export function ProfilePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg p-6 border-2 border-blue-200 mb-8"
+            className="bg-white/20 dark:bg-gray-800/20 backdrop-blur-sm rounded-2xl shadow-lg p-6 border-2 border-blue-200 dark:border-blue-800 mb-8"
           >
-            <h3 className="text-lg font-bold text-gray-900 mb-4">思考记录</h3>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">思考记录</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* 逻辑推理 */}
               <div className="relative rounded-xl p-5 border-2 border-red-300/50 overflow-hidden">
@@ -945,19 +945,19 @@ export function ProfilePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg p-6 border-2 border-indigo-200 mb-8"
+            className="bg-white/20 dark:bg-gray-800/20 backdrop-blur-sm rounded-2xl shadow-lg p-6 border-2 border-indigo-200 dark:border-indigo-800 mb-8"
             id="ai-config"
           >
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
               <Bot size={20} className="text-indigo-500" />
               AI 大模型配置
               {llmConfig && (
-                <span className="ml-2 px-2 py-0.5 text-xs font-medium text-green-600 bg-green-50 rounded-full border border-green-200">
+                <span className="ml-2 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 rounded-full border border-green-200 dark:border-green-800">
                   已配置
                 </span>
               )}
             </h3>
-            <p className="text-sm text-gray-500 mb-4">配置 AI 模型用于圆桌讨论、海龟汤等需要 AI 的功能模块</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">配置 AI 模型用于圆桌讨论、海龟汤等需要 AI 的功能模块</p>
 
             {/* 配置指南入口 */}
             <button
@@ -979,11 +979,11 @@ export function ProfilePage() {
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden mb-4"
                 >
-                  <div className="bg-indigo-50/60 backdrop-blur-sm rounded-xl border border-indigo-200/50 p-5 space-y-5">
+                  <div className="bg-indigo-50/60 dark:bg-indigo-900/20 backdrop-blur-sm rounded-xl border border-indigo-200/50 dark:border-indigo-700/50 p-5 space-y-5">
                     {/* 总体步骤 */}
                     <div>
-                      <h4 className="text-sm font-bold text-indigo-800 mb-2">配置步骤（通用）</h4>
-                      <ol className="text-xs text-indigo-700 space-y-1.5 list-decimal list-inside">
+                      <h4 className="text-sm font-bold text-indigo-800 dark:text-indigo-200 mb-2">配置步骤（通用）</h4>
+                      <ol className="text-xs text-indigo-700 dark:text-indigo-300 space-y-1.5 list-decimal list-inside">
                         <li>选择一个 AI 服务商（下方有各服务商的获取指引）</li>
                         <li>前往该服务商官网注册账号并登录</li>
                         <li>在控制台 / API 管理页面创建 API Key</li>
@@ -994,15 +994,15 @@ export function ProfilePage() {
 
                     {/* 各服务商详细指南 */}
                     <div className="space-y-3">
-                      <h4 className="text-sm font-bold text-indigo-800">各服务商获取 API Key 指南</h4>
+                      <h4 className="text-sm font-bold text-indigo-800 dark:text-indigo-200">各服务商获取 API Key 指南</h4>
 
                       {/* DeepSeek */}
-                      <div className="bg-white/60 rounded-lg p-3 border border-indigo-100">
+                      <div className="bg-white/60 dark:bg-gray-700/60 rounded-lg p-3 border border-indigo-100 dark:border-indigo-900/50">
                         <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-sm font-bold text-gray-800">DeepSeek</span>
+                          <span className="text-sm font-bold text-gray-800 dark:text-gray-200">DeepSeek</span>
                           <span className="px-1.5 py-0.5 text-[10px] font-medium bg-green-100 text-green-700 rounded">推荐 · 性价比高</span>
                         </div>
-                        <ol className="text-xs text-gray-600 space-y-1 list-decimal list-inside">
+                        <ol className="text-xs text-gray-600 dark:text-gray-400 space-y-1 list-decimal list-inside">
                           <li>访问 <span className="font-mono text-indigo-600">platform.deepseek.com</span> 注册/登录</li>
                           <li>进入左侧菜单「API Keys」</li>
                           <li>点击「Create API Key」，复制生成的 Key</li>
@@ -1011,12 +1011,12 @@ export function ProfilePage() {
                       </div>
 
                       {/* 通义千问 */}
-                      <div className="bg-white/60 rounded-lg p-3 border border-indigo-100">
+                      <div className="bg-white/60 dark:bg-gray-700/60 rounded-lg p-3 border border-indigo-100 dark:border-indigo-900/50">
                         <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-sm font-bold text-gray-800">通义千问 (Qwen)</span>
+                          <span className="text-sm font-bold text-gray-800 dark:text-gray-200">通义千问 (Qwen)</span>
                           <span className="px-1.5 py-0.5 text-[10px] font-medium bg-blue-100 text-blue-700 rounded">阿里云</span>
                         </div>
-                        <ol className="text-xs text-gray-600 space-y-1 list-decimal list-inside">
+                        <ol className="text-xs text-gray-600 dark:text-gray-400 space-y-1 list-decimal list-inside">
                           <li>访问 <span className="font-mono text-indigo-600">dashscope.console.aliyun.com</span> 登录阿里云账号</li>
                           <li>开通「DashScope」服务（开通免费）</li>
                           <li>进入「API-KEY 管理」→「创建新的 API Key」，复制生成的 Key</li>
@@ -1025,12 +1025,12 @@ export function ProfilePage() {
                       </div>
 
                       {/* 智谱 GLM */}
-                      <div className="bg-white/60 rounded-lg p-3 border border-indigo-100">
+                      <div className="bg-white/60 dark:bg-gray-700/60 rounded-lg p-3 border border-indigo-100 dark:border-indigo-900/50">
                         <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-sm font-bold text-gray-800">智谱 GLM</span>
+                          <span className="text-sm font-bold text-gray-800 dark:text-gray-200">智谱 GLM</span>
                           <span className="px-1.5 py-0.5 text-[10px] font-medium bg-purple-100 text-purple-700 rounded">有免费额度</span>
                         </div>
-                        <ol className="text-xs text-gray-600 space-y-1 list-decimal list-inside">
+                        <ol className="text-xs text-gray-600 dark:text-gray-400 space-y-1 list-decimal list-inside">
                           <li>访问 <span className="font-mono text-indigo-600">open.bigmodel.cn</span> 注册/登录</li>
                           <li>进入「API Keys」页面</li>
                           <li>点击「添加 API Key」，复制生成的 Key</li>
@@ -1039,12 +1039,12 @@ export function ProfilePage() {
                       </div>
 
                       {/* Kimi */}
-                      <div className="bg-white/60 rounded-lg p-3 border border-indigo-100">
+                      <div className="bg-white/60 dark:bg-gray-700/60 rounded-lg p-3 border border-indigo-100 dark:border-indigo-900/50">
                         <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-sm font-bold text-gray-800">Kimi (Moonshot)</span>
+                          <span className="text-sm font-bold text-gray-800 dark:text-gray-200">Kimi (Moonshot)</span>
                           <span className="px-1.5 py-0.5 text-[10px] font-medium bg-orange-100 text-orange-700 rounded">长文本</span>
                         </div>
-                        <ol className="text-xs text-gray-600 space-y-1 list-decimal list-inside">
+                        <ol className="text-xs text-gray-600 dark:text-gray-400 space-y-1 list-decimal list-inside">
                           <li>访问 <span className="font-mono text-indigo-600">platform.moonshot.cn</span> 注册/登录</li>
                           <li>进入「API Key 管理」</li>
                           <li>点击「创建新的 API Key」，复制生成的 Key</li>
@@ -1053,12 +1053,12 @@ export function ProfilePage() {
                       </div>
 
                       {/* 豆包 */}
-                      <div className="bg-white/60 rounded-lg p-3 border border-indigo-100">
+                      <div className="bg-white/60 dark:bg-gray-700/60 rounded-lg p-3 border border-indigo-100 dark:border-indigo-900/50">
                         <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-sm font-bold text-gray-800">豆包 (字节跳动)</span>
+                          <span className="text-sm font-bold text-gray-800 dark:text-gray-200">豆包 (字节跳动)</span>
                           <span className="px-1.5 py-0.5 text-[10px] font-medium bg-red-100 text-red-700 rounded">火山引擎</span>
                         </div>
-                        <ol className="text-xs text-gray-600 space-y-1 list-decimal list-inside">
+                        <ol className="text-xs text-gray-600 dark:text-gray-400 space-y-1 list-decimal list-inside">
                           <li>访问 <span className="font-mono text-indigo-600">console.volcengine.com/ark</span> 登录火山引擎账号</li>
                           <li>开通「方舟」(ARK) 服务</li>
                           <li>创建接入点（模型推理服务），获取 API Key</li>
@@ -1072,15 +1072,15 @@ export function ProfilePage() {
                       <h4 className="text-sm font-bold text-indigo-800 mb-2">常见问题</h4>
                       <div className="space-y-2">
                         <div className="text-xs text-gray-600">
-                          <span className="font-medium text-indigo-700">Q: API Key 是免费的吗？</span>
+                          <span className="font-medium text-indigo-700 dark:text-indigo-300">Q: API Key 是免费的吗？</span>
                           <p className="text-gray-500 ml-2">A: 大部分服务商注册后会赠送免费额度，用完后按量付费。智谱 GLM 的 glm-4-flash 模型长期免费。</p>
                         </div>
                         <div className="text-xs text-gray-600">
-                          <span className="font-medium text-indigo-700">Q: 我的 API Key 安全吗？</span>
+                          <span className="font-medium text-indigo-700 dark:text-indigo-300">Q: 我的 API Key 安全吗？</span>
                           <p className="text-gray-500 ml-2">A: API Key 仅保存在你的浏览器本地（localStorage），不会上传到我们的服务器。</p>
                         </div>
                         <div className="text-xs text-gray-600">
-                          <span className="font-medium text-indigo-700">Q: 保存配置后仍然连接失败？</span>
+                          <span className="font-medium text-indigo-700 dark:text-indigo-300">Q: 保存配置后仍然连接失败？</span>
                           <p className="text-gray-500 ml-2">A: 请检查网络环境是否可以访问对应服务商的 API 地址，部分服务商需要海外网络。</p>
                         </div>
                       </div>
@@ -1092,11 +1092,11 @@ export function ProfilePage() {
 
             {/* Provider 选择 */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">AI 服务商</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">AI 服务商</label>
               <select
                 value={aiProvider}
                 onChange={(e) => setAiProvider(e.target.value as LLMProvider)}
-                className="w-full px-3 py-2.5 bg-white/30 backdrop-blur-sm border border-gray-300/50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors"
+                className="w-full px-3 py-2.5 bg-white/30 dark:bg-gray-700/50 backdrop-blur-sm border border-gray-300/50 dark:border-gray-600/50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors"
               >
                 <option value="deepseek">DeepSeek</option>
                 <option value="qwen">通义千问</option>
@@ -1108,19 +1108,19 @@ export function ProfilePage() {
 
             {/* API Key */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">API Key</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">API Key</label>
               <div className="relative">
                 <input
                   type={showApiKey ? 'text' : 'password'}
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   placeholder="输入你的 API Key..."
-                  className="w-full px-3 py-2.5 pr-10 bg-white/30 backdrop-blur-sm border border-gray-300/50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors"
+                  className="w-full px-3 py-2.5 pr-10 bg-white/30 dark:bg-gray-700/50 backdrop-blur-sm border border-gray-300/50 dark:border-gray-600/50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowApiKey(!showApiKey)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                 >
                   {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -1129,11 +1129,11 @@ export function ProfilePage() {
 
             {/* Model 选择 */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">模型</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">模型</label>
               <select
                 value={aiModel}
                 onChange={(e) => setAiModel(e.target.value)}
-                className="w-full px-3 py-2.5 bg-white/30 backdrop-blur-sm border border-gray-300/50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors"
+                className="w-full px-3 py-2.5 bg-white/30 dark:bg-gray-700/50 backdrop-blur-sm border border-gray-300/50 dark:border-gray-600/50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors"
               >
                 {(() => {
                   const config = getProviderConfig(aiProvider);
@@ -1149,7 +1149,7 @@ export function ProfilePage() {
               <button
                 type="button"
                 onClick={() => setShowAdvanced(!showAdvanced)}
-                className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
               >
                 <ChevronDown size={14} className={`transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
                 高级设置
@@ -1163,13 +1163,13 @@ export function ProfilePage() {
                     className="overflow-hidden"
                   >
                     <div className="pt-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">自定义 Base URL</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">自定义 Base URL</label>
                       <input
                         type="text"
                         value={aiBaseUrl}
                         onChange={(e) => setAiBaseUrl(e.target.value)}
                         placeholder={getProviderConfig(aiProvider).baseUrl}
-                        className="w-full px-3 py-2.5 bg-gray-100 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors font-mono"
+                        className="w-full px-3 py-2.5 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition-colors font-mono"
                       />
                       <p className="text-xs text-gray-400 mt-1">留空则使用默认地址</p>
                     </div>
@@ -1189,8 +1189,8 @@ export function ProfilePage() {
                 >
                   <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
                     validationStatus === 'success'
-                      ? 'bg-green-50 text-green-700 border border-green-200'
-                      : 'bg-red-50 text-red-700 border border-red-200'
+                      ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'
+                      : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800'
                   }`}>
                     {validationStatus === 'success' ? <CheckCircle2 size={16} /> : <X size={16} />}
                     {validationMessage}
@@ -1206,7 +1206,7 @@ export function ProfilePage() {
                 whileTap={{ scale: 0.98 }}
                 onClick={handleTestConnection}
                 disabled={isValidating || !apiKey.trim()}
-                className="flex items-center gap-2 px-4 py-2.5 bg-white/30 backdrop-blur-sm hover:bg-white/40 text-gray-700 rounded-xl text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-4 py-2.5 bg-white/30 dark:bg-gray-700/50 backdrop-blur-sm hover:bg-white/40 dark:hover:bg-gray-700/70 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isValidating ? (
                   <Loader2 size={16} className="animate-spin" />
@@ -1238,7 +1238,7 @@ export function ProfilePage() {
                     setValidationStatus('idle');
                     toast.success('已清除 AI 配置');
                   }}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-sm font-medium transition-all"
+                  className="flex items-center gap-2 px-4 py-2.5 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 rounded-xl text-sm font-medium transition-all"
                 >
                   <Trash2 size={16} />
                   清除
@@ -1252,9 +1252,9 @@ export function ProfilePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg p-6 border-2 border-blue-200 mb-8"
+            className="bg-white/20 dark:bg-gray-800/20 backdrop-blur-sm rounded-2xl shadow-lg p-6 border-2 border-blue-200 dark:border-blue-800 mb-8"
           >
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
               <Settings size={20} className="text-blue-500" />
               数据管理
             </h3>
@@ -1328,13 +1328,13 @@ export function ProfilePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 }}
-            className="bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg p-6 border-2 border-emerald-200 mb-8"
+            className="bg-white/20 dark:bg-gray-800/20 backdrop-blur-sm rounded-2xl shadow-lg p-6 border-2 border-emerald-200 dark:border-emerald-800 mb-8"
           >
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-2">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-2">
               <MessageSquare size={20} className="text-emerald-500" />
               用户体验反馈
             </h3>
-            <p className="text-sm text-gray-500 mb-4">分享你的使用感受、建议或遇到的问题，帮助我们做得更好</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">分享你的使用感受、建议或遇到的问题，帮助我们做得更好</p>
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -1369,7 +1369,7 @@ export function ProfilePage() {
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                  className="w-full max-w-md bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 overflow-hidden"
+                  className="w-full max-w-md bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 dark:border-gray-700/50 overflow-hidden"
                   onClick={(e) => e.stopPropagation()}
                 >
                   {feedbackSuccess ? (
@@ -1381,21 +1381,21 @@ export function ProfilePage() {
                       >
                         <CheckCircle2 size={48} className="text-emerald-500 mx-auto mb-4" />
                       </motion.div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">感谢你的反馈！</h3>
-                      <p className="text-sm text-gray-500">我们会认真阅读并持续改进</p>
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">感谢你的反馈！</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">我们会认真阅读并持续改进</p>
                     </div>
                   ) : (
                     <>
-                      <div className="p-6 border-b border-gray-100">
+                      <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                         <div className="flex items-center justify-between">
-                          <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                             <MessageSquare size={20} className="text-emerald-500" />
                             提交反馈
                           </h3>
                           <button
                             onClick={() => setShowFeedbackModal(false)}
                             disabled={isSubmittingFeedback}
-                            className="p-1 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+                            className="p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors disabled:opacity-50"
                           >
                             <X size={20} />
                           </button>
@@ -1409,7 +1409,7 @@ export function ProfilePage() {
                             placeholder="分享你的使用感受、建议或遇到的问题..."
                             rows={5}
                             maxLength={2000}
-                            className="w-full px-4 py-3 bg-gray-50/80 text-gray-800 placeholder-gray-400 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300 resize-none text-sm transition-colors"
+                            className="w-full px-4 py-3 bg-gray-50/80 dark:bg-gray-700/80 text-gray-800 dark:text-gray-200 placeholder-gray-400 rounded-xl border border-gray-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300 resize-none text-sm transition-colors"
                           />
                           <div className="flex justify-end mt-1">
                             <span className="text-xs text-gray-400">
@@ -1426,13 +1426,13 @@ export function ProfilePage() {
                               value={feedbackEmail}
                               onChange={(e) => setFeedbackEmail(e.target.value)}
                               placeholder="联系方式（可选，方便我们回复你）"
-                              className="w-full px-4 py-2.5 bg-gray-50/80 text-gray-800 placeholder-gray-400 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300 text-sm transition-colors"
+                              className="w-full px-4 py-2.5 bg-gray-50/80 dark:bg-gray-700/80 text-gray-800 dark:text-gray-200 placeholder-gray-400 rounded-xl border border-gray-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300 text-sm transition-colors"
                             />
                           </div>
                         )}
 
                         {feedbackError && (
-                          <div className="px-3 py-2 bg-red-50 text-red-600 rounded-lg text-sm border border-red-200">
+                          <div className="px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm border border-red-200 dark:border-red-800">
                             {feedbackError}
                           </div>
                         )}
@@ -1469,9 +1469,9 @@ export function ProfilePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg p-6 border-2 border-red-200"
+            className="bg-white/20 dark:bg-gray-800/20 backdrop-blur-sm rounded-2xl shadow-lg p-6 border-2 border-red-200 dark:border-red-800"
           >
-            <h3 className="text-lg font-bold text-red-700 mb-4 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-red-700 dark:text-red-400 mb-4 flex items-center gap-2">
               <Trash2 size={20} className="text-red-500" />
               危险操作
             </h3>

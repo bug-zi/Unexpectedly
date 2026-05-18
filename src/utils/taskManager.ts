@@ -325,8 +325,8 @@ export function getTaskStreak(): number {
   const yesterdayString = toLocalDateString(yesterday);
 
   // 如果今天没完成，从昨天开始检查
-  let startDate = saved[today]?.dailyCompleted ? today : yesterdayString;
-  let checkDate = new Date(startDate);
+  const startDate = saved[today]?.dailyCompleted ? today : yesterdayString;
+  const checkDate = new Date(startDate);
 
   for (let i = 0; i < 365; i++) {
     const dateStr = toLocalDateString(checkDate);

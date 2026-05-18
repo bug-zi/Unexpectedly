@@ -32,6 +32,7 @@ import { RoundtableSetupPage } from '@/pages/RoundtableSetupPage';
 import { QuestionThinkingHubPage } from '@/pages/QuestionThinkingHubPage';
 import { DebateHallPage } from '@/pages/DebateHallPage';
 import { RandomQuestPage } from '@/pages/RandomQuestPage';
+import { DiffuserPage } from '@/pages/DiffuserPage';
 import { useGlobalNotificationReminder } from '@/hooks/useGlobalNotificationReminder';
 import { useSync } from '@/hooks/useSync';
 import { useEffect, useRef } from 'react';
@@ -123,6 +124,7 @@ function App() {
         <Route path="/debate" element={<DebateHallPage />} />
         <Route path="/random-quest" element={<RandomQuestPage />} />
         <Route path="/inspiration" element={<InspirationPage />} />
+        <Route path="/inspiration/diffuser" element={<DiffuserPage />} />
         <Route path="/inspiration/:domainId" element={<InspirationDomainPage />} />
         <Route path="/notifications" element={<NotificationSettingsPage />} />
         <Route path="/login" element={<LoginPage />} />
