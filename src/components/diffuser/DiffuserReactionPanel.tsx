@@ -263,12 +263,7 @@ export default function DiffuserReactionPanel({
                   </button>
                   <button
                     onClick={() => setShowMergeConfirm(true)}
-                    disabled={adoptedCount === 0}
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
-                      adoptedCount > 0
-                        ? 'bg-green-50 text-green-700 border-green-200/60 hover:bg-green-100'
-                        : 'bg-gray-50 text-gray-400 border-gray-200/60 cursor-not-allowed'
-                    }`}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium border transition-colors bg-green-50 text-green-700 border-green-200/60 hover:bg-green-100"
                   >
                     <Zap size={14} />
                     合并并关闭
@@ -276,8 +271,8 @@ export default function DiffuserReactionPanel({
                 </div>
                 <p className="text-center text-[10px] text-gray-400 mt-1.5">
                   {adoptedCount > 0
-                    ? `已采纳 ${adoptedCount} 条，${adoptedCount > 0 ? '合并后将融合为新节点' : '请先采纳结果'}`
-                    : '请先采纳结果后才能合并'}
+                    ? `已采纳 ${adoptedCount} 条，合并后将融合为新节点`
+                    : '合并后两个词语将融合为新节点'}
                 </p>
               </div>
             )}
