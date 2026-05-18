@@ -5,7 +5,7 @@
 
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Zap, Loader2, Check } from 'lucide-react';
+import { X, Zap, Loader2, Check, RefreshCw } from 'lucide-react';
 import { useDiffuserStore } from '@/stores/diffuserStore';
 import type { DiffuserReaction, DiffuserReactionResult } from '@/types/diffuser';
 import { generateId } from '@/utils/diffuserLayout';
@@ -15,6 +15,7 @@ interface DiffuserReactionPanelProps {
   reaction: DiffuserReaction | null;
   isGenerating: boolean;
   onClose: () => void;
+  onRegenerate: () => void;
 }
 
 const TYPE_STYLES: Record<string, string> = {
@@ -31,6 +32,7 @@ export default function DiffuserReactionPanel({
   reaction: reactionProp,
   isGenerating,
   onClose,
+  onRegenerate,
 }: DiffuserReactionPanelProps) {
   const addNote = useDiffuserStore((s) => s.addNote);
   const markResultAdopted = useDiffuserStore((s) => s.markResultAdopted);
@@ -179,15 +181,24 @@ export default function DiffuserReactionPanel({
                   </span>
                 )}
               </div>
-              <button
-                onClick={handleKeepClose}
+              <div className="flex items-center gap-1">
+                {!isGenerating && reaction && reaction.results.length > 0 && (
+                  <button
+                    onClick={onRegenerate}
+                    className="flex items-center gap-1 px-2 py-1 text-xs text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-colors"
+                  >
+                    <RefreshCw size={13} />
+                    再次生成
+                  </button>
+                )}
+                <button
+                  onClick={handleKeepClose}
                 className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <X size={16} />
               </button>
+              </div>
             </div>
-
-            {/* 内容区域 */}
             <div className="overflow-y-auto max-h-[45vh] px-4 py-3">
               {isGenerating ? (
                 <div className="flex flex-col items-center justify-center py-8 gap-2">

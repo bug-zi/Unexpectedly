@@ -342,6 +342,9 @@ export function DiffuserPage() {
         reaction={activeReaction}
         isGenerating={isReactionGenerating}
         onClose={() => setActiveReaction(null)}
+        onRegenerate={() => {
+          if (activeReaction) handleReaction(activeReaction.nodeIdA, activeReaction.nodeIdB);
+        }}
       />
     </div>
   );
