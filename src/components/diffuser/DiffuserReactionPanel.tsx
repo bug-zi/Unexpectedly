@@ -18,12 +18,12 @@ interface DiffuserReactionPanelProps {
 }
 
 const TYPE_STYLES: Record<string, string> = {
-  '故事灵感': 'bg-purple-50 text-purple-700 border-purple-200/60',
-  '奇妙比喻': 'bg-amber-50 text-amber-700 border-amber-200/60',
-  '深思问题': 'bg-blue-50 text-blue-700 border-blue-200/60',
-  '新奇视角': 'bg-teal-50 text-teal-700 border-teal-200/60',
-  '融合概念': 'bg-rose-50 text-rose-700 border-rose-200/60',
-  '有趣场景': 'bg-green-50 text-green-700 border-green-200/60',
+  '产品雏形': 'bg-green-50 text-green-700 border-green-200/60',
+  '市场机会': 'bg-teal-50 text-teal-700 border-teal-200/60',
+  '商业模式': 'bg-emerald-50 text-emerald-700 border-emerald-200/60',
+  '用户场景': 'bg-cyan-50 text-cyan-700 border-cyan-200/60',
+  '创新组合': 'bg-lime-50 text-lime-700 border-lime-200/60',
+  '痛点洞察': 'bg-amber-50 text-amber-700 border-amber-200/60',
 };
 
 export default function DiffuserReactionPanel({
