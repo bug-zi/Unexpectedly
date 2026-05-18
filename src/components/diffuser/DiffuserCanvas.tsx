@@ -63,9 +63,28 @@ export function DiffuserCanvas({
   const touchDistRef = useRef(0);
   const touchCenterRef = useRef({ x: 0, y: 0 });
 
-  // 键盘快捷键
+  // 键盘快捷键 + 方向键/WASD 连续平移画布
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
+    const keysDown = new Set<string>();
+    let rafId = 0;
+
+    const isPanKey = (key: string) =>
+      ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'W', 'a', 'A', 's', 'S', 'd', 'D'].includes(key);
+
+    const tick = () => {
+      const SPEED = 8;
+      let dx = 0, dy = 0;
+      if (keysDown.has('ArrowUp') || keysDown.has('w') || keysDown.has('W')) dy += SPEED;
+      if (keysDown.has('ArrowDown') || keysDown.has('s') || keysDown.has('S')) dy -= SPEED;
+      if (keysDown.has('ArrowLeft') || keysDown.has('a') || keysDown.has('A')) dx += SPEED;
+      if (keysDown.has('ArrowRight') || keysDown.has('d') || keysDown.has('D')) dx -= SPEED;
+      if (dx !== 0 || dy !== 0) {
+        setPan(p => ({ x: p.x + dx, y: p.y + dy }));
+      }
+      if (keysDown.size > 0) rafId = requestAnimationFrame(tick);
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onSelectNode(null);
         onSelectIds([]);
@@ -78,9 +97,26 @@ export function DiffuserCanvas({
           onDeleteNode(selectedId);
         }
       }
+      if (isPanKey(e.key)) {
+        e.preventDefault();
+        if (!keysDown.has(e.key)) {
+          keysDown.add(e.key);
+          if (keysDown.size === 1) rafId = requestAnimationFrame(tick);
+        }
+      }
     };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      keysDown.delete(e.key);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      cancelAnimationFrame(rafId);
+    };
   }, [selectedId, selectedIds, onSelectNode, onSelectIds, onDeleteNode]);
 
   // 自动居中到新节点
