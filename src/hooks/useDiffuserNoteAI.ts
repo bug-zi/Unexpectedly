@@ -46,8 +46,8 @@ export function useDiffuserNoteAI() {
         let fullText = '';
 
         for await (const token of streamChat(messages, configSnapshot, {
-          temperature: 0.7,
-          max_tokens: 500,
+          temperature: 0.85,
+          max_tokens: 800,
         })) {
           if (abortRef.current) break;
           fullText += token;
