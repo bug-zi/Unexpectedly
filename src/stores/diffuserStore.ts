@@ -62,6 +62,11 @@ interface DiffuserState {
   clearSelection: () => void;
   /** 批量移动节点（一次 set，避免中间渲染） */
   moveNodesBatch: (moves: Array<{ nodeId: string; x: number; y: number }>) => void;
+
+  /** 快照当前画布状态（用于模式切换时保存/恢复） */
+  snapshotState: () => { nodes: DiffuserNode[]; edges: DiffuserEdge[]; reactions: DiffuserReaction[] };
+  /** 从快照恢复画布状态 */
+  restoreState: (snapshot: { nodes: DiffuserNode[]; edges: DiffuserEdge[]; reactions: DiffuserReaction[] }) => void;
 }
 
 export const useDiffuserStore = create<DiffuserState>()(
@@ -239,6 +244,18 @@ export const useDiffuserStore = create<DiffuserState>()(
       },
 
       clearCanvas: () => set({ nodes: [], edges: [], reactions: [], selectedIds: [] }),
+
+      snapshotState: () => {
+        const s = get();
+        return { nodes: s.nodes, edges: s.edges, reactions: s.reactions };
+      },
+
+      restoreState: (snapshot) => set({
+        nodes: snapshot.nodes,
+        edges: snapshot.edges,
+        reactions: snapshot.reactions,
+        selectedIds: [],
+      }),
 
       // 碰撞反应
       reactions: [],

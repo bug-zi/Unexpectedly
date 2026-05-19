@@ -2,9 +2,10 @@
  * 灵感扩散器 - 主页面
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Trash2 } from 'lucide-react';
+import { BrainstormTabView } from '@/components/brainstorm/BrainstormTabView';
 import { useDiffuserStore } from '@/stores/diffuserStore';
 import { useDiffuserAI } from '@/hooks/useDiffuserAI';
 import { DiffuserCanvas } from '@/components/diffuser/DiffuserCanvas';
@@ -30,6 +31,8 @@ export function DiffuserPage() {
   const getChildrenOf = useDiffuserStore((s) => s.getChildrenOf);
   const getDescendantIds = useDiffuserStore((s) => s.getDescendantIds);
   const clearCanvas = useDiffuserStore((s) => s.clearCanvas);
+  const snapshotState = useDiffuserStore((s) => s.snapshotState);
+  const restoreState = useDiffuserStore((s) => s.restoreState);
   const moveNode = useDiffuserStore((s) => s.moveNode);
   const addReaction = useDiffuserStore((s) => s.addReaction);
   const selectedIds = useDiffuserStore((s) => s.selectedIds);
@@ -49,6 +52,21 @@ export function DiffuserPage() {
   const [nearTargetId, setNearTargetId] = useState<string | null>(null);
   const [activeReaction, setActiveReaction] = useState<DiffuserReaction | null>(null);
   const [isReactionGenerating, setIsReactionGenerating] = useState(false);
+  const [mode, setMode] = useState<'manual' | 'auto'>('manual');
+
+  // 手动模式数据快照，切换到自动模式时保存，切回来时恢复
+  const manualSnapshotRef = useRef<{ nodes: typeof nodes; edges: typeof edges; reactions: ReturnType<typeof useDiffuserStore.getState>['reactions'] } | null>(null);
+
+  // 模式切换时保存/恢复画布数据，两个模式互不干扰
+  useEffect(() => {
+    if (mode === 'auto') {
+      manualSnapshotRef.current = snapshotState();
+      clearCanvas();
+    } else if (manualSnapshotRef.current) {
+      restoreState(manualSnapshotRef.current);
+      manualSnapshotRef.current = null;
+    }
+  }, [mode]);
 
   // 输入新词语
   const handleSubmitWord = useCallback(
@@ -252,12 +270,38 @@ export function DiffuserPage() {
 
           <h1 className="text-gray-700 dark:text-gray-200 font-medium text-sm hidden sm:block">灵感扩散器</h1>
 
+          {/* 模式切换 Tab */}
+          <div className="flex items-center bg-white/30 dark:bg-gray-700/30 rounded-lg p-0.5 ml-2">
+            <button
+              onClick={() => setMode('manual')}
+              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                mode === 'manual'
+                  ? 'bg-white/80 dark:bg-gray-600/80 text-green-700 dark:text-green-300 shadow-sm'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+              }`}
+            >
+              手动模式
+            </button>
+            <button
+              onClick={() => setMode('auto')}
+              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                mode === 'auto'
+                  ? 'bg-white/80 dark:bg-gray-600/80 text-green-700 dark:text-green-300 shadow-sm'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+              }`}
+            >
+              自动模式
+            </button>
+          </div>
+
         <div className="flex-1" />
 
-        {/* 输入栏 */}
+        {/* 输入栏 - 仅手动模式 */}
+        {mode === 'manual' && (
         <div className="w-48 sm:w-64 md:w-80">
           <DiffuserInputBar onSubmit={handleSubmitWord} isLoading={isGenerating} recentWords={nodes.filter(n => !n.parentId).map(n => n.word)} />
         </div>
+        )}
 
         <div className="flex-1" />
 
@@ -269,8 +313,8 @@ export function DiffuserPage() {
           {nodes.length}
         </span>
 
-        {/* 清空画布 */}
-        {nodes.length > 0 && (
+        {/* 清空画布 - 仅手动模式 */}
+        {mode === 'manual' && nodes.length > 0 && (
           <button
             className="p-1.5 sm:p-2 rounded-full bg-white/20 text-gray-500 hover:bg-red-500/30 hover:text-red-400 transition-colors"
             title="清空画布"
@@ -282,6 +326,29 @@ export function DiffuserPage() {
       </div>
 
       {/* 画布区域 */}
+      {mode === 'auto' ? (
+        <BrainstormTabView>
+          <DiffuserCanvas
+            nodes={nodes}
+            edges={edges}
+            selectedId={null}
+            selectedIds={[]}
+            onSelectNode={() => {}}
+            onSelectIds={() => {}}
+            onAddToSelection={() => {}}
+            onExpandNode={() => {}}
+            onAddMoreNode={() => {}}
+            onDeleteNode={() => {}}
+            onMoveNode={() => {}}
+            onMoveNodesBatch={() => {}}
+            onOpenNotebook={() => {}}
+            onReaction={() => {}}
+            nearTargetId={null}
+            onDragNear={() => {}}
+            centerOnNode={centerTarget}
+          />
+        </BrainstormTabView>
+      ) : (
       <div className="flex-1 relative flex flex-col min-h-0">
         {nodes.length === 0 && <DiffuserEmptyState isConfigured={isConfigured} />}
         <DiffuserCanvas
@@ -304,9 +371,12 @@ export function DiffuserPage() {
           centerOnNode={centerTarget}
         />
       </div>
+      )}
 
       </div>
-      {/* 删除确认弹窗 */}
+      {/* 手动模式专属面板 */}
+      {mode === 'manual' && (
+      <>
       <DiffuserDeleteDialog
         isOpen={!!deleteTarget}
         word={deleteNode?.word ?? ''}
@@ -315,7 +385,6 @@ export function DiffuserPage() {
         onCancel={() => setDeleteTarget(null)}
       />
 
-      {/* 清空画布确认弹窗 */}
       <DiffuserClearDialog
         isOpen={showClearConfirm}
         nodeCount={nodes.length}
@@ -328,7 +397,6 @@ export function DiffuserPage() {
         onCancel={() => setShowClearConfirm(false)}
       />
 
-      {/* 词语笔记本面板 */}
       <DiffuserNotebook
         isOpen={!!notebookTarget}
         nodeId={notebookTarget}
@@ -336,7 +404,6 @@ export function DiffuserPage() {
         onClose={() => setNotebookTarget(null)}
       />
 
-      {/* 碰撞反应面板 */}
       <DiffuserReactionPanel
         isOpen={!!activeReaction}
         reaction={activeReaction}
@@ -346,6 +413,8 @@ export function DiffuserPage() {
           if (activeReaction) handleReaction(activeReaction.nodeIdA, activeReaction.nodeIdB);
         }}
       />
+      </>
+      )}
     </div>
   );
 }
