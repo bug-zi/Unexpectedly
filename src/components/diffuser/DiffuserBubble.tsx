@@ -85,11 +85,12 @@ export const DiffuserBubble = memo(function DiffuserBubble({
 
   // 拖拽处理（含碰撞检测 + 组拖拽）
   const snapTargetRef = useRef<string | null>(null);
+  const dragActiveRef = useRef(false); // 是否真正进入拖拽（超过移动阈值）
   const handleDragStart = useCallback((e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button')) return;
     e.stopPropagation();
-    setIsDragging(true);
     dragStart.current = { x: e.clientX, y: e.clientY, nodeX: node.x, nodeY: node.y };
+    dragActiveRef.current = false;
 
     // 多选组拖拽：快照所有选中节点位置
     if (isMultiSelected && selectedNodes && selectedNodes.length > 0 && onMoveBatch) {
@@ -99,8 +100,17 @@ export const DiffuserBubble = memo(function DiffuserBubble({
     }
 
     const handleMove = (ev: MouseEvent) => {
-      const dx = (ev.clientX - dragStart.current.x) / zoom;
-      const dy = (ev.clientY - dragStart.current.y) / zoom;
+      const rawDx = ev.clientX - dragStart.current.x;
+      const rawDy = ev.clientY - dragStart.current.y;
+      // 移动超过5px才真正进入拖拽模式
+      if (!dragActiveRef.current) {
+        if (Math.abs(rawDx) < 5 && Math.abs(rawDy) < 5) return;
+        dragActiveRef.current = true;
+        setIsDragging(true);
+      }
+
+      const dx = rawDx / zoom;
+      const dy = rawDy / zoom;
 
       if (groupDragStart.current && onMoveBatch) {
         // 组拖拽：所有选中节点统一偏移
@@ -126,13 +136,14 @@ export const DiffuserBubble = memo(function DiffuserBubble({
       }
     };
     const handleUp = () => {
-      // 仅单拖拽触发碰撞反应
-      if (!groupDragStart.current && snapTargetRef.current) {
+      // 仅真正拖拽过才触发碰撞反应
+      if (dragActiveRef.current && !groupDragStart.current && snapTargetRef.current) {
         onReaction(snapTargetRef.current);
         snapTargetRef.current = null;
         onDragNear(null);
       }
       groupDragStart.current = null;
+      dragActiveRef.current = false;
       setIsDragging(false);
       window.removeEventListener('mousemove', handleMove);
       window.removeEventListener('mouseup', handleUp);
