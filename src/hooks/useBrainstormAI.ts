@@ -8,6 +8,7 @@ import { useRoundtableStore } from '@/stores/roundtableStore';
 import { streamChat } from '@/services/llmService';
 import {
   buildMultiWordReactionPrompt,
+  buildQuickGatePrompt,
   buildScoringPrompt,
   buildReviewPrompt,
   buildSeedExtractPrompt,
@@ -37,6 +38,11 @@ function extractJSON(text: string): string | null {
   return match ? match[0] : null;
 }
 
+/** 加权评分常量 */
+const SCORING_WEIGHTS = { innovation: 1.5, fun: 1.3, feasibility: 0.7, practicality: 0.5 };
+const WEIGHTED_THRESHOLD = 5.5;
+const GATE_THRESHOLD = 12; // innovation + fun 必须达到此值
+
 export function useBrainstormAI() {
   const llmConfig = useRoundtableStore((state) => state.llmConfig);
   const abortRef = useRef(false);
@@ -45,13 +51,14 @@ export function useBrainstormAI() {
   const generateMultiReaction = useCallback(
     async (
       words: string[],
-      lessonsLearned?: string[]
+      lessonsLearned?: string[],
+      userPrefs?: { liked: string[]; disliked: string[] }
     ): Promise<DiffuserReactionResult[]> => {
       if (!llmConfig) return [];
 
       abortRef.current = false;
       const configSnapshot = { ...llmConfig };
-      const messages = buildMultiWordReactionPrompt(words, lessonsLearned);
+      const messages = buildMultiWordReactionPrompt(words, lessonsLearned, userPrefs);
 
       try {
         const text = await streamCall(messages, configSnapshot, {
@@ -88,14 +95,53 @@ export function useBrainstormAI() {
     [llmConfig]
   );
 
-  /** 评分单条创意 */
+  /** 快筛门：只评创新性+趣味性，快速过滤无聊点子 */
+  const quickGateIdea = useCallback(
+    async (
+      idea: string,
+      sourceWords: string[]
+    ): Promise<{ innovation: number; fun: number; pass: boolean } | null> => {
+      if (!llmConfig) return null;
+
+      const configSnapshot = { ...llmConfig };
+      const messages = buildQuickGatePrompt(idea, sourceWords);
+
+      try {
+        const text = await streamCall(messages, configSnapshot, {
+          temperature: 0.3,
+          max_tokens: 120,
+        }, abortRef);
+
+        if (!text) return { innovation: 5, fun: 5, pass: true };
+
+        const jsonStr = extractJSON(text);
+        if (!jsonStr) return { innovation: 5, fun: 5, pass: true };
+
+        const parsed = JSON.parse(jsonStr);
+        const innovation = Number(parsed.innovation) || 5;
+        const fun = Number(parsed.fun) || 5;
+        const pass = (innovation + fun >= GATE_THRESHOLD) || innovation >= 8 || fun >= 8;
+
+        return { innovation, fun, pass };
+      } catch {
+        return { innovation: 5, fun: 5, pass: true };
+      }
+    },
+    [llmConfig]
+  );
+
+  /** 评分单条创意（加权 + 防重复） */
   const scoreIdea = useCallback(
-    async (idea: string, sourceWords: string[]): Promise<IdeaScores & { reasoning: string; qualified: boolean } | null> => {
+    async (
+      idea: string,
+      sourceWords: string[],
+      recentQualifiedIdeas?: string[]
+    ): Promise<IdeaScores & { reasoning: string; qualified: boolean } | null> => {
       if (!llmConfig) return null;
 
       abortRef.current = false;
       const configSnapshot = { ...llmConfig };
-      const messages = buildScoringPrompt(idea, sourceWords);
+      const messages = buildScoringPrompt(idea, sourceWords, recentQualifiedIdeas);
 
       try {
         const text = await streamCall(messages, configSnapshot, {
@@ -115,7 +161,13 @@ export function useBrainstormAI() {
         const practicality = Number(parsed.practicality) || 5;
         const fun = Number(parsed.fun) || 5;
         const average = Number(((innovation + feasibility + practicality + fun) / 4).toFixed(1));
-        const qualified = average >= 6.0 && [innovation, feasibility, practicality, fun].filter((s) => s >= 7).length >= 2;
+        const weightedAverage = Number((
+          (innovation * SCORING_WEIGHTS.innovation + fun * SCORING_WEIGHTS.fun +
+           feasibility * SCORING_WEIGHTS.feasibility + practicality * SCORING_WEIGHTS.practicality) / 4
+        ).toFixed(1));
+        const qualified = weightedAverage >= WEIGHTED_THRESHOLD
+          && (innovation >= 7 || fun >= 8)
+          && [innovation, feasibility, practicality, fun].filter((s) => s >= 6).length >= 2;
 
         return {
           innovation,
@@ -123,6 +175,7 @@ export function useBrainstormAI() {
           practicality,
           fun,
           average,
+          weightedAverage,
           reasoning: String(parsed.reasoning || ''),
           qualified,
         };
@@ -217,6 +270,7 @@ export function useBrainstormAI() {
 
   return {
     generateMultiReaction,
+    quickGateIdea,
     scoreIdea,
     reviewRound,
     extractSeedKeywords,

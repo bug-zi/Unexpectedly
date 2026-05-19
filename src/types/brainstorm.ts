@@ -9,6 +9,7 @@ export interface IdeaScores {
   practicality: number;
   fun: number;
   average: number;
+  weightedAverage: number;
 }
 
 /** 自动模式生成的点子 */
@@ -22,6 +23,7 @@ export interface BrainstormIdea {
   qualified: boolean;
   roundNumber: number;
   createdAt: string;
+  userDiscardReason?: string;
 }
 
 /** 碰撞结果（多词碰撞） */

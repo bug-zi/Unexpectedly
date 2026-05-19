@@ -45,10 +45,23 @@ const MULTI_REACTION_SYSTEM_PROMPT = `你是一个疯狂但靠谱的创意碰撞
  */
 export function buildMultiWordReactionPrompt(
   words: string[],
-  lessonsLearned?: string[]
+  lessonsLearned?: string[],
+  userPrefs?: { liked: string[]; disliked: string[] }
 ): ChatMessage[] {
   const wordsStr = words.map((w) => `「${w}」`).join('和');
   let userContent = `将${wordsStr}碰撞融合，生成4条紧扣这些词语的创意。`;
+
+  if (userPrefs && (userPrefs.liked.length > 0 || userPrefs.disliked.length > 0)) {
+    userContent += '\n\n【用户偏好参照——非常重要，直接影响创意方向】';
+    if (userPrefs.liked.length > 0) {
+      const likedSample = userPrefs.liked.slice(0, 6);
+      userContent += `\n用户喜欢的点子（生成类似风格的创意）：\n${likedSample.map((l) => `- ${l}`).join('\n')}`;
+    }
+    if (userPrefs.disliked.length > 0) {
+      const dislikedSample = userPrefs.disliked.slice(0, 4);
+      userContent += `\n用户不喜欢的点子（避开这类风格和方向）：\n${dislikedSample.map((l) => `- ${l}`).join('\n')}`;
+    }
+  }
 
   if (lessonsLearned && lessonsLearned.length > 0) {
     userContent += `\n\n本轮指导原则（基于之前轮次的经验总结）：\n${lessonsLearned.map((l) => `- ${l}`).join('\n')}`;
@@ -57,6 +70,33 @@ export function buildMultiWordReactionPrompt(
   return [
     { role: 'system', content: MULTI_REACTION_SYSTEM_PROMPT },
     { role: 'user', content: userContent },
+  ];
+}
+
+// ===================== 快筛门 =====================
+
+const QUICK_GATE_SYSTEM_PROMPT = `你是一位创意筛选员。快速判断这条创意是否值得深入评估。
+只评两个维度（1-10分）：
+- 创新性（innovation）：想法有多新颖？
+- 趣味性（fun）：人们会不会想尝试？
+
+输出格式（严格遵守）：
+纯JSON，不要任何其他文字。
+{"innovation":N,"fun":N}`;
+
+/**
+ * 构建快筛提示
+ */
+export function buildQuickGatePrompt(
+  idea: string,
+  sourceWords: string[]
+): ChatMessage[] {
+  return [
+    { role: 'system', content: QUICK_GATE_SYSTEM_PROMPT },
+    {
+      role: 'user',
+      content: `来源词语：${sourceWords.join('、')}\n创意内容：${idea}`,
+    },
   ];
 }
 
@@ -72,9 +112,9 @@ const SCORING_SYSTEM_PROMPT = `你是一位理性的创意评估师。你会收�
 
 评分流程（先思考再打分）：
 1. 先判断这条创意是否紧扣了所有来源词语。如果有明显遗漏，创新性直接-2分。
-2. 逐个维度评估，给出1-10分。
-3. 计算平均分。
-4. 判断是否合格：平均分≥6.0 且至少2个维度≥7.0。
+2. 如果下方列出了已有点子，判断这条创意是否与它们方向重复或过于相似。如果重复，创新性直接-3分。
+3. 逐个维度评估，给出1-10分。
+4. 计算平均分。
 
 硬性规则：
 - 不要给面子分，6分以下是正常的
@@ -83,21 +123,25 @@ const SCORING_SYSTEM_PROMPT = `你是一位理性的创意评估师。你会收�
 
 输出格式（严格遵守）：
 纯JSON，不要任何其他文字。
-{"innovation":N,"feasibility":N,"practicality":N,"fun":N,"average":N,"reasoning":"2-3句简短评价","qualified":true/false}`;
+{"innovation":N,"feasibility":N,"practicality":N,"fun":N,"average":N,"reasoning":"2-3句简短评价"}`;
 
 /**
  * 构建评分提示
  */
 export function buildScoringPrompt(
   idea: string,
-  sourceWords: string[]
+  sourceWords: string[],
+  recentQualifiedIdeas?: string[]
 ): ChatMessage[] {
+  let userContent = `来源词语：${sourceWords.join('、')}\n创意内容：${idea}`;
+
+  if (recentQualifiedIdeas && recentQualifiedIdeas.length > 0) {
+    userContent += `\n\n【已有点子（请勿重复类似方向）】\n${recentQualifiedIdeas.map((t) => `- ${t}`).join('\n')}`;
+  }
+
   return [
     { role: 'system', content: SCORING_SYSTEM_PROMPT },
-    {
-      role: 'user',
-      content: `来源词语：${sourceWords.join('、')}\n创意内容：${idea}`,
-    },
+    { role: 'user', content: userContent },
   ];
 }
 
@@ -118,7 +162,7 @@ interface ReviewInputData {
   seedWord: string;
   expandedWords: string[];
   qualifiedIdeas: Array<{ ideaText: string; scores: { average: number } }>;
-  discardedIdeas: Array<{ ideaText: string; scores: { average: number }; reasoning: string }>;
+  discardedIdeas: Array<{ ideaText: string; scores: { average: number }; reasoning: string; userDiscardReason?: string }>;
 }
 
 /**
@@ -132,7 +176,13 @@ export function buildReviewPrompt(
     .map((i) => `  - [${i.scores.average.toFixed(1)}分] ${i.ideaText}`)
     .join('\n');
   const discarded = roundData.discardedIdeas
-    .map((i) => `  - [${i.scores.average.toFixed(1)}分] ${i.ideaText}（${i.reasoning}）`)
+    .map((i) => {
+      let line = `  - [${i.scores.average.toFixed(1)}分] ${i.ideaText}（${i.reasoning}）`;
+      if (i.userDiscardReason) {
+        line += `\n    用户反馈：${i.userDiscardReason}`;
+      }
+      return line;
+    })
     .join('\n');
 
   let userContent = `【本轮数据】

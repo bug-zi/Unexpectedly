@@ -2,11 +2,13 @@
  * 灵感扩散器 - 主页面
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trash2 } from 'lucide-react';
+import { ArrowLeft, Trash2, Archive, XCircle } from 'lucide-react';
 import { BrainstormTabView } from '@/components/brainstorm/BrainstormTabView';
+import { IdeaCard } from '@/components/brainstorm/IdeaCard';
 import { useDiffuserStore } from '@/stores/diffuserStore';
+import { useBrainstormStore } from '@/stores/brainstormStore';
 import { useDiffuserAI } from '@/hooks/useDiffuserAI';
 import { DiffuserCanvas } from '@/components/diffuser/DiffuserCanvas';
 import { DiffuserInputBar } from '@/components/diffuser/DiffuserInputBar';
@@ -52,21 +54,45 @@ export function DiffuserPage() {
   const [nearTargetId, setNearTargetId] = useState<string | null>(null);
   const [activeReaction, setActiveReaction] = useState<DiffuserReaction | null>(null);
   const [isReactionGenerating, setIsReactionGenerating] = useState(false);
-  const [mode, setMode] = useState<'manual' | 'auto'>('manual');
+  const [mode, setModeRaw] = useState<'manual' | 'auto'>(() => {
+    return (localStorage.getItem('wwx-diffuser-mode') as 'manual' | 'auto') || 'manual';
+  });
+  const [showCollection, setShowCollection] = useState(false);
 
-  // 手动模式数据快照，切换到自动模式时保存，切回来时恢复
-  const manualSnapshotRef = useRef<{ nodes: typeof nodes; edges: typeof edges; reactions: ReturnType<typeof useDiffuserStore.getState>['reactions'] } | null>(null);
+  const collectionBox = useBrainstormStore((s) => s.collectionBox);
+  const removeFromCollection = useBrainstormStore((s) => s.removeFromCollection);
 
-  // 模式切换时保存/恢复画布数据，两个模式互不干扰
-  useEffect(() => {
-    if (mode === 'auto') {
-      manualSnapshotRef.current = snapshotState();
-      clearCanvas();
-    } else if (manualSnapshotRef.current) {
-      restoreState(manualSnapshotRef.current);
-      manualSnapshotRef.current = null;
+  const MANUAL_BACKUP_KEY = 'wwx-diffuser-manual-backup';
+  const AUTO_BACKUP_KEY = 'wwx-diffuser-auto-backup';
+
+  // 同步模式切换：在点击时立即保存当前画布 + 恢复目标模式画布，不用 useEffect
+  const switchMode = useCallback((newMode: 'manual' | 'auto') => {
+    const prevMode = localStorage.getItem('wwx-diffuser-mode') || 'manual';
+    if (prevMode === newMode) return;
+
+    // 1) 保存当前画布到对应模式的备份
+    const currentSnapshot = snapshotState();
+    const backupKey = prevMode === 'manual' ? MANUAL_BACKUP_KEY : AUTO_BACKUP_KEY;
+    try { localStorage.setItem(backupKey, JSON.stringify(currentSnapshot)); } catch {}
+
+    // 2) 恢复目标模式的画布
+    const targetBackupKey = newMode === 'manual' ? MANUAL_BACKUP_KEY : AUTO_BACKUP_KEY;
+    try {
+      const saved = localStorage.getItem(targetBackupKey);
+      if (saved) {
+        restoreState(JSON.parse(saved));
+      } else if (newMode === 'auto') {
+        clearCanvas();
+      }
+      // manual 首次无备份则保持当前画布不变
+    } catch {
+      if (newMode === 'auto') clearCanvas();
     }
-  }, [mode]);
+
+    // 3) 更新 mode
+    localStorage.setItem('wwx-diffuser-mode', newMode);
+    setModeRaw(newMode);
+  }, [snapshotState, restoreState, clearCanvas]);
 
   // 输入新词语
   const handleSubmitWord = useCallback(
@@ -273,7 +299,7 @@ export function DiffuserPage() {
           {/* 模式切换 Tab */}
           <div className="flex items-center bg-white/30 dark:bg-gray-700/30 rounded-lg p-0.5 ml-2">
             <button
-              onClick={() => setMode('manual')}
+              onClick={() => switchMode('manual')}
               className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
                 mode === 'manual'
                   ? 'bg-white/80 dark:bg-gray-600/80 text-green-700 dark:text-green-300 shadow-sm'
@@ -283,7 +309,7 @@ export function DiffuserPage() {
               手动模式
             </button>
             <button
-              onClick={() => setMode('auto')}
+              onClick={() => switchMode('auto')}
               className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
                 mode === 'auto'
                   ? 'bg-white/80 dark:bg-gray-600/80 text-green-700 dark:text-green-300 shadow-sm'
@@ -304,6 +330,20 @@ export function DiffuserPage() {
         )}
 
         <div className="flex-1" />
+
+        {/* 收纳盒按钮 - 仅自动模式 */}
+        {mode === 'auto' && (
+          <button
+            onClick={() => setShowCollection(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-green-50/60 dark:bg-green-900/20 hover:bg-green-100/70 dark:hover:bg-green-900/35 transition-colors"
+          >
+            <Archive size={14} className="text-green-600 dark:text-green-400" />
+            <span className="text-xs font-medium text-gray-700 dark:text-gray-200">收纳盒</span>
+            <span className="text-xs px-1.5 py-0.5 rounded-full bg-green-500/15 text-green-600 dark:text-green-400 font-medium">
+              {collectionBox.length}
+            </span>
+          </button>
+        )}
 
         {/* 节点数量 */}
         <span className="text-gray-500 dark:text-gray-400 text-xs hidden md:inline">
@@ -414,6 +454,46 @@ export function DiffuserPage() {
         }}
       />
       </>
+      )}
+
+      {/* 收纳盒弹窗 - 页面居中 */}
+      {showCollection && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowCollection(false)}
+          />
+          <div className="relative bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-2xl border border-green-200/40 dark:border-green-700/40 w-[520px] max-w-[90vw] max-h-[80vh] flex flex-col">
+            <div className="flex items-center gap-2 px-5 py-4 border-b border-green-200/30 dark:border-green-700/30">
+              <Archive size={18} className="text-green-600 dark:text-green-400" />
+              <h2 className="text-base font-semibold text-gray-800 dark:text-gray-100 flex-1">
+                收纳盒
+              </h2>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-600 dark:text-green-400 font-medium">
+                {collectionBox.length} 个点子
+              </span>
+              <button
+                onClick={() => setShowCollection(false)}
+                className="p-1 rounded-lg hover:bg-gray-200/50 dark:hover:bg-gray-700/50 transition-colors text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              >
+                <XCircle size={20} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5 space-y-3">
+              {collectionBox.length > 0 ? (
+                collectionBox.map((idea) => (
+                  <IdeaCard key={idea.id} idea={idea} onRemove={removeFromCollection} />
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                  <Archive size={40} className="mb-3 opacity-30" />
+                  <p className="text-sm">收纳盒还是空的</p>
+                  <p className="text-xs mt-1">从展台挑选好点子收入这里</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

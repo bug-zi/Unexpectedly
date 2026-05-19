@@ -3,6 +3,7 @@
  */
 
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type {
   BrainstormPhase,
   BrainstormIdea,
@@ -55,7 +56,7 @@ interface BrainstormState {
   addToShowcase: (idea: BrainstormIdea) => void;
   addIdeaToDiscard: (idea: BrainstormIdea) => void;
   moveToCollection: (ideaId: string) => void;
-  discardFromShowcase: (ideaId: string) => void;
+  discardFromShowcase: (ideaId: string, reason?: string) => void;
   removeFromCollection: (ideaId: string) => void;
 
   startRound: (seedWord: string) => void;
@@ -73,7 +74,9 @@ interface BrainstormState {
 
 let logIdCounter = 0;
 
-export const useBrainstormStore = create<BrainstormState>((set, get) => ({
+export const useBrainstormStore = create<BrainstormState>()(
+  persist(
+    (set, get) => ({
   phase: 'idle',
   previousPhase: null,
   currentRound: 0,
@@ -99,7 +102,7 @@ export const useBrainstormStore = create<BrainstormState>((set, get) => ({
   setTopicInput: (input) => set({ topicInput: input }),
 
   startSession: (topic, rounds) =>
-    set({
+    set((s) => ({
       phase: 'idle',
       previousPhase: null,
       currentRound: 0,
@@ -107,14 +110,15 @@ export const useBrainstormStore = create<BrainstormState>((set, get) => ({
       topicInput: topic ?? '',
       rounds: [],
       lessonsLearned: [],
-      collectionBox: [],
-      discardPile: [],
+      // 保留收纳盒和丢弃堆，新风暴在已有基础上进行
+      collectionBox: s.collectionBox,
+      discardPile: s.discardPile,
       showcase: [],
       collidedKeys: [],
       activityLog: [],
       tokensUsed: 0,
       errorMessage: null,
-    }),
+    })),
 
   pauseSession: () =>
     set((s) => ({
@@ -163,13 +167,13 @@ export const useBrainstormStore = create<BrainstormState>((set, get) => ({
       };
     }),
 
-  discardFromShowcase: (ideaId) =>
+  discardFromShowcase: (ideaId, reason) =>
     set((s) => {
       const idea = s.showcase.find((i) => i.id === ideaId);
       if (!idea) return s;
       return {
         showcase: s.showcase.filter((i) => i.id !== ideaId),
-        discardPile: [...s.discardPile, idea],
+        discardPile: [...s.discardPile, { ...idea, userDiscardReason: reason }],
       };
     }),
 
@@ -241,4 +245,14 @@ export const useBrainstormStore = create<BrainstormState>((set, get) => ({
     })),
 
   addTokens: (n) => set((s) => ({ tokensUsed: s.tokensUsed + n })),
-}));
+    }),
+    {
+      name: 'brainstorm-storage',
+      partialize: (state) => ({
+        collectionBox: state.collectionBox,
+        discardPile: state.discardPile,
+        showcase: state.showcase,
+      }),
+    }
+  )
+);

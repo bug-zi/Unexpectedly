@@ -190,7 +190,17 @@ export function useBrainstormEngine() {
         useBrainstormStore.getState().addCollidedKey(key);
 
         const reactionResults = await withRetry(
-          () => ai.generateMultiReaction(group, useBrainstormStore.getState().lessonsLearned),
+          () => {
+            const bsNow = useBrainstormStore.getState();
+            return ai.generateMultiReaction(
+              group,
+              bsNow.lessonsLearned,
+              {
+                liked: bsNow.collectionBox.map((i) => i.ideaText),
+                disliked: bsNow.discardPile.map((i) => i.ideaText),
+              }
+            );
+          },
           1,
           signalRef.current
         );
@@ -201,7 +211,7 @@ export function useBrainstormEngine() {
           sourceWords: group,
           ideaText: r.content,
           type: r.type,
-          scores: { innovation: 0, feasibility: 0, practicality: 0, fun: 0, average: 0 },
+          scores: { innovation: 0, feasibility: 0, practicality: 0, fun: 0, average: 0, weightedAverage: 0 },
           reasoning: '',
           qualified: false,
           roundNumber: roundNum,
@@ -235,19 +245,56 @@ export function useBrainstormEngine() {
 
       if (signalRef.current.aborted) return;
 
-      // === SCORING ===
+      // === SCORING (Two-Phase) ===
       bs.setPhase('scoring');
       const qualifiedIdeas: Array<BrainstormIdea & { scores: { average: number } }> = [];
       const discardedIdeas: Array<BrainstormIdea & { scores: { average: number }; reasoning: string }> = [];
+      const currentRoundQualifiedTexts: string[] = [];
+
+      // 防重复：取历史收纳盒中最高分的5条
+      const recentHistory = [...useBrainstormStore.getState().collectionBox]
+        .sort((a, b) => b.scores.average - a.scores.average)
+        .slice(0, 5)
+        .map((i) => i.ideaText);
 
       for (const collision of collisionResults) {
         for (const idea of collision.ideas) {
           if (signalRef.current.aborted) return;
 
-          bs.addLog('scoring', `评分中...`);
+          // --- Phase 1: 快筛门 ---
+          bs.addLog('scoring', `快筛中...`);
+          const gateResult = await withRetry(
+            () => ai.quickGateIdea(idea.ideaText, idea.sourceWords),
+            1,
+            signalRef.current
+          );
 
+          if (gateResult && !gateResult.pass) {
+            const gateIdea: BrainstormIdea = {
+              ...idea,
+              scores: {
+                innovation: gateResult.innovation,
+                feasibility: 0,
+                practicality: 0,
+                fun: gateResult.fun,
+                average: 0,
+                weightedAverage: 0,
+              },
+              reasoning: '快速筛选未通过（创新性或趣味性不足）',
+              qualified: false,
+            };
+            bs.addIdeaToDiscard(gateIdea);
+            discardedIdeas.push(gateIdea as typeof gateIdea & { scores: { average: number }; reasoning: string });
+            bs.addLog('scoring', `✗ 快筛丢弃 ${idea.ideaText.slice(0, 20)}...`);
+            await delay(50);
+            continue;
+          }
+
+          // --- Phase 2: 深度加权评分 ---
+          bs.addLog('scoring', `深度评分中...`);
+          const antiDupContext = [...recentHistory, ...currentRoundQualifiedTexts.slice(-3)].slice(0, 8);
           const scoreResult = await withRetry(
-            () => ai.scoreIdea(idea.ideaText, idea.sourceWords),
+            () => ai.scoreIdea(idea.ideaText, idea.sourceWords, antiDupContext),
             1,
             signalRef.current
           );
@@ -261,6 +308,7 @@ export function useBrainstormEngine() {
                 practicality: scoreResult.practicality,
                 fun: scoreResult.fun,
                 average: scoreResult.average,
+                weightedAverage: scoreResult.weightedAverage,
               },
               reasoning: scoreResult.reasoning,
               qualified: scoreResult.qualified,
@@ -269,11 +317,12 @@ export function useBrainstormEngine() {
             if (scoreResult.qualified) {
               bs.addToShowcase(scoredIdea);
               qualifiedIdeas.push(scoredIdea as typeof scoredIdea & { scores: { average: number } });
-              bs.addLog('scoring', `✓ 入展 [${scoreResult.average.toFixed(1)}分] ${idea.ideaText.slice(0, 20)}...`);
+              currentRoundQualifiedTexts.push(idea.ideaText);
+              bs.addLog('scoring', `✓ 入展 [加权${scoreResult.weightedAverage.toFixed(1)}分] ${idea.ideaText.slice(0, 20)}...`);
             } else {
               bs.addIdeaToDiscard(scoredIdea);
               discardedIdeas.push(scoredIdea as typeof scoredIdea & { scores: { average: number }; reasoning: string });
-              bs.addLog('scoring', `✗ 丢弃 [${scoreResult.average.toFixed(1)}分] ${idea.ideaText.slice(0, 20)}...`);
+              bs.addLog('scoring', `✗ 丢弃 [加权${scoreResult.weightedAverage.toFixed(1)}分] ${idea.ideaText.slice(0, 20)}...`);
             }
           }
 
@@ -298,6 +347,7 @@ export function useBrainstormEngine() {
           ideaText: i.ideaText,
           scores: { average: i.scores.average },
           reasoning: i.reasoning,
+          userDiscardReason: (i as any).userDiscardReason,
         })),
       };
 
