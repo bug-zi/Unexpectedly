@@ -133,7 +133,7 @@ export function ShowcasePanel({
                   onClick={handleConfirmDiscard}
                   whileTap={{ scale: 0.97 }}
                 >
-                  直接丢弃
+                  {discardReason.trim() ? '丢弃' : '直接丢弃'}
                 </motion.button>
               </div>
             </motion.div>
