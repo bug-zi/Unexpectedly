@@ -172,7 +172,7 @@ export function useBrainstormEngine() {
       const currentNodes = useDiffuserStore.getState().nodes
         .filter((n) => n.word !== seedWord)
         .map((n) => n.word);
-      const collisionGroups = selectCollisionGroups(currentNodes, existingCollisions, 4);
+      const collisionGroups = selectCollisionGroups(currentNodes, existingCollisions, 10);
 
       bs.addLog('colliding', `规划 ${collisionGroups.length} 组碰撞`);
 
@@ -388,9 +388,6 @@ export function useBrainstormEngine() {
         runningRef.current = false;
         return;
       }
-
-      // 清空画布
-      useDiffuserStore.getState().clearCanvas();
 
       const totalRounds = rounds ?? bs.totalRounds;
 

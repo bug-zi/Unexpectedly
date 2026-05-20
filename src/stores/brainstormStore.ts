@@ -111,11 +111,11 @@ export const useBrainstormStore = create<BrainstormState>()(
       topicInput: topic ?? '',
       rounds: [],
       lessonsLearned: [],
-      // 保留收纳盒和丢弃堆，新风暴在已有基础上进行
+      // 保留展台、收纳盒和丢弃堆，新风暴在已有基础上追加
       collectionBox: s.collectionBox,
       discardPile: s.discardPile,
-      showcase: [],
-      collidedKeys: [],
+      showcase: s.showcase,
+      collidedKeys: s.collidedKeys,
       activityLog: [],
       tokensUsed: 0,
       errorMessage: null,

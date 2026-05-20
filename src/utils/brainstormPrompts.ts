@@ -22,7 +22,7 @@ const MULTI_REACTION_SYSTEM_PROMPT = `你是一个疯狂但靠谱的创意碰撞
 
 硬性规则：
 1. 每条content不超过70字，纯文字，禁止emoji和装饰符号
-2. 生成4条结果，覆盖至少4个不同维度
+2. 生成2条结果，覆盖至少2个不同维度
 3. type字段只能是：反常识组合、行为改造、隐喻实体化、极端场景、微型实验
 4. 禁止空洞概念，禁止标签式描述
 5. 每条必须包含具体细节，让人在脑子里画出画面
@@ -50,7 +50,7 @@ export function buildMultiWordReactionPrompt(
   userPrefs?: { liked: string[]; disliked: string[]; preferenceSummary?: string }
 ): ChatMessage[] {
   const wordsStr = words.map((w) => `「${w}」`).join('和');
-  let userContent = `将${wordsStr}碰撞融合，生成4条紧扣这些词语的创意。`;
+  let userContent = `将${wordsStr}碰撞融合，生成2条紧扣这些词语的创意。`;
 
   // 长期偏好库摘要（跨 session 累积，优先级最高）
   if (userPrefs?.preferenceSummary) {

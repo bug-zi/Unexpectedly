@@ -40,7 +40,7 @@ function extractJSON(text: string): string | null {
 
 /** 加权评分常量 */
 const SCORING_WEIGHTS = { innovation: 1.5, fun: 1.3, feasibility: 0.7, practicality: 0.5 };
-const WEIGHTED_THRESHOLD = 5.5;
+const WEIGHTED_THRESHOLD = 7.0;
 const GATE_THRESHOLD = 12; // innovation + fun 必须达到此值
 
 export function useBrainstormAI() {
