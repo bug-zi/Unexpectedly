@@ -84,12 +84,19 @@ export function DiffuserCanvas({
       if (keysDown.size > 0) rafId = requestAnimationFrame(tick);
     };
 
+    const isEditableTarget = (target: EventTarget | null): boolean => {
+      if (!target || !(target instanceof HTMLElement)) return false;
+      const tag = target.tagName;
+      return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'
+        || (tag === 'DIV' && target.isContentEditable);
+    };
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onSelectNode(null);
         onSelectIds([]);
       }
-      if (e.key === 'Delete') {
+      if (e.key === 'Delete' && !isEditableTarget(e.target)) {
         if (selectedIds.length > 0) {
           selectedIds.forEach((id) => onDeleteNode(id));
           onSelectIds([]);
@@ -97,7 +104,7 @@ export function DiffuserCanvas({
           onDeleteNode(selectedId);
         }
       }
-      if (isPanKey(e.key)) {
+      if (isPanKey(e.key) && !isEditableTarget(e.target)) {
         e.preventDefault();
         if (!keysDown.has(e.key)) {
           keysDown.add(e.key);

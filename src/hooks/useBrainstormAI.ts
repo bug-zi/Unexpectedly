@@ -52,7 +52,7 @@ export function useBrainstormAI() {
     async (
       words: string[],
       lessonsLearned?: string[],
-      userPrefs?: { liked: string[]; disliked: string[] }
+      userPrefs?: { liked: string[]; disliked: string[]; preferenceSummary?: string }
     ): Promise<DiffuserReactionResult[]> => {
       if (!llmConfig) return [];
 

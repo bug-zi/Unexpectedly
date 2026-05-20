@@ -7,6 +7,7 @@ import { useBrainstormStore } from '@/stores/brainstormStore';
 import { useDiffuserStore } from '@/stores/diffuserStore';
 import { useDiffuserAI } from '@/hooks/useDiffuserAI';
 import { useBrainstormAI } from '@/hooks/useBrainstormAI';
+import { useUserPreferenceStore } from '@/stores/userPreferenceStore';
 import { generateId } from '@/utils/diffuserLayout';
 import { calcRadialPositions } from '@/utils/diffuserLayout';
 import { selectDiverseWords, selectCollisionGroups, makeCollisionKey, selectSeedFromCollection } from '@/utils/brainstormLayout';
@@ -192,12 +193,14 @@ export function useBrainstormEngine() {
         const reactionResults = await withRetry(
           () => {
             const bsNow = useBrainstormStore.getState();
+            const prefStore = useUserPreferenceStore.getState();
             return ai.generateMultiReaction(
               group,
               bsNow.lessonsLearned,
               {
                 liked: bsNow.collectionBox.map((i) => i.ideaText),
                 disliked: bsNow.discardPile.map((i) => i.ideaText),
+                preferenceSummary: prefStore.getPreferenceSummary(),
               }
             );
           },

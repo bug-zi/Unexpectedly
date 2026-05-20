@@ -28,6 +28,7 @@ const MULTI_REACTION_SYSTEM_PROMPT = `你是一个疯狂但靠谱的创意碰撞
 5. 每条必须包含具体细节，让人在脑子里画出画面
 6. 场景必须多样化：每条创意必须在不同场景中发生
 7. 优先写让人意外但想通后觉得合理的想法
+8. 如果提供了用户长期偏好档案，必须严格遵循：多做用户喜欢的类型和风格，绝对不做用户明确反馈过不喜欢的方向
 
 质量自检：
 - 同时涉及所有词语了吗？
@@ -46,20 +47,26 @@ const MULTI_REACTION_SYSTEM_PROMPT = `你是一个疯狂但靠谱的创意碰撞
 export function buildMultiWordReactionPrompt(
   words: string[],
   lessonsLearned?: string[],
-  userPrefs?: { liked: string[]; disliked: string[] }
+  userPrefs?: { liked: string[]; disliked: string[]; preferenceSummary?: string }
 ): ChatMessage[] {
   const wordsStr = words.map((w) => `「${w}」`).join('和');
   let userContent = `将${wordsStr}碰撞融合，生成4条紧扣这些词语的创意。`;
 
+  // 长期偏好库摘要（跨 session 累积，优先级最高）
+  if (userPrefs?.preferenceSummary) {
+    userContent += `\n\n【用户长期偏好档案——最重要，直接决定创意方向】\n${userPrefs.preferenceSummary}`;
+  }
+
+  // 当前 session 的实时偏好
   if (userPrefs && (userPrefs.liked.length > 0 || userPrefs.disliked.length > 0)) {
-    userContent += '\n\n【用户偏好参照——非常重要，直接影响创意方向】';
+    userContent += '\n\n【本次会话偏好参照】';
     if (userPrefs.liked.length > 0) {
       const likedSample = userPrefs.liked.slice(0, 6);
-      userContent += `\n用户喜欢的点子（生成类似风格的创意）：\n${likedSample.map((l) => `- ${l}`).join('\n')}`;
+      userContent += `\n本次喜欢的点子：\n${likedSample.map((l) => `- ${l}`).join('\n')}`;
     }
     if (userPrefs.disliked.length > 0) {
       const dislikedSample = userPrefs.disliked.slice(0, 4);
-      userContent += `\n用户不喜欢的点子（避开这类风格和方向）：\n${dislikedSample.map((l) => `- ${l}`).join('\n')}`;
+      userContent += `\n本次不喜欢的点子（避开）：\n${dislikedSample.map((l) => `- ${l}`).join('\n')}`;
     }
   }
 

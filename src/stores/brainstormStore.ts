@@ -12,6 +12,7 @@ import type {
   CollisionResult,
   ActivityLogEntry,
 } from '@/types/brainstorm';
+import { useUserPreferenceStore } from '@/stores/userPreferenceStore';
 
 interface BrainstormState {
   // 状态机
@@ -161,6 +162,7 @@ export const useBrainstormStore = create<BrainstormState>()(
     set((s) => {
       const idea = s.showcase.find((i) => i.id === ideaId);
       if (!idea) return s;
+      useUserPreferenceStore.getState().recordLike(idea);
       return {
         showcase: s.showcase.filter((i) => i.id !== ideaId),
         collectionBox: [...s.collectionBox, idea],
@@ -171,6 +173,7 @@ export const useBrainstormStore = create<BrainstormState>()(
     set((s) => {
       const idea = s.showcase.find((i) => i.id === ideaId);
       if (!idea) return s;
+      useUserPreferenceStore.getState().recordDislike(idea, reason);
       return {
         showcase: s.showcase.filter((i) => i.id !== ideaId),
         discardPile: [...s.discardPile, { ...idea, userDiscardReason: reason }],
