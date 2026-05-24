@@ -12,6 +12,7 @@ import {
   buildScoringPrompt,
   buildReviewPrompt,
   buildSeedExtractPrompt,
+  buildRuleGenerationPrompt,
 } from '@/utils/brainstormPrompts';
 import type { DiffuserReactionResult, ChatMessage } from '@/types';
 import type { IdeaScores, RoundReview } from '@/types/brainstorm';
@@ -52,13 +53,14 @@ export function useBrainstormAI() {
     async (
       words: string[],
       lessonsLearned?: string[],
-      userPrefs?: { liked: string[]; disliked: string[]; preferenceSummary?: string }
+      userPrefs?: { liked: string[]; disliked: string[]; preferenceSummary?: string },
+      controlRules?: string
     ): Promise<DiffuserReactionResult[]> => {
       if (!llmConfig) return [];
 
       abortRef.current = false;
       const configSnapshot = { ...llmConfig };
-      const messages = buildMultiWordReactionPrompt(words, lessonsLearned, userPrefs);
+      const messages = buildMultiWordReactionPrompt(words, lessonsLearned, userPrefs, controlRules);
 
       try {
         const text = await streamCall(messages, configSnapshot, {
@@ -268,12 +270,36 @@ export function useBrainstormAI() {
     abortRef.current = true;
   }, []);
 
+  /** 控制中枢：用户需求 → AI 生成普适规则 */
+  const generateRule = useCallback(
+    async (userRequirement: string): Promise<string | null> => {
+      if (!llmConfig) return null;
+      abortRef.current = false;
+      const configSnapshot = { ...llmConfig };
+      const messages = buildRuleGenerationPrompt(userRequirement);
+      try {
+        const text = await streamCall(messages, configSnapshot, {
+          temperature: 0.3,
+          max_tokens: 200,
+        }, abortRef);
+        const jsonStr = extractJSON(text);
+        if (!jsonStr) return null;
+        const parsed = JSON.parse(jsonStr);
+        return parsed?.rule || null;
+      } catch {
+        return null;
+      }
+    },
+    [llmConfig]
+  );
+
   return {
     generateMultiReaction,
     quickGateIdea,
     scoreIdea,
     reviewRound,
     extractSeedKeywords,
+    generateRule,
     abort,
     isConfigured: !!llmConfig,
   };

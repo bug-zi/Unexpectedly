@@ -74,13 +74,14 @@ export function useDiffuserAI(options?: UseDiffuserAIOptions) {
   const generateWords = useCallback(
     async (
       word: string,
-      existingWords: string[] = []
+      existingWords: string[] = [],
+      controlRules?: string
     ): Promise<DiffuserWord[]> => {
       if (!llmConfig) return [];
 
       abortRef.current = false;
       const configSnapshot = { ...llmConfig };
-      const messages = buildDiffuserPrompt(word, count, existingWords);
+      const messages = buildDiffuserPrompt(word, count, existingWords, controlRules);
 
       try {
         let fullText = '';

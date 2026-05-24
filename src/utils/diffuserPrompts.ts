@@ -39,12 +39,17 @@ const SYSTEM_PROMPT = `你是一个思维发散助手。用户给你一个词语
 export function buildDiffuserPrompt(
   word: string,
   count: number = 8,
-  existingWords: string[] = []
+  existingWords: string[] = [],
+  controlRules?: string
 ): ChatMessage[] {
   let userContent = `请为「${word}」生成 ${count} 个多维度的联想词。`;
 
   if (existingWords.length > 0) {
     userContent += `\n\n已有的关联词（不要重复，要往新方向发散）：${existingWords.join('、')}`;
+  }
+
+  if (controlRules && controlRules.trim()) {
+    userContent += `\n\n【用户自定义规则——种子词方向必须遵循】\n${controlRules}`;
   }
 
   return [

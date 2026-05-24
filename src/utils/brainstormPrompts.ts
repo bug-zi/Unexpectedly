@@ -7,6 +7,25 @@ import type { ChatMessage } from '@/types';
 
 // ===================== 多词碰撞 =====================
 
+/** 内置生成规则 - 供 UI 展示（按类别分开） */
+export const BUILT_IN_RULES: { seed: string[]; idea: string[] } = {
+  seed: [
+    '只生成名词，禁止动词、形容词、副词',
+    '必须是日常常见、通俗易懂的名词',
+    '与原词的关联要直观，让人一看就懂',
+    '每个联想词的关联角度必须不同',
+    '禁止低于0.8相关性的词语',
+  ],
+  idea: [
+    '每条创意必须涉及全部给定的词语，缺一不可',
+    '每条不超过70字，纯文字，禁止emoji和装饰符号',
+    '禁止空洞概念和标签式描述，必须包含具体细节',
+    '场景必须多样化，每条创意在不同场景中发生',
+    '优先写让人意外但想通后觉得合理的想法',
+    '严格遵循用户长期偏好：多做喜欢的，绝对不做不喜欢的方向',
+  ],
+};
+
 const MULTI_REACTION_SYSTEM_PROMPT = `你是一个疯狂但靠谱的创意碰撞引擎。给你2-4个词语，你要把它们融合成让人"哇"一声的创意点子。
 
 【扣题规则——最重要】
@@ -47,7 +66,8 @@ const MULTI_REACTION_SYSTEM_PROMPT = `你是一个疯狂但靠谱的创意碰撞
 export function buildMultiWordReactionPrompt(
   words: string[],
   lessonsLearned?: string[],
-  userPrefs?: { liked: string[]; disliked: string[]; preferenceSummary?: string }
+  userPrefs?: { liked: string[]; disliked: string[]; preferenceSummary?: string },
+  controlRules?: string
 ): ChatMessage[] {
   const wordsStr = words.map((w) => `「${w}」`).join('和');
   let userContent = `将${wordsStr}碰撞融合，生成2条紧扣这些词语的创意。`;
@@ -72,6 +92,11 @@ export function buildMultiWordReactionPrompt(
 
   if (lessonsLearned && lessonsLearned.length > 0) {
     userContent += `\n\n本轮指导原则（基于之前轮次的经验总结）：\n${lessonsLearned.map((l) => `- ${l}`).join('\n')}`;
+  }
+
+  // 控制中枢 - 用户自定义规则
+  if (controlRules && controlRules.trim()) {
+    userContent += `\n\n【用户自定义规则——必须严格遵循】\n${controlRules}`;
   }
 
   return [
@@ -211,6 +236,30 @@ ${discarded || '  （无）'}
   return [
     { role: 'system', content: REVIEW_SYSTEM_PROMPT },
     { role: 'user', content: userContent },
+  ];
+}
+
+// ===================== 控制中枢 - 规则生成 =====================
+
+const RULE_GENERATION_SYSTEM_PROMPT = `你是一位创意规则提炼专家。用户会描述自己对创意灵感的要求或偏好，你要把它提炼成一条简洁、普适、可执行的提示词规则。
+
+要求：
+1. 从用户的具体描述中提炼出一般性的规则，不要只针对用户举的例子
+2. 规则要简洁明确，1-2句话，让 AI 每次生成时都能遵循
+3. 规则要从正面和/或反面两个角度描述：应该怎么做 + 应该避免什么
+4. 不要过度限制，保留创意空间——规则是引导方向，不是锁死路径
+
+输出格式：
+纯JSON，不要任何其他文字。
+{"rule":"提炼后的规则文本"}`;
+
+/**
+ * 构建规则生成提示 - 用户输入需求 → AI 生成普适规则
+ */
+export function buildRuleGenerationPrompt(userRequirement: string): ChatMessage[] {
+  return [
+    { role: 'system', content: RULE_GENERATION_SYSTEM_PROMPT },
+    { role: 'user', content: `用户要求：${userRequirement}\n\n请提炼为一条普适的创意生成规则。` },
   ];
 }
 

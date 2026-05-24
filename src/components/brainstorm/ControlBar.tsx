@@ -3,10 +3,11 @@
  */
 
 import { useState } from 'react';
-import { Play, Pause, RotateCcw, Trash2 } from 'lucide-react';
+import { Play, Pause, RotateCcw, Trash2, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, X } from 'lucide-react';
 import type { BrainstormPhase } from '@/types/brainstorm';
+import { useControlHubStore } from '@/stores/controlHubStore';
 
 interface ControlBarProps {
   phase: BrainstormPhase;
@@ -21,6 +22,7 @@ interface ControlBarProps {
   onRestart: () => void;
   onClear: () => void;
   isConfigured: boolean;
+  onOpenControlHub: () => void;
 }
 
 export function ControlBar({
@@ -36,8 +38,10 @@ export function ControlBar({
   onRestart,
   onClear,
   isConfigured,
+  onOpenControlHub,
 }: ControlBarProps) {
   const [showClearDialog, setShowClearDialog] = useState(false);
+  const activeRuleCount = useControlHubStore((s) => s.rules.filter((r) => r.isActive).length);
   const isIdle = phase === 'idle';
   const isActive = !['idle', 'completed', 'error'].includes(phase);
   const isPaused = phase === 'paused';
@@ -118,6 +122,21 @@ export function ControlBar({
             </span>
           )}
         </div>
+
+        {/* 控制中枢按钮 */}
+        <button
+          onClick={onOpenControlHub}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-500/10 text-sm transition-colors"
+          title="控制中枢"
+        >
+          <Settings size={14} />
+          <span className="hidden sm:inline">控制中枢</span>
+          {activeRuleCount > 0 && (
+            <span className="text-xs px-1.5 py-0.5 rounded-full bg-green-500/15 text-green-600 dark:text-green-400 font-medium">
+              {activeRuleCount}
+            </span>
+          )}
+        </button>
 
         {/* 清空按钮 */}
         {hasContent && (

@@ -8,6 +8,7 @@ import { useDiffuserStore } from '@/stores/diffuserStore';
 import { useDiffuserAI } from '@/hooks/useDiffuserAI';
 import { useBrainstormAI } from '@/hooks/useBrainstormAI';
 import { useUserPreferenceStore } from '@/stores/userPreferenceStore';
+import { useControlHubStore } from '@/stores/controlHubStore';
 import { generateId } from '@/utils/diffuserLayout';
 import { calcRadialPositions } from '@/utils/diffuserLayout';
 import { selectDiverseWords, selectCollisionGroups, makeCollisionKey, selectSeedFromCollection } from '@/utils/brainstormLayout';
@@ -89,7 +90,8 @@ export function useBrainstormEngine() {
       if (!seedWord) {
         // 让AI生成一个随机种子词
         bs.addLog('seeding', 'AI 正在生成种子词...');
-        const words = await generateWords('随机有趣名词', []);
+        const controlRules = useControlHubStore.getState().getActiveRulesText('seed');
+        const words = await generateWords('随机有趣名词', [], controlRules);
         if (words.length > 0) {
           seedWord = words[0].word;
         } else {
@@ -112,8 +114,9 @@ export function useBrainstormEngine() {
 
       // 第1层：8个词
       const allExistingWords = useDiffuserStore.getState().nodes.map((n) => n.word);
+      const expandRules = useControlHubStore.getState().getActiveRulesText('seed');
       const layer1 = await withRetry(
-        () => generateWords(seedWord, allExistingWords),
+        () => generateWords(seedWord, allExistingWords, expandRules),
         1,
         signalRef.current
       );
@@ -143,8 +146,9 @@ export function useBrainstormEngine() {
         if (!wordNode) continue;
 
         const currentAllWords = useDiffuserStore.getState().nodes.map((n) => n.word);
+        const layer2Rules = useControlHubStore.getState().getActiveRulesText('seed');
         const layer2 = await withRetry(
-          () => generateMore(word.word, currentAllWords),
+          () => generateMore(word.word, currentAllWords, layer2Rules),
           1,
           signalRef.current
         );
@@ -201,7 +205,8 @@ export function useBrainstormEngine() {
                 liked: bsNow.collectionBox.map((i) => i.ideaText),
                 disliked: bsNow.discardPile.map((i) => i.ideaText),
                 preferenceSummary: prefStore.getPreferenceSummary(),
-              }
+              },
+              useControlHubStore.getState().getActiveRulesText('idea')
             );
           },
           1,

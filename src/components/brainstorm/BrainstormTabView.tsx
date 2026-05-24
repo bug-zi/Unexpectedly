@@ -2,13 +2,14 @@
  * 灵感风暴 - 主布局容器
  */
 
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { useBrainstormStore } from '@/stores/brainstormStore';
 import { useDiffuserStore } from '@/stores/diffuserStore';
 import { useBrainstormEngine } from '@/hooks/useBrainstormEngine';
 import { StagePanel } from './StagePanel';
 import { ShowcasePanel } from './CollectionBox';
 import { ControlBar } from './ControlBar';
+import { ControlHub } from './ControlHub';
 
 interface BrainstormTabViewProps {
   children: ReactNode; // 共享画布
@@ -28,6 +29,7 @@ export function BrainstormTabView({ children }: BrainstormTabViewProps) {
   const resetSession = useBrainstormStore((s) => s.resetSession);
 
   const engine = useBrainstormEngine();
+  const [showControlHub, setShowControlHub] = useState(false);
 
   const handleClear = () => {
     resetSession();
@@ -73,6 +75,13 @@ export function BrainstormTabView({ children }: BrainstormTabViewProps) {
         onRestart={engine.restart}
         onClear={handleClear}
         isConfigured={engine.isConfigured}
+        onOpenControlHub={() => setShowControlHub(true)}
+      />
+
+      {/* 控制中枢弹窗 */}
+      <ControlHub
+        isOpen={showControlHub}
+        onClose={() => setShowControlHub(false)}
       />
     </div>
   );
