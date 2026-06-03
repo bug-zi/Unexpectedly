@@ -1,340 +1,268 @@
 # 万万没想到 (Unexpectedly)
 
-> 每日思维提升工具 — 通过精心设计的问题引导深度思考，激发创造力，记录成长轨迹。
+> 每天抽一点时间，把脑子从惯性里拽出来。
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite)](https://vitejs.dev/)
-![Supabase](https://img.shields.io/badge/Backend-Supabase-3ECF8E?logo=supabase)
+[![Supabase](https://img.shields.io/badge/Backend-Supabase-3ECF8E?logo=supabase)](https://supabase.com/)
 
----
+## 这是什么
 
-## 项目简介
+**万万没想到** 是一个思维训练和创意生成工具。它不假装帮你「提升生产力」，它更关心你今天有没有问出一个好问题、写下一段像样的文字、把一个旧想法撞出新角度。
 
-**万万没想到** 是一个交互式思维训练平台，通过不同维度的问题引导用户进行深度思考。整合了问题探索、AI 辩论、大咖圆桌、创意写作、逻辑推理等多种模块，帮助用户打破思维定式，发现新的可能。
+当前版本包含四个主入口：
 
-### 核心理念
-
-- **深度思考** — 每天 5 分钟，通过精心设计的问题启发思考
-- **创意激发** — 多维度问题库 + 随机词汇组合，激发无限可能
-- **成长追踪** — 记录思考轨迹，见证思维成长
-- **游戏化学习** — 逻辑推理游戏 + 每日任务系统，让思考更有趣
-- **AI 赋能** — 辩论对手、大咖圆桌、智能问答，AI 全程参与思维训练
-
----
+| 入口 | 做什么 |
+| --- | --- |
+| 逻辑推理 | 海龟汤、谜语、Yes or No、猜数字，用游戏逼自己认真推理 |
+| 问题思考 | 精选问题卡片、AI 辩论堂、回答记录和思考统计 |
+| 写作创造 | 灵感老虎机、文笔挑战、创作历史和字数统计 |
+| 灵感源泉 | AI 生成灵感、灵感涟漪、灵感扩散画布和历史收藏 |
 
 ## 功能概览
 
 ### 问题思考
 
-| 功能 | 说明 |
-|------|------|
-| 双类别导航 | 思维维度 (5 类) x 生活场景 (5 类) = 25 种问题组合 |
-| 问题探索 | 175+ 精选问题，涵盖假设、逆向、联想、反思、未来五大思维维度 |
-| 深度回答 | 富文本编辑，支持自动保存草稿 |
-| 收藏 & 待思考 | 个人书签系统，随时回顾 |
-| 自定义收藏夹 | 用户自建收藏夹，灵活管理问题 |
-| 数据导出 | 支持 PDF / Markdown 格式导出 |
-
-**思维维度**：假设思维 / 逆向思考 / 联想创意 / 自我反思 / 未来设想
-
-**生活场景**：职业发展 / 创意激发 / 人际关系 / 学习成长 / 生活哲学
-
-### AI 辩论堂
-
-- AI 自动生成辩题，支持正方/反方立场选择
-- 实时辩论对话，AI 作为对手即时回应
-- 评委评价系统，给出辩论表现评分和改进建议
-- 辩论历史记录，随时回顾
-
-### 大咖圆桌
-
-- 30+ 历史与当代思想家（苏格拉底、爱因斯坦、老子、乔布斯等）
-- 每位思想家拥有独特的思维风格和系统提示词
-- 多人圆桌讨论，从不同视角探讨同一问题
-- 智能匹配：根据问题类别自动推荐适合的思想家
+- 5 种思维维度：假设思维、逆向思考、联想创意、自我反思、未来设想。
+- 5 种生活场景：职业发展、创意激发、人际关系、学习成长、生活哲学。
+- 问题探索、分类浏览、回答页、收藏、待思考、自定义收藏夹。
+- AI 辩论堂：选择立场，与 AI 辩手对话，并获得评委式反馈。
+- 成长追踪：记录回答、查看思考次数和阶段变化。
+- AI 问题生成器：用于生成新的思考题。
 
 ### 写作创造
 
-| 工具 | 说明 |
-|------|------|
-| 灵感老虎机 | 697 个词汇，27 个类别，随机三词组合激发创意 |
-| 文笔挑战 | 100 道续写题目，涵盖奇幻/悬疑/情感/探险等 10 大类，随机出题，已完成题目不再出现 |
-
-**老虎机特殊彩蛋**：特定词汇组合（如"哲学家" + "编程" + "咖啡"）会触发隐藏效果。
+- 灵感老虎机：随机词语组合，打破「我不知道写什么」的空转。
+- 文笔挑战：给定一句开头，继续写出一个完整片段。
+- 历史记录：老虎机与文笔挑战作品统一查看，支持编辑和删除。
+- 创作统计：记录创作次数和累计字数。
 
 ### 逻辑推理
 
-| 游戏 | 玩法 |
-|------|------|
-| 海龟汤 | 通过是/否问题推理离奇故事真相，支持 AI 提示 |
-| 谜语人 | 猜谜语，锻炼联想思维，17 道精选谜题 |
-| 猜数字 | 经典 xAxB 推理，猜出四位不重复数字 |
-| Yes or No | AI 出题，通过是/否提问猜出 AI 心中的词语 |
+- 海龟汤：通过是/否提问还原故事真相，需要 AI 配置。
+- 谜语人：基于内置谜题库训练联想和语言理解。
+- Yes or No：AI 出题，你用是/否问题逼近答案，需要 AI 配置。
+- 猜数字：经典 xAxB 数字推理，支持不同模式选择。
+- 游戏记录与统计：查看历史局数、完成情况、提示次数和耗时。
 
-### 知识科普
+### 灵感源泉
 
-- **世界之最** — 有趣的世界纪录和知识
-- **系统思维** — 理解系统与流程的思维方式
-- **健康主理** — 健康知识与管理
-- **AI 问答** — 基于 AI 的知识问答系统
+- 6 个灵感领域：文学创作、项目开发、沟通表达、学术探索、生活创意、人际关系。
+- 3 种生成深度：火花、深潜、跨界碰撞。
+- 灵感历史、收藏、统计、编辑和删除。
+- 灵感涟漪：围绕一句输入继续追问、扩写、发散。
+- 灵感扩散器：以节点画布展开词语联想，支持手动模式、自动模式、节点碰撞反应、笔记和收纳盒。
 
-### 成长系统
+### 任务、签到与个人中心
 
-| 功能 | 说明 |
-|------|------|
-| 时间轴视图 | 按时间查看所有思考记录 |
-| 统计分析 | 思考次数、字数统计、成长曲线 |
-| 思维变化 | 对比不同时期对同一问题的看法 |
-| 每日任务 | 问题思考 / 写作创作 / 逻辑推理三类每日挑战 |
-| 每周任务 | 回顾与总结，养成思考习惯 |
-| 签到打卡 | 连续打卡记录，连续天数追踪 |
-| 成就系统 | 里程碑奖励，持续激励 |
+- 随机小任务：通过扭蛋机生成创意、身体行动、社交互动、自我反思、探索发现、善意传递等任务。
+- 任务中心：每日任务、完成记录和进度管理。
+- 签到打卡：记录连续思考习惯。
+- 通知提醒：本地通知设置与全局提醒。
+- 个人中心：用户资料、主题偏好、AI 模型配置、数据同步入口。
 
-### 数据管理
+## AI 配置
 
-- **云端同步** — 基于 Supabase 的数据备份，登录即同步
-- **本地优先** — 离线可用，联网后自动同步
-- **用户隔离** — 每个用户数据完全独立
-- **数据迁移** — 自动检测并迁移旧版本数据
-- **数据导出** — 随时导出个人数据 (PDF / Markdown / JSON)
+项目的主要 AI 功能使用 OpenAI 兼容的 Chat Completions 接口。API Key 在浏览器本地保存，不上传到项目后端。
 
----
+内置服务商配置：
+
+| 服务商 | 默认模型 |
+| --- | --- |
+| DeepSeek | `deepseek-chat` |
+| 通义千问 | `qwen-plus` |
+| 智谱 GLM | `glm-4-flash` |
+| Kimi | `moonshot-v1-8k` |
+| 豆包 | `doubao-pro-32k` |
+
+进入 `个人中心` 后填写服务商、模型和 API Key，即可启用辩论堂、圆桌讨论、海龟汤 AI、Yes or No、灵感源泉、随机小任务等功能。
 
 ## 技术栈
 
 | 层级 | 技术 |
-|------|------|
-| 框架 | React 18 + TypeScript 5 |
-| 构建 | Vite 5 |
-| 状态管理 | Zustand（持久化 + 中间件） |
+| --- | --- |
+| 前端 | React 18, TypeScript 5, Vite 5 |
 | 路由 | React Router v6 |
-| 样式 | Tailwind CSS 3 |
-| 动画 | Framer Motion 11 |
-| 图标 | Lucide React / Phosphor Icons / Iconify |
-| 后端 | Supabase (Auth + PostgreSQL + Storage) |
-| AI | OpenAI API |
-| 导出 | html2canvas + jsPDF |
-| 虚拟列表 | React Virtuoso |
+| 样式 | Tailwind CSS, 自定义背景图与动效 |
+| 动画 | Framer Motion |
+| 状态 | Zustand |
+| 后端 | Supabase Auth, PostgreSQL, Storage |
+| AI | OpenAI 兼容接口，支持多服务商 |
 | 拖拽 | dnd-kit |
-| 日期 | date-fns |
-| 通知 | react-toastify |
-
----
+| 图标 | Lucide React, Phosphor Icons, Iconify |
+| 导出 | html2canvas, jsPDF |
+| SEO | react-helmet-async, JSON-LD |
+| 演示视频 | Remotion 子项目 |
 
 ## 快速开始
 
 ### 环境要求
 
-- Node.js >= 18.0.0
-- npm >= 9.0.0
+- Node.js 18 或更高版本
+- npm 9 或更高版本
+- 一个 Supabase 项目
 
-### 安装
+### 安装依赖
 
 ```bash
-# 克隆仓库
 git clone https://github.com/bug-zi/Unexpectedly.git
 cd Unexpectedly
-
-# 安装依赖
 npm install
-
-# 配置环境变量
-cp .env.example .env
-# 编辑 .env，填入 Supabase 配置
 ```
 
-`.env` 文件内容：
+### 配置环境变量
+
+在项目根目录新建 `.env.local`：
 
 ```env
 VITE_SUPABASE_URL=你的 Supabase 项目 URL
 VITE_SUPABASE_ANON_KEY=你的 Supabase 匿名密钥
+VITE_SITE_URL=http://localhost:5173
 ```
 
-### 数据库初始化
+可选变量：
 
-在 Supabase Dashboard 的 SQL Editor 中按顺序执行 `supabase/migrations/` 目录下的迁移文件。
+```env
+VITE_GLM_API_KEY=用于 AI 问题生成器的智谱 API Key
+```
 
-### 启动
+### 初始化数据库
+
+在 Supabase Dashboard 的 SQL Editor 中执行 `supabase/migrations/` 目录下的 SQL 文件。新库优先从 `NEW_DATABASE.sql` 开始；已有库按实际缺失表结构执行对应迁移。
+
+### 启动开发环境
 
 ```bash
 npm run dev
-# 打开 http://localhost:5173
 ```
 
----
+默认访问地址：
 
-## 项目结构
-
-```
-src/
-├── pages/              # 路由页面组件（30+ 页面）
-│   ├── HomePage.tsx            # 首页导航
-│   ├── QuestionExplorerPage.tsx # 问题探索
-│   ├── DebateHallPage.tsx      # AI 辩论堂
-│   ├── RoundtablePage.tsx      # 大咖圆桌
-│   ├── WritingChallengePage.tsx # 文笔挑战
-│   ├── SlotMachinePage.tsx     # 灵感老虎机
-│   ├── TurtleSoupPage.tsx      # 海龟汤
-│   ├── GuessNumberPage.tsx     # 猜数字
-│   ├── TaskPage.tsx            # 每日任务
-│   ├── CheckInPage.tsx         # 签到打卡
-│   ├── GrowthTrackerPage.tsx   # 成长追踪
-│   └── ...
-├── components/
-│   ├── features/       # 功能组件（QuestionCard, SlotMachine 等）
-│   ├── debate/         # 辩论模块组件
-│   ├── roundtable/     # 圆桌模块组件
-│   ├── collections/    # 收藏管理组件
-│   ├── virtualized/    # 虚拟列表组件
-│   └── ui/             # 基础 UI 组件（Button, Input, Card 等）
-├── stores/             # Zustand 状态管理
-│   ├── appStore.ts            # 全局应用状态
-│   ├── debateStore.ts         # 辩论会话状态
-│   └── roundtableStore.ts     # 圆桌会话状态
-├── hooks/              # 自定义 Hooks
-│   ├── useAuth.ts             # 认证状态
-│   ├── useSync.ts             # 数据同步
-│   ├── useDebate.ts           # 辩论逻辑
-│   ├── useRoundtable.ts       # 圆桌逻辑
-│   ├── useFavorites.ts        # 收藏管理
-│   ├── useCollections.ts      # 收藏夹管理
-│   └── useAutoSave.ts         # 自动保存
-├── services/           # 外部服务集成
-│   ├── authService.ts         # 认证服务
-│   └── syncService.ts         # 同步服务
-├── utils/              # 工具函数
-│   ├── taskManager.ts         # 任务系统
-│   ├── userStorage.ts         # 用户数据隔离
-│   ├── storage.ts             # 存储工具
-│   ├── export.ts              # 数据导出
-│   ├── aiQuestionGenerator.ts # AI 问题生成
-│   ├── turtleSoupAI.ts        # 海龟汤 AI
-│   ├── thinkerMatcher.ts      # 思想家匹配
-│   └── dataMigration.ts       # 数据迁移
-├── constants/          # 静态数据
-│   ├── questions.ts           # 问题库（175+）
-│   ├── categories.ts          # 类别配置
-│   ├── thinkers.ts            # 思想家（30+）
-│   ├── turtleSoup.ts          # 海龟汤题库
-│   ├── riddles.ts             # 谜语题库
-│   ├── slotMachineWords.ts    # 老虎机词汇（697 个）
-│   └── writingPrompts         # 文笔挑战（100 题，内嵌于页面）
-├── types/              # TypeScript 类型定义
-└── lib/                # 第三方客户端配置（Supabase）
+```text
+http://localhost:5173
 ```
 
----
-
-## 路由一览
-
-| 路径 | 页面 | 说明 |
-|------|------|------|
-| `/` | HomePage | 首页导航 |
-| `/questions` | QuestionThinkingHubPage | 问题思考中心 |
-| `/questions/explore` | QuestionExplorerPage | 问题探索 |
-| `/question/:id` | QuestionPage | 回答问题 |
-| `/debate` | DebateHallPage | AI 辩论堂 |
-| `/roundtable/setup` | RoundtableSetupPage | 大咖圆桌设置 |
-| `/roundtable/discuss` | RoundtablePage | 大咖圆桌讨论 |
-| `/writing` | WritingPage | 写作创造中心 |
-| `/writing-challenge` | WritingChallengePage | 文笔挑战 |
-| `/slot-machine` | SlotMachinePage | 灵感老虎机 |
-| `/slot-machine/answer` | SlotMachineAnswerPage | 老虎机创作 |
-| `/logic-reasoning` | LogicReasoningPage | 逻辑推理中心 |
-| `/turtle-soup` | TurtleSoupPage | 海龟汤 |
-| `/logic-reasoning/riddle` | RiddlePage | 谜语人 |
-| `/logic-reasoning/guess-number` | GuessNumberPage | 猜数字 |
-| `/knowledge-popularize` | KnowledgePopularizePage | 知识科普中心 |
-| `/knowledge-popularize/world-records` | WorldRecordsPage | 世界之最 |
-| `/knowledge-popularize/systems-thinking` | SystemsThinkingPage | 系统思维 |
-| `/knowledge-popularize/health-management` | HealthManagementPage | 健康主理 |
-| `/knowledge-popularize/ai-ask` | KnowledgeAIAskPage | AI 问答 |
-| `/questions/growth` | GrowthTrackerPage | 成长追踪 |
-| `/tasks` | TaskPage | 每日任务 |
-| `/checkin` | CheckInPage | 签到打卡 |
-| `/favorites` | FavoritesPage | 我的收藏 |
-| `/later` | LaterPage | 待思考 |
-| `/profile` | ProfilePage | 个人中心 |
-| `/login` | LoginPage | 登录 |
-
----
-
-## 开发脚本
+## 常用脚本
 
 ```bash
-npm run dev          # 启动开发服务器 (port 5173)
-npm run build        # 生产构建（TypeScript 检查 + Vite 构建）
+npm run dev          # 启动 Vite 开发服务器
+npm run build        # 生产构建
+npm run build:check  # TypeScript 检查 + 生产构建
 npm run preview      # 预览生产构建
-npm run lint         # ESLint 代码检查
-npm run format       # Prettier 格式化
+npm run lint         # ESLint 检查
+npm run format       # 格式化 src 下的 TS/TSX/CSS
 npm run type-check   # TypeScript 类型检查
 ```
 
----
+## 目录结构
 
-## 数据架构
+```text
+src/
+├── pages/          # 路由页面
+├── components/     # UI、功能模块、辩论、圆桌、灵感扩散等组件
+├── hooks/          # 认证、同步、AI、通知、收藏等 Hooks
+├── stores/         # Zustand 状态
+├── services/       # Supabase、LLM、反馈等服务
+├── utils/          # 存储、导出、迁移、提示词、布局等工具
+├── constants/      # 问题库、分类、SEO、题库、灵感领域配置
+├── types/          # TypeScript 类型
+├── lib/            # Supabase 客户端
+└── styles/         # 全局样式和落地页样式
 
-### 核心存储键
+supabase/
+├── setup.sql
+└── migrations/     # 数据库迁移
 
-应用使用 localStorage 做本地持久化，通过 `user-{userId}-` 前缀实现用户数据隔离：
+public/
+├── landing/        # 静态介绍页
+├── check/          # 检查页
+└── *.html          # 数据恢复、应急修复、演示页面
 
-| 存储键 | 数据 |
-|--------|------|
-| `wwx-answers` | 用户回答记录 |
-| `wwx-slot-machine` | 老虎机结果 |
-| `wwx-debate` | 辩论会话记录 |
+video/              # Remotion 演示视频项目
+landing-page/       # 独立静态落地页草稿
+```
+
+## 主要路由
+
+| 路径 | 页面 |
+| --- | --- |
+| `/` | 首页 |
+| `/questions` | 问题思考中心 |
+| `/questions/explore` | 问题探索 |
+| `/question/:id` | 问题回答 |
+| `/questions/growth` 或 `/growth` | 成长追踪 |
+| `/questions/question-generator` 或 `/question-generator` | AI 问题生成器 |
+| `/debate` | AI 辩论堂 |
+| `/writing` | 写作创造 |
+| `/slot-machine` | 灵感老虎机 |
+| `/slot-machine/answer` | 老虎机构思写作 |
+| `/writing-challenge` | 文笔挑战 |
+| `/logic-reasoning` | 逻辑推理中心 |
+| `/turtle-soup` | 海龟汤 |
+| `/logic-reasoning/riddle` | 谜语人 |
+| `/logic-reasoning/yes-or-no` | Yes or No |
+| `/logic-reasoning/guess-number` | 猜数字 |
+| `/inspiration` | 灵感源泉 |
+| `/inspiration/diffuser` | 灵感扩散器 |
+| `/inspiration/:domainId` | 灵感领域详情 |
+| `/random-quest` | 随机小任务 |
+| `/roundtable/setup` | 圆桌讨论设置 |
+| `/roundtable/discuss` | 圆桌讨论 |
+| `/favorites` | 我的收藏 |
+| `/later` | 待思考 |
+| `/collections/:id` | 收藏夹详情 |
+| `/tasks` | 任务中心 |
+| `/checkin` | 签到打卡 |
+| `/notifications` | 通知设置 |
+| `/profile` | 个人中心 |
+| `/login` | 登录 |
+| `/auth/callback` | 登录回调 |
+
+## 数据与同步
+
+- 本地优先：思考、创作、游戏、任务等记录优先保存在浏览器本地。
+- 用户隔离：本地存储通过用户前缀区分不同账号数据。
+- 云端同步：登录后使用 Supabase 同步用户资料、回答、收藏、稍后思考和用户数据。
+- 自动迁移：应用启动时会执行旧数据迁移逻辑。
+
+常见本地存储键：
+
+| Key | 内容 |
+| --- | --- |
+| `wwx-answers` | 问题回答 |
+| `wwx-slot-machine` | 灵感老虎机记录 |
+| `wwx-debate` | 辩论记录 |
 | `wwx-turtle-soup` | 海龟汤记录 |
 | `wwx-riddle` | 谜语记录 |
 | `wwx-guess-number` | 猜数字记录 |
 | `wwx-yes-or-no` | Yes or No 记录 |
 | `writing-challenge-works` | 文笔挑战作品 |
 | `wanwan-task-progress` | 任务进度 |
-| `wanwan-task-completed-days` | 完成天数 |
 
-### Supabase 数据表
+## 演示视频
 
-| 表名 | 用途 |
-|------|------|
-| `profiles` | 用户资料 |
-| `questions` | 问题库 |
-| `answers` | 用户回答 |
-| `user_data` | 用户数据 |
-| `favorites` | 收藏记录 |
-| `later_questions` | 待思考记录 |
+`video/` 是独立的 Remotion 项目：
 
----
+```bash
+cd video
+npm install
+npm run studio
+npm run render
+```
 
-## 贡献指南
+渲染输出位置为 `video/out/demo.mp4`。
 
-欢迎贡献代码、报告问题或提出新功能建议！
+## 部署
 
-1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交修改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启 Pull Request
+项目包含 `vercel.json`，可部署到 Vercel。生产环境至少需要配置：
 
----
-
-## 更新日志
-
-### v1.0.0
-- 问题思考系统（双类别导航、深度回答、收藏管理）
-- AI 辩论堂（自动出题、实时辩论、评委评价）
-- 大咖圆桌（30+ 思想家、多人讨论、智能匹配）
-- 灵感老虎机（697 词库、27 类别、彩蛋系统）
-- 文笔挑战（100 道续写题、随机出题、排除已完成）
-- 逻辑推理游戏（海龟汤、谜语人、猜数字、Yes or No）
-- 知识科普模块（世界之最、系统思维、健康主理、AI 问答）
-- 成长追踪系统（时间轴、统计、思维变化对比）
-- 每日任务 & 签到打卡 & 成就系统
-- Supabase 云端同步 & 用户认证
-- 深色模式 & 响应式设计
-- 数据导出（PDF / Markdown / JSON）
-
----
+```env
+VITE_SUPABASE_URL=你的 Supabase 项目 URL
+VITE_SUPABASE_ANON_KEY=你的 Supabase 匿名密钥
+VITE_SITE_URL=你的正式站点 URL
+```
 
 ## 许可证
 
@@ -342,10 +270,4 @@ npm run type-check   # TypeScript 类型检查
 
 ---
 
-<div align="center">
-
-**用思考连接创意，用创意改变世界**
-
 Made by [bug-zi](https://github.com/bug-zi)
-
-</div>
