@@ -22,8 +22,8 @@ import { getQuestionById } from '@/constants/questions';
 import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { supabase } from '@/lib/supabase';
-import { clsx } from 'clsx';
-import { usePageSEO } from '@/hooks/usePageSEO';
+import { useThoughtBurst } from '@/components/effects/ThoughtBurstProvider';
+import { triggerThoughtBurstFromEvent } from '@/utils/thoughtBurst';
 
 // 自定义动画
 const customEasing = {
@@ -35,6 +35,7 @@ type ViewMode = 'grid' | 'list';
 
 export function LaterPage() {
   const navigate = useNavigate();
+  const { triggerThoughtBurst } = useThoughtBurst();
   const { laterQuestions, stats, loading } = useLater();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [searchQuery, setSearchQuery] = useState('');
@@ -259,6 +260,13 @@ export function LaterPage() {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.1 }}
                   whileHover={{ scale: 1.02, y: -4 }}
+                  onClick={(event) => {
+                    triggerThoughtBurstFromEvent(event, triggerThoughtBurst, {
+                      color: '#eab308',
+                      accentColor: '#22d3ee',
+                      intensity: 0.78,
+                    });
+                  }}
                   className="relative rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all cursor-pointer border-2 border-yellow-400 dark:border-yellow-600 overflow-hidden"
                 >
                   {/* 背景图 */}

@@ -10,6 +10,8 @@ import { Collection } from '@/types/collections';
 import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import clsx from 'clsx';
+import { useThoughtBurst } from '@/components/effects/ThoughtBurstProvider';
+import { runAfterThoughtBurst, triggerThoughtBurstFromElement } from '@/utils/thoughtBurst';
 
 interface CollectionCardProps {
   collection: Collection;
@@ -18,14 +20,21 @@ interface CollectionCardProps {
 
 export function CollectionCard({ collection, onClick }: CollectionCardProps) {
   const navigate = useNavigate();
+  const { triggerThoughtBurst } = useThoughtBurst();
   const isCompleted = collection.progress === 100;
   const isActive = collection.progress > 0 && !isCompleted;
 
-  const handleClick = () => {
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    triggerThoughtBurstFromElement(event.currentTarget, triggerThoughtBurst, {
+      color: collection.color || '#f59e0b',
+      accentColor: '#22d3ee',
+      intensity: 0.92,
+    });
+
     if (onClick) {
-      onClick();
+      runAfterThoughtBurst(onClick);
     } else {
-      navigate(`/collections/${collection.id}`);
+      runAfterThoughtBurst(() => navigate(`/collections/${collection.id}`));
     }
   };
 

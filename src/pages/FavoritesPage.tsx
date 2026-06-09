@@ -26,7 +26,8 @@ import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { supabase } from '@/lib/supabase';
 import { clsx } from 'clsx';
-import { usePageSEO } from '@/hooks/usePageSEO';
+import { useThoughtBurst } from '@/components/effects/ThoughtBurstProvider';
+import { runAfterThoughtBurst, triggerThoughtBurstFromEvent } from '@/utils/thoughtBurst';
 
 // 自定义动画
 const customEasing = {
@@ -39,6 +40,7 @@ type FilterType = 'all' | 'answered';
 
 export function FavoritesPage() {
   const navigate = useNavigate();
+  const { triggerThoughtBurst } = useThoughtBurst();
   const { favorites, stats, loading: favoritesLoading } = useFavorites();
   const { collections, loading: collectionsLoading } = useCollections();
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -90,8 +92,17 @@ export function FavoritesPage() {
     return true;
   });
 
-  const handleQuestionClick = (questionId: string) => {
-    navigate(`/question/${questionId}`);
+  const burstAndNavigate = (
+    event: React.MouseEvent<HTMLElement>,
+    path: string,
+    color = '#f59e0b'
+  ) => {
+    triggerThoughtBurstFromEvent(event, triggerThoughtBurst, {
+      color,
+      accentColor: '#22d3ee',
+      intensity: 0.95,
+    });
+    runAfterThoughtBurst(() => navigate(path));
   };
 
   return (
@@ -295,7 +306,12 @@ export function FavoritesPage() {
                 transition={{ delay: 0.1 }}
                 whileHover={{ scale: 1.05, y: -4 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => {
+                onClick={(event) => {
+                  triggerThoughtBurstFromEvent(event, triggerThoughtBurst, {
+                    color: '#f59e0b',
+                    accentColor: '#22d3ee',
+                    intensity: 0.78,
+                  });
                   if (stat.key === 'collections') {
                     // 滚动到集合区域
                     const collectionSection = document.getElementById('collections-section');
@@ -445,7 +461,7 @@ export function FavoritesPage() {
                     transition={{ delay: 0.6 + index * 0.05 }}
                     whileHover={{ scale: 1.02, y: -4 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => navigate(`/collections/${collection.id}`)}
+                    onClick={(event) => burstAndNavigate(event, `/collections/${collection.id}`, collection.color || '#f59e0b')}
                     className="relative rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer border-2 border-transparent hover:border-amber-300 dark:hover:border-amber-700 overflow-hidden group backdrop-blur-sm"
                   >
                     {/* 背景图片 */}
@@ -563,7 +579,7 @@ export function FavoritesPage() {
                       transition={{ delay: Math.min(index * 0.03, 0.3) }}
                       whileHover={{ scale: 1.01, x: 4 }}
                       whileTap={{ scale: 0.99 }}
-                      onClick={() => handleQuestionClick(question.id)}
+                      onClick={(event) => burstAndNavigate(event, `/question/${question.id}`, '#f59e0b')}
                       className="relative flex items-center gap-3 px-4 py-3 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-amber-200/40 dark:border-amber-800/40 hover:border-amber-400/60 dark:hover:border-amber-600/60 hover:shadow-md transition-all cursor-pointer overflow-hidden"
                     >
                       <div className="absolute inset-0 bg-cover bg-center opacity-20" style={{ backgroundImage: "url('/UI-picture/UI-question3.jpg')" }} />

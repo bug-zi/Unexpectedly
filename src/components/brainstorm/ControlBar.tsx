@@ -14,6 +14,7 @@ interface ControlBarProps {
   currentRound: number;
   totalRounds: number;
   collectedCount: number;
+  hasClearableContent: boolean;
   topicInput: string;
   onTopicChange: (val: string) => void;
   onStart: (topic?: string, rounds?: number) => void;
@@ -30,6 +31,7 @@ export function ControlBar({
   currentRound,
   totalRounds,
   collectedCount,
+  hasClearableContent,
   topicInput,
   onTopicChange,
   onStart,
@@ -46,7 +48,6 @@ export function ControlBar({
   const isActive = !['idle', 'completed', 'error'].includes(phase);
   const isPaused = phase === 'paused';
   const isDone = phase === 'completed' || phase === 'error';
-  const hasContent = collectedCount > 0 || !isIdle;
 
   return (
     <>
@@ -139,7 +140,7 @@ export function ControlBar({
         </button>
 
         {/* 清空按钮 */}
-        {hasContent && (
+        {hasClearableContent && (
           <button
             onClick={() => setShowClearDialog(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-500/10 text-sm transition-colors"
@@ -190,7 +191,7 @@ export function ControlBar({
                 确定要清空当前画布上的所有内容吗？
               </p>
               <p className="text-center text-red-500/70 text-xs mb-4">
-                包括展台、收纳盒中的全部点子，此操作不可撤销
+                会清空画布和展台，收纳盒中的点子会保留
               </p>
 
               <div className="flex gap-3">

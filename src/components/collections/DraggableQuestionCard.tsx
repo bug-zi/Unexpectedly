@@ -6,6 +6,8 @@ import { CSS } from '@dnd-kit/utilities';
 import { Question } from '@/types';
 import { getCategoryConfig } from '@/constants/categories';
 import { Icon } from '@iconify/react';
+import { useThoughtBurst } from '@/components/effects/ThoughtBurstProvider';
+import { triggerThoughtBurstFromEvent } from '@/utils/thoughtBurst';
 
 interface DraggableQuestionCardProps {
   question: Question;
@@ -26,6 +28,7 @@ export const DraggableQuestionCard = memo(({
   isDragging = false,
   disableDrag = false,
 }: DraggableQuestionCardProps) => {
+  const { triggerThoughtBurst } = useThoughtBurst();
   const {
     attributes,
     listeners,
@@ -145,7 +148,15 @@ export const DraggableQuestionCard = memo(({
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={onStart}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  triggerThoughtBurstFromEvent(event, triggerThoughtBurst, {
+                    color: category?.color || '#f59e0b',
+                    accentColor: '#22d3ee',
+                    intensity: 0.92,
+                  });
+                  onStart();
+                }}
                 className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all"
               >
                 开始思考

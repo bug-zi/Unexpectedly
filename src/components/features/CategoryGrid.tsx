@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
-import { PrimaryCategory, ThinkingDimension, LifeScenario } from '@/types';
 import { THINKING_DIMENSIONS, LIFE_SCENARIOS } from '@/constants/categories';
 import { CategoryIcon } from '@/components/ui/Icon';
+import { useThoughtBurst } from '@/components/effects/ThoughtBurstProvider';
+import { triggerThoughtBurstFromEvent } from '@/utils/thoughtBurst';
 
 interface CategoryGridProps {
   type: 'thinking' | 'scenario';
@@ -9,6 +10,7 @@ interface CategoryGridProps {
 }
 
 export function CategoryGrid({ type, onSelect }: CategoryGridProps) {
+  const { triggerThoughtBurst } = useThoughtBurst();
   const categories =
     type === 'thinking' ? THINKING_DIMENSIONS : LIFE_SCENARIOS;
 
@@ -40,7 +42,14 @@ export function CategoryGrid({ type, onSelect }: CategoryGridProps) {
           variants={item}
           whileHover={{ y: -8, boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => onSelect(category.id)}
+          onClick={(event) => {
+            triggerThoughtBurstFromEvent(event, triggerThoughtBurst, {
+              color: category.color,
+              accentColor: '#22d3ee',
+              intensity: 0.95,
+            });
+            onSelect(category.id);
+          }}
           className="bg-white dark:bg-gray-800 rounded-2xl p-6 text-left transition-all border-2 border-transparent hover:border-primary-200 dark:hover:border-primary-800 group"
         >
           <CategoryIcon

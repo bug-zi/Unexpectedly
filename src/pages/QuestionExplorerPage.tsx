@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { QuestionCard } from '@/components/features/QuestionCard';
 import { ArrowLeft, Brain, Globe, Star, BookOpen, Sparkles, FileText } from 'lucide-react';
@@ -15,6 +15,8 @@ import { usePageSEO } from '@/hooks/usePageSEO';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getFAQPageSchema } from '@/constants/structuredData';
 import { QUESTIONS } from '@/constants/questions';
+import { useThoughtBurst } from '@/components/effects/ThoughtBurstProvider';
+import { runAfterThoughtBurst, triggerThoughtBurstFromEvent } from '@/utils/thoughtBurst';
 
 // 自定义缓动曲线
 const customEasing = {
@@ -24,10 +26,10 @@ const customEasing = {
 
 export function QuestionExplorerPage() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { setCurrentQuestion } = useAppStore();
   const { SEORender } = usePageSEO({ seo: '/questions/explore' });
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const { triggerThoughtBurst } = useThoughtBurst();
+  const [selectedCategory] = useState<string | null>(null);
   const [currentQuestion, setQuestion] = useState(() => getRandomQuestion());
 
   const handleStartThinking = () => {
@@ -50,10 +52,17 @@ export function QuestionExplorerPage() {
     }
   };
 
-  const handleResetCategory = () => {
-    setSelectedCategory(null);
-    const question = getRandomQuestion();
-    setQuestion(question);
+  const burstAndNavigate = (
+    event: React.MouseEvent<HTMLElement>,
+    path: string,
+    color = '#f59e0b'
+  ) => {
+    triggerThoughtBurstFromEvent(event, triggerThoughtBurst, {
+      color,
+      accentColor: '#22d3ee',
+      intensity: 1,
+    });
+    runAfterThoughtBurst(() => navigate(path));
   };
 
   return (
@@ -209,7 +218,7 @@ export function QuestionExplorerPage() {
                 <motion.button
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => navigate('/categories/thinking')}
+                  onClick={(event) => burstAndNavigate(event, '/categories/thinking', '#f59e0b')}
                   className="group relative p-4 rounded-xl shadow-md hover:shadow-lg transition-all border-2 border-amber-200 dark:border-amber-800 hover:border-amber-400 dark:hover:border-amber-600 overflow-hidden"
                 >
                   <div
@@ -236,7 +245,7 @@ export function QuestionExplorerPage() {
                 <motion.button
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => navigate('/categories/scenario')}
+                  onClick={(event) => burstAndNavigate(event, '/categories/scenario', '#eab308')}
                   className="group relative p-4 rounded-xl shadow-md hover:shadow-lg transition-all border-2 border-amber-200 dark:border-amber-800 hover:border-yellow-400 dark:hover:border-yellow-600 overflow-hidden"
                 >
                   <div

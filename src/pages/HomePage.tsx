@@ -16,6 +16,8 @@ import { usePageSEO } from '@/hooks/usePageSEO';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { GeoContent } from '@/components/seo/GeoContent';
 import { getWebApplicationSchema, getItemListSchema } from '@/constants/structuredData';
+import { useThoughtBurst } from '@/components/effects/ThoughtBurstProvider';
+import { runAfterThoughtBurst, triggerThoughtBurstFromEvent } from '@/utils/thoughtBurst';
 
 // 自定义缓动曲线
 const customEasing = {
@@ -123,6 +125,7 @@ export function HomePage() {
   const navigate = useNavigate();
   const { setCurrentQuestion } = useAppStore();
   const { SEORender } = usePageSEO({ seo: '/' });
+  const { triggerThoughtBurst } = useThoughtBurst();
   const [currentThinkingQuote, setCurrentThinkingQuote] = useState('');
   const [quoteIndex, setQuoteIndex] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -215,6 +218,20 @@ export function HomePage() {
       });
     }, 10000);
   }, []);
+
+  const burstAndNavigate = (
+    event: React.MouseEvent<HTMLElement>,
+    path: string,
+    color: string,
+    accentColor: string
+  ) => {
+    triggerThoughtBurstFromEvent(event, triggerThoughtBurst, {
+      color,
+      accentColor,
+      intensity: 1.18,
+    });
+    runAfterThoughtBurst(() => navigate(path));
+  };
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -359,7 +376,7 @@ export function HomePage() {
                   boxShadow: '0 25px 50px -12px rgba(239, 68, 68, 0.25)',
                 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => navigate('/logic-reasoning')}
+                onClick={(event) => burstAndNavigate(event, '/logic-reasoning', '#ef4444', '#fb7185')}
                 className="group relative w-full backdrop-blur-xl rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-red-200/80 dark:border-red-800/60 hover:border-rose-400 dark:hover:border-rose-600 p-8 text-left overflow-hidden cursor-pointer"
                 style={{
                   backgroundImage: 'url(/UI-picture/UI-index1.jpg)',
@@ -437,7 +454,7 @@ export function HomePage() {
                   boxShadow: '0 25px 50px -12px rgba(245, 158, 11, 0.25)',
                 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => navigate('/questions')}
+                onClick={(event) => burstAndNavigate(event, '/questions', '#f59e0b', '#22d3ee')}
                 className="group relative w-full backdrop-blur-xl rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-amber-200/80 dark:border-amber-800/60 hover:border-orange-400 dark:hover:border-orange-600 p-8 text-left overflow-hidden cursor-pointer"
                 style={{
                   backgroundImage: 'url(/UI-picture/UI-question1.jpg)',
@@ -502,7 +519,7 @@ export function HomePage() {
                   boxShadow: '0 25px 50px -12px rgba(59, 130, 246, 0.25)',
                 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => navigate('/writing')}
+                onClick={(event) => burstAndNavigate(event, '/writing', '#3b82f6', '#22d3ee')}
                 className="group relative w-full backdrop-blur-xl rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-blue-200/80 dark:border-blue-800/60 hover:border-cyan-400 dark:hover:border-cyan-600 p-8 text-left overflow-hidden cursor-pointer"
                 style={{
                   backgroundImage: 'url(/UI-picture/UI-writing1.jpg)',
@@ -567,7 +584,7 @@ export function HomePage() {
                   boxShadow: '0 25px 50px -12px rgba(34, 197, 94, 0.25)',
                 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => navigate('/inspiration')}
+                onClick={(event) => burstAndNavigate(event, '/inspiration', '#22c55e', '#a3e635')}
                 className="group relative w-full backdrop-blur-xl rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-green-200/80 dark:border-green-800/60 hover:border-emerald-400 dark:hover:border-emerald-600 p-8 text-left overflow-hidden cursor-pointer"
                 style={{
                   backgroundImage: 'url(/UI-picture/UI-knowledge2.jpg)',

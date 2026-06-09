@@ -39,6 +39,7 @@ import { useEffect, useRef } from 'react';
 import { syncOnLogin } from '@/services/syncService';
 import { autoMigrate } from '@/utils/dataMigration';
 import { useThemeInitializer } from '@/stores/themeStore';
+import { ThoughtBurstProvider } from '@/components/effects/ThoughtBurstProvider';
 
 function App() {
   const syncTriggeredRef = useRef(false);
@@ -92,61 +93,63 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/questions" element={<QuestionThinkingHubPage />} />
-        <Route path="/questions/explore" element={<QuestionExplorerPage />} />
-        <Route path="/questions/growth" element={<GrowthTrackerPage />} />
-        <Route path="/growth" element={<GrowthTrackerPage />} />
-        <Route path="/questions/question-generator" element={<QuestionGeneratorPage />} />
-        <Route path="/question-generator" element={<QuestionGeneratorPage />} />
-        <Route path="/question/:id" element={<QuestionPage />} />
-        <Route path="/questions/:id" element={<QuestionPage />} />
-        <Route path="/writing" element={<WritingPage />} />
-        <Route path="/slot-machine" element={<SlotMachinePage />} />
-        <Route path="/writing-challenge" element={<WritingChallengePage />} />
-        <Route path="/slot-machine/answer" element={<SlotMachineAnswerPage />} />
-        <Route path="/categories/:type" element={<CategoryListPage />} />
-        <Route path="/favorites" element={<FavoritesPage />} />
-        <Route path="/later" element={<LaterPage />} />
-        <Route path="/collections/:id" element={<CollectionDetailPage />} />
-        <Route path="/logic-reasoning" element={<LogicReasoningPage />} />
-        <Route path="/turtle-soup" element={<TurtleSoupPage />} />
-        <Route path="/logic-reasoning/riddle" element={<RiddlePage />} />
-        <Route path="/logic-reasoning/yes-or-no" element={<YesOrNoPage />} />
-        <Route path="/logic-reasoning/guess-number" element={<GuessNumberPage />} />
-        <Route path="/checkin" element={<CheckInPage />} />
-        <Route path="/tasks" element={<TaskPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/roundtable/setup" element={<RoundtableSetupPage />} />
-        <Route path="/roundtable/discuss" element={<RoundtablePage />} />
-        <Route path="/debate" element={<DebateHallPage />} />
-        <Route path="/random-quest" element={<RandomQuestPage />} />
-        <Route path="/inspiration" element={<InspirationPage />} />
-        <Route path="/inspiration/diffuser" element={<DiffuserPage />} />
-        <Route path="/inspiration/:domainId" element={<InspirationDomainPage />} />
-        <Route path="/notifications" element={<NotificationSettingsPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/auth/callback" element={<AuthCallbackPage />} />
-      </Routes>
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme={isDark ? 'dark' : 'light'}
-        toastClassName={`${isDark ? '!bg-gray-800/90 !text-gray-200 !border-gray-700/50' : '!bg-white/90 !text-gray-800 !border-gray-200/50'} !backdrop-blur-md !shadow-xl !border !rounded-xl`}
-        progressClassName={isDark ? '!bg-gradient-to-r !from-gray-600 !to-gray-500' : '!bg-gradient-to-r !from-gray-400 !to-gray-500'}
-        className="!font-medium"
-        closeButton={false}
-      />
-    </BrowserRouter>
+    <ThoughtBurstProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/questions" element={<QuestionThinkingHubPage />} />
+          <Route path="/questions/explore" element={<QuestionExplorerPage />} />
+          <Route path="/questions/growth" element={<GrowthTrackerPage />} />
+          <Route path="/growth" element={<GrowthTrackerPage />} />
+          <Route path="/questions/question-generator" element={<QuestionGeneratorPage />} />
+          <Route path="/question-generator" element={<QuestionGeneratorPage />} />
+          <Route path="/question/:id" element={<QuestionPage />} />
+          <Route path="/questions/:id" element={<QuestionPage />} />
+          <Route path="/writing" element={<WritingPage />} />
+          <Route path="/slot-machine" element={<SlotMachinePage />} />
+          <Route path="/writing-challenge" element={<WritingChallengePage />} />
+          <Route path="/slot-machine/answer" element={<SlotMachineAnswerPage />} />
+          <Route path="/categories/:type" element={<CategoryListPage />} />
+          <Route path="/favorites" element={<FavoritesPage />} />
+          <Route path="/later" element={<LaterPage />} />
+          <Route path="/collections/:id" element={<CollectionDetailPage />} />
+          <Route path="/logic-reasoning" element={<LogicReasoningPage />} />
+          <Route path="/turtle-soup" element={<TurtleSoupPage />} />
+          <Route path="/logic-reasoning/riddle" element={<RiddlePage />} />
+          <Route path="/logic-reasoning/yes-or-no" element={<YesOrNoPage />} />
+          <Route path="/logic-reasoning/guess-number" element={<GuessNumberPage />} />
+          <Route path="/checkin" element={<CheckInPage />} />
+          <Route path="/tasks" element={<TaskPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/roundtable/setup" element={<RoundtableSetupPage />} />
+          <Route path="/roundtable/discuss" element={<RoundtablePage />} />
+          <Route path="/debate" element={<DebateHallPage />} />
+          <Route path="/random-quest" element={<RandomQuestPage />} />
+          <Route path="/inspiration" element={<InspirationPage />} />
+          <Route path="/inspiration/diffuser" element={<DiffuserPage />} />
+          <Route path="/inspiration/:domainId" element={<InspirationDomainPage />} />
+          <Route path="/notifications" element={<NotificationSettingsPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
+        </Routes>
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme={isDark ? 'dark' : 'light'}
+          toastClassName={`${isDark ? '!bg-gray-800/90 !text-gray-200 !border-gray-700/50' : '!bg-white/90 !text-gray-800 !border-gray-200/50'} !backdrop-blur-md !shadow-xl !border !rounded-xl`}
+          progressClassName={isDark ? '!bg-gradient-to-r !from-gray-600 !to-gray-500' : '!bg-gradient-to-r !from-gray-400 !to-gray-500'}
+          className="!font-medium"
+          closeButton={false}
+        />
+      </BrowserRouter>
+    </ThoughtBurstProvider>
   );
 }
 

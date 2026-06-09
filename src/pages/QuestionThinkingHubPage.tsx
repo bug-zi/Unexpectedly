@@ -22,6 +22,8 @@ import { useLLMConfig } from '@/hooks/useLLMConfig';
 import { usePageSEO } from '@/hooks/usePageSEO';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getItemListSchema } from '@/constants/structuredData';
+import { useThoughtBurst } from '@/components/effects/ThoughtBurstProvider';
+import { runAfterThoughtBurst, triggerThoughtBurstFromEvent } from '@/utils/thoughtBurst';
 
 // 自定义动画
 const customEasing = {
@@ -33,6 +35,7 @@ export function QuestionThinkingHubPage() {
   const navigate = useNavigate();
   const { isConfigured: isAIConfigured } = useLLMConfig();
   const { SEORender } = usePageSEO({ seo: '/questions' });
+  const { triggerThoughtBurst } = useThoughtBurst();
   const [showInstructions, setShowInstructions] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showAIRequiredTip, setShowAIRequiredTip] = useState(false);
@@ -65,6 +68,19 @@ export function QuestionThinkingHubPage() {
   const startRandomModule = () => {
     const randomIndex = Math.floor(Math.random() * thinkingModules.length);
     navigate(thinkingModules[randomIndex].path);
+  };
+
+  const burstAndNavigate = (
+    event: React.MouseEvent<HTMLElement>,
+    path: string,
+    color = '#f59e0b'
+  ) => {
+    triggerThoughtBurstFromEvent(event, triggerThoughtBurst, {
+      color,
+      accentColor: '#22d3ee',
+      intensity: 1.1,
+    });
+    runAfterThoughtBurst(() => navigate(path));
   };
 
   return (
@@ -397,7 +413,7 @@ export function QuestionThinkingHubPage() {
                   boxShadow: '0 25px 50px -12px rgba(234, 179, 8, 0.25)',
                 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => navigate('/questions/explore')}
+                onClick={(event) => burstAndNavigate(event, '/questions/explore', '#eab308')}
                 className="group relative w-full rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-yellow-200 dark:border-yellow-800 hover:border-amber-400 dark:hover:border-amber-600 p-8 text-left overflow-hidden cursor-pointer"
                 style={{
                   backgroundImage: 'url(/UI-picture/UI-question1.jpg)',
@@ -455,11 +471,11 @@ export function QuestionThinkingHubPage() {
                   boxShadow: '0 25px 50px -12px rgba(234, 179, 8, 0.25)',
                 } : {}}
                 whileTap={isAIConfigured ? { scale: 0.98 } : {}}
-                onClick={() => {
+                onClick={(event) => {
                   if (!isAIConfigured) {
                     setShowAIRequiredTip(true);
                   } else {
-                    navigate('/debate');
+                    burstAndNavigate(event, '/debate', '#f97316');
                   }
                 }}
                 className={`group relative w-full rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-yellow-200 dark:border-yellow-800 hover:border-amber-400 dark:hover:border-amber-600 p-8 text-left overflow-hidden ${

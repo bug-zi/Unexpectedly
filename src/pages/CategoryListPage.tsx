@@ -1,14 +1,15 @@
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Search, Sparkles, Filter, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Search, Sparkles, Filter } from 'lucide-react';
 import { QuestionCard } from '@/components/features/QuestionCard';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { QUESTIONS } from '@/constants/questions';
-import { getCategoryConfig, THINKING_DIMENSIONS, LIFE_SCENARIOS } from '@/constants/categories';
-import { ThinkingDimension, LifeScenario } from '@/types';
+import { THINKING_DIMENSIONS, LIFE_SCENARIOS } from '@/constants/categories';
 import { Icon } from '@/components/ui/Icon';
+import { useThoughtBurst } from '@/components/effects/ThoughtBurstProvider';
+import { triggerThoughtBurstFromEvent } from '@/utils/thoughtBurst';
 
 // 自定义动画
 const customEasing = {
@@ -19,6 +20,7 @@ const customEasing = {
 export function CategoryListPage() {
   const { type } = useParams<{ type: 'thinking' | 'scenario' }>();
   const navigate = useNavigate();
+  const { triggerThoughtBurst } = useThoughtBurst();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -152,7 +154,14 @@ export function CategoryListPage() {
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => setSelectedCategory(null)}
+                onClick={(event) => {
+                  triggerThoughtBurstFromEvent(event, triggerThoughtBurst, {
+                    color: '#f59e0b',
+                    accentColor: '#22d3ee',
+                    intensity: 0.82,
+                  });
+                  setSelectedCategory(null);
+                }}
                 className={`px-6 py-3 rounded-2xl font-bold transition-all shadow-lg ${
                   !selectedCategory
                     ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
@@ -176,7 +185,14 @@ export function CategoryListPage() {
                     transition={{ delay: 0.3 + index * 0.05 }}
                     whileHover={{ scale: 1.05, y: -2, rotate: isSelected ? 0 : 2 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => handleCategorySelect(category.id)}
+                    onClick={(event) => {
+                      triggerThoughtBurstFromEvent(event, triggerThoughtBurst, {
+                        color: category.color,
+                        accentColor: '#22d3ee',
+                        intensity: 0.86,
+                      });
+                      handleCategorySelect(category.id);
+                    }}
                     className={`px-6 py-3 rounded-2xl font-bold transition-all flex items-center gap-2 shadow-lg ${
                       isSelected
                         ? 'text-white'

@@ -27,12 +27,16 @@ export function BrainstormTabView({ children }: BrainstormTabViewProps) {
   const discardFromShowcase = useBrainstormStore((s) => s.discardFromShowcase);
   const setTopicInput = useBrainstormStore((s) => s.setTopicInput);
   const resetSession = useBrainstormStore((s) => s.resetSession);
+  const collectionBox = useBrainstormStore((s) => s.collectionBox);
+  const canvasNodeCount = useDiffuserStore((s) => s.nodes.length);
 
   const engine = useBrainstormEngine();
   const [showControlHub, setShowControlHub] = useState(false);
 
   const handleClear = () => {
+    const savedCollectionBox = useBrainstormStore.getState().collectionBox;
     resetSession();
+    useBrainstormStore.setState({ collectionBox: savedCollectionBox });
     useDiffuserStore.getState().clearCanvas();
   };
 
@@ -66,7 +70,8 @@ export function BrainstormTabView({ children }: BrainstormTabViewProps) {
         phase={phase}
         currentRound={currentRound}
         totalRounds={totalRounds}
-        collectedCount={useBrainstormStore((s) => s.collectionBox).length}
+        collectedCount={collectionBox.length}
+        hasClearableContent={canvasNodeCount > 0 || showcase.length > 0 || discardPile.length > 0 || phase !== 'idle'}
         topicInput={topicInput}
         onTopicChange={setTopicInput}
         onStart={engine.start}

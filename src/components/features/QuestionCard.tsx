@@ -10,6 +10,8 @@ import { useLater } from '@/hooks/useLater';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { useLLMConfig } from '@/hooks/useLLMConfig';
+import { useThoughtBurst } from '@/components/effects/ThoughtBurstProvider';
+import { triggerThoughtBurstFromEvent } from '@/utils/thoughtBurst';
 
 interface QuestionCardProps {
   question: Question;
@@ -32,6 +34,7 @@ export function QuestionCard({
   const [favoriteAnimating, setFavoriteAnimating] = useState(false);
   const [laterAnimating, setLaterAnimating] = useState(false);
   const navigate = useNavigate();
+  const { triggerThoughtBurst } = useThoughtBurst();
 
   // 使用本地乐观状态，立即响应点击
   const [optimisticFavorited, setOptimisticFavorited] = useState<boolean | null>(null);
@@ -46,6 +49,12 @@ export function QuestionCard({
     : null;
 
   if (!category) return null;
+
+  const burstOptions = {
+    color: category.color || '#f59e0b',
+    accentColor: '#22d3ee',
+    intensity: 1,
+  };
 
   const handleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -260,7 +269,11 @@ export function QuestionCard({
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={onStart}
+          onClick={(event) => {
+            event.stopPropagation();
+            triggerThoughtBurstFromEvent(event, triggerThoughtBurst, burstOptions);
+            onStart();
+          }}
           className="relative overflow-hidden w-full py-2.5 px-4 rounded-lg font-medium transition-all border border-amber-200 dark:border-amber-800"
         >
           <div
@@ -274,7 +287,8 @@ export function QuestionCard({
           <motion.button
             whileHover={isAIConfigured ? { scale: 1.02 } : {}}
             whileTap={isAIConfigured ? { scale: 0.98 } : {}}
-            onClick={() => {
+            onClick={(event) => {
+              event.stopPropagation();
               if (!isAIConfigured) {
                 toast.warning('请配置AI大模型后再来访问', {
                   position: 'top-center',
@@ -283,6 +297,11 @@ export function QuestionCard({
                 });
                 return;
               }
+              triggerThoughtBurstFromEvent(event, triggerThoughtBurst, {
+                ...burstOptions,
+                color: '#f59e0b',
+                intensity: 1.12,
+              });
               onRoundtable();
             }}
             className={`relative overflow-hidden w-full py-2.5 px-4 rounded-lg font-medium transition-all ${
@@ -304,7 +323,14 @@ export function QuestionCard({
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={onSkip}
+          onClick={(event) => {
+            event.stopPropagation();
+            triggerThoughtBurstFromEvent(event, triggerThoughtBurst, {
+              ...burstOptions,
+              intensity: 0.86,
+            });
+            onSkip();
+          }}
           className="relative overflow-hidden w-full py-2.5 px-4 rounded-lg font-medium transition-all border border-amber-200 dark:border-amber-800"
         >
           <div
